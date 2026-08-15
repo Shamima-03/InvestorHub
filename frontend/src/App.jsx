@@ -1,26 +1,22 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { getMe } from "./features/auth/authSlice";
-import PublicLayout from "./layouts/PublicLayout";
-import DashboardLayout from "./layouts/DashboardLayout";
-import ProtectedRoute from "./routes/ProtectedRoute";
-import LandingPage from "./pages/LandingPage";
-import FindingGoalPage from "./pages/FindingGoalPage";
-import ContactPage from "./pages/ContactPage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import DashboardOverview from "./pages/dashboard/DashboardOverview";
-import MyPosts from "./pages/dashboard/MyPosts";
-import CreatePost from "./pages/dashboard/CreatePost";
-import ProfilePage from "./pages/dashboard/ProfilePage";
-import MatchesPage from "./pages/dashboard/MatchesPage";
-import ChatPage from "./pages/dashboard/ChatPage";
-import ManageUsers from "./pages/dashboard/ManageUsers";
-import ReportsPage from "./pages/dashboard/ReportsPage";
-import AnalyticsPage from "./pages/dashboard/AnalyticsPage";
-import PostDetail from "./pages/dashboard/PostDetail";
-import EditPost from "./pages/dashboard/EditPost";
+import { getMe } from "./store";
+import { PublicLayout, DashboardLayout, ProtectedRoute } from "./components/Layout";
+import Home from "./pages/Home";
+import FindingGoal from "./pages/FindingGoal";
+import Contact from "./pages/Contact";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Pending from "./pages/Pending";
+import Dashboard from "./pages/Dashboard";
+import Posts from "./pages/Posts";
+import PostForm from "./pages/PostForm";
+import Profile from "./pages/Profile";
+import Matches from "./pages/Matches";
+import Chat from "./pages/Chat";
+import { Users, Reports, Analytics } from "./pages/Admin";
+import PostDetail from "./pages/PostDetail";
 
 function App() {
   const dispatch = useDispatch();
@@ -33,32 +29,25 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<PublicLayout><LandingPage /></PublicLayout>} />
-        <Route path="/finding-goal" element={<PublicLayout><FindingGoalPage /></PublicLayout>} />
-        <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+        <Route path="/finding-goal" element={<PublicLayout><FindingGoal /></PublicLayout>} />
+        <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+        <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
+        <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
+        <Route path="/pending" element={<PublicLayout><Pending /></PublicLayout>} />
         <Route path="/post/:id" element={<PublicLayout><PostDetail /></PublicLayout>} />
 
-        <Route path="/dashboard" element={
-          <ProtectedRoute><DashboardLayout /></ProtectedRoute>
-        }>
-          <Route index element={<DashboardOverview />} />
-          <Route path="posts" element={<MyPosts />} />
-          <Route path="create-post" element={<CreatePost />} />
-          <Route path="edit-post/:id" element={<EditPost />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="matches" element={<MatchesPage />} />
-          <Route path="chat" element={<ChatPage />} />
-          <Route path="users" element={
-            <ProtectedRoute roles={["admin"]}><ManageUsers /></ProtectedRoute>
-          } />
-          <Route path="reports" element={
-            <ProtectedRoute roles={["admin"]}><ReportsPage /></ProtectedRoute>
-          } />
-          <Route path="analytics" element={
-            <ProtectedRoute roles={["admin"]}><AnalyticsPage /></ProtectedRoute>
-          } />
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+          <Route index element={<Dashboard />} />
+          <Route path="posts" element={<Posts />} />
+          <Route path="create-post" element={<PostForm />} />
+          <Route path="edit-post/:id" element={<PostForm />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="matches" element={<Matches />} />
+          <Route path="chat" element={<Chat />} />
+          <Route path="users" element={<ProtectedRoute roles={["admin"]}><Users /></ProtectedRoute>} />
+          <Route path="reports" element={<ProtectedRoute roles={["admin"]}><Reports /></ProtectedRoute>} />
+          <Route path="analytics" element={<ProtectedRoute roles={["admin"]}><Analytics /></ProtectedRoute>} />
         </Route>
 
         <Route path="*" element={

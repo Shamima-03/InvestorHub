@@ -1,182 +1,185 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Search, ChevronDown, ArrowRight, TrendingUp, Users, Building2 } from "lucide-react";
+
+const RESOURCE_TYPES = [
+  { label: "All resources", value: "" },
+  { label: "Investors", value: "investor_post" },
+  { label: "Businesses", value: "business_post" },
+  { label: "Posts", value: "" },
+];
+
+const POPULAR = ["Technology", "Healthcare", "Real Estate", "FinTech"];
+
+const STATS = [
+  { icon: Users, label: "Active investors", value: "1,200+" },
+  { icon: Building2, label: "Businesses listed", value: "850+" },
+  { icon: TrendingUp, label: "Matches made", value: "3,400+" },
+];
 
 export default function Hero() {
-  const [query, setQuery] = useState('');
-  const [resourceType, setResourceType] = useState('All resources');
+  const [query, setQuery] = useState("");
+  const [resourceType, setResourceType] = useState(RESOURCE_TYPES[0]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
-  const resourceTypes = ['All resources', 'Investors', 'Businesses', 'Posts'];
+  useEffect(() => {
+    const close = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
 
-  const handleSearch = e => {
+  const handleSearch = (e) => {
     e.preventDefault();
-    navigate(`/finding-goal?search=${encodeURIComponent(query)}`);
+    const params = new URLSearchParams();
+    if (query.trim()) params.set("search", query.trim());
+    if (resourceType.value) params.set("type", resourceType.value);
+    navigate(`/finding-goal?${params.toString()}`);
   };
 
   return (
-    <section className="relative min-h-[750px] flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
-      {/* Decorative Blobs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Large green circle - top right */}
-        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent-green/8 animate-pulse-slow" />
+    <section className="bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div>
+            <p className="inline-flex items-center text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full">
+              Investor &amp; business matching
+            </p>
+            <h1 className="mt-5 text-4xl sm:text-5xl font-bold text-slate-900 leading-[1.15] tracking-tight">
+              Where investors meet{" "}
+              <span className="text-emerald-600">visionaries</span>
+            </h1>
+            <p className="mt-5 text-lg text-slate-600 leading-relaxed max-w-xl">
+              Discover opportunities, send match requests, and grow partnerships
+              between investors and entrepreneurs — in one place.
+            </p>
 
-        {/* Neon green ring */}
-        <div className="absolute top-20 right-20 w-64 h-64 rounded-full border-2 border-accent-green/20 animate-float" />
-
-        {/* Pink blob - top left */}
-        <div className="absolute top-40 -left-20 w-48 h-48 rounded-full bg-accent-pink/10 animate-float-reverse" />
-
-        {/* Small green dot cluster */}
-        <div className="absolute top-32 left-1/4 w-3 h-3 rounded-full bg-accent-green/50 animate-float" />
-        <div className="absolute top-48 left-1/3 w-2 h-2 rounded-full bg-accent-green/30 animate-float-reverse" />
-        <div className="absolute top-24 left-1/3 w-4 h-4 rounded-full bg-accent-green/20 animate-pulse-slow" />
-
-        {/* Purple light circle */}
-        <div className="absolute bottom-40 right-1/4 w-80 h-80 rounded-full bg-primary/15 blur-3xl" />
-
-        {/* Green curved line */}
-        <svg
-          className="absolute top-16 left-0 w-full h-full opacity-15"
-          viewBox="0 0 1440 750"
-          fill="none"
-        >
-          <path
-            d="M-100 300 C 200 100, 500 500, 800 200 S 1200 400, 1540 150"
-            stroke="#34D399"
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
-        </svg>
-
-        {/* Second green curved line */}
-        <svg
-          className="absolute bottom-20 left-0 w-full h-full opacity-10"
-          viewBox="0 0 1440 750"
-          fill="none"
-        >
-          <path
-            d="M-50 550 C 300 700, 600 300, 900 500 S 1300 350, 1540 500"
-            stroke="#34D399"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </svg>
-
-        {/* Dots pattern - top */}
-        <div className="absolute top-36 right-1/3 grid grid-cols-5 gap-2 opacity-15">
-          {Array.from({ length: 25 }).map((_, i) => (
-            <div key={i} className="w-1.5 h-1.5 rounded-full bg-white" />
-          ))}
-        </div>
-
-        {/* Dots pattern - bottom left */}
-        <div className="absolute bottom-32 left-16 grid grid-cols-4 gap-3 opacity-10">
-          {Array.from({ length: 16 }).map((_, i) => (
-            <div key={i} className="w-2 h-2 rounded-full bg-accent-green" />
-          ))}
-        </div>
-
-        {/* Floating abstract shapes */}
-        <div className="absolute top-1/3 right-12 w-20 h-20 bg-accent-pink/10 rounded-2xl rotate-45 animate-float blur-sm" />
-        <div className="absolute bottom-1/3 left-24 w-16 h-16 bg-accent-green/10 rounded-full animate-float-reverse blur-sm" />
-
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-950/80" />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight animate-fade-in-up">
-          Where Investors Meet <br className="hidden sm:block" />
-          <span className="bg-gradient-to-r from-green-400 via-green-300 to-green-400 bg-clip-text text-transparent">
-            Visionaries
-          </span>
-        </h1>
-
-        <p className="mt-6 text-lg md:text-xl text-white/70 max-w-2xl mx-auto animate-fade-in-up-delay">
-          Connect, Collaborate, and Grow Together. The ultimate matchmaking
-          platform for investors and entrepreneurs.
-        </p>
-
-        {/* Search Box */}
-        <form
-          onSubmit={handleSearch}
-          className="mt-10 animate-fade-in-up-delay-2"
-        >
-          <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl p-2 max-w-3xl mx-auto flex items-center border border-white/10 shadow-2xl">
-            {/* Dropdown */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 px-4 py-3 text-white/90 hover:text-white text-sm font-medium whitespace-nowrap rounded-xl hover:bg-white/10 transition-all"
-              >
-                {resourceType}
-                <ChevronDown
-                  size={14}
-                  className={`transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`}
-                />
-              </button>
-              {dropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl py-2 w-48 z-50">
-                  {resourceTypes.map(type => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => {
-                        setResourceType(type);
-                        setDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-primary/5 transition-colors ${
-                        resourceType === type
-                          ? 'text-primary font-semibold bg-primary/5'
-                          : 'text-gray-700'
-                      }`}
-                    >
-                      {type}
-                    </button>
-                  ))}
+            <form onSubmit={handleSearch} className="mt-8">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-2 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="flex items-center justify-between gap-2 w-full sm:w-auto min-w-[148px] h-11 px-3 text-sm font-medium text-slate-700 rounded-lg hover:bg-gray-50"
+                  >
+                    {resourceType.label}
+                    <ChevronDown
+                      size={16}
+                      className={`text-slate-400 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {dropdownOpen && (
+                    <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20">
+                      {RESOURCE_TYPES.map((type) => (
+                        <button
+                          key={type.label}
+                          type="button"
+                          onClick={() => {
+                            setResourceType(type);
+                            setDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-sm ${
+                            resourceType.label === type.label
+                              ? "text-emerald-700 font-medium bg-emerald-50"
+                              : "text-slate-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {type.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+
+                <div className="hidden sm:block w-px h-6 bg-gray-200" />
+
+                <div className="flex-1 flex items-center min-w-0">
+                  <Search size={16} className="text-slate-400 ml-2 shrink-0 hidden sm:block" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search investors, businesses, posts..."
+                    className="flex-1 h-11 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none bg-transparent"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="h-11 px-5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shrink-0"
+                >
+                  Search
+                </button>
+              </div>
+            </form>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="text-sm text-slate-400">Popular:</span>
+              {POPULAR.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => navigate(`/finding-goal?category=${tag}`)}
+                  className="text-sm text-slate-600 hover:text-emerald-700 px-2.5 py-1 rounded-md border border-gray-200 hover:border-emerald-200 hover:bg-emerald-50 transition-colors"
+                >
+                  {tag}
+                </button>
+              ))}
             </div>
 
-            {/* Divider */}
-            <div className="w-px h-8 bg-white/20" />
-
-            {/* Input */}
-            <input
-              type="text"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Search for investors, businesses, opportunities..."
-              className="flex-1 bg-transparent text-white placeholder-white/40 px-4 py-3 outline-none text-sm"
-            />
-
-            {/* Search Button */}
-            <button
-              type="submit"
-              className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all duration-300 hover:shadow-lg hover:shadow-primary/50 shrink-0"
-            >
-              <Search size={16} />
-              <span className="hidden sm:inline">Search</span>
-            </button>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold"
+              >
+                Get started free
+                <ArrowRight size={16} />
+              </Link>
+              <Link
+                to="/finding-goal"
+                className="inline-flex items-center h-11 px-5 rounded-lg border border-gray-200 text-slate-700 text-sm font-semibold hover:bg-gray-50"
+              >
+                Browse posts
+              </Link>
+            </div>
           </div>
-        </form>
 
-        {/* Tags */}
-        <div className="mt-6 flex flex-wrap justify-center gap-2 animate-fade-in-up-delay-2">
-          <span className="text-white/40 text-sm">Popular:</span>
-          {['Technology', 'Healthcare', 'Real Estate', 'FinTech'].map(tag => (
-            <button
-              key={tag}
-              onClick={() => navigate(`/finding-goal?category=${tag}`)}
-              className="text-white/60 hover:text-accent-green text-sm px-3 py-1 rounded-full border border-white/10 hover:border-accent-green/30 transition-all duration-300"
-            >
-              {tag}
-            </button>
-          ))}
+          <div className="relative">
+            <div className="rounded-2xl border border-gray-200 bg-slate-50 p-6 sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-5">
+                Platform snapshot
+              </p>
+              <div className="space-y-3">
+                {STATS.map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="flex items-center gap-4 bg-white border border-gray-200 rounded-xl px-4 py-4"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                      <stat.icon size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xl font-bold text-slate-900 leading-none">{stat.value}</p>
+                      <p className="text-sm text-slate-500 mt-1">{stat.label}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 rounded-xl bg-white border border-gray-200 px-4 py-4">
+                <p className="text-sm font-semibold text-slate-900">How it works</p>
+                <ol className="mt-3 space-y-2 text-sm text-slate-600">
+                  <li>1. Create a free investor or business profile</li>
+                  <li>2. Publish or browse opportunities</li>
+                  <li>3. Match, chat, and close the deal</li>
+                </ol>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

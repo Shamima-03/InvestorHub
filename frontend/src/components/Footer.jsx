@@ -1,100 +1,79 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-950 border-t border-white/5 text-gray-400">
-      <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="bg-accent-green/20 rounded-lg px-2 py-1 border border-accent-green/30">
-              <span className="text-accent-green font-extrabold text-sm">
+    <footer className="bg-white border-t border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="col-span-2 md:col-span-1">
+            <Link to="/" className="inline-flex items-center gap-2.5">
+              <span className="w-8 h-8 rounded-lg bg-emerald-600 text-white text-sm font-bold flex items-center justify-center">
                 IH
               </span>
-            </div>
-            <span className="text-white font-bold text-lg">InvestorHub</span>
+              <span className="text-[17px] font-semibold text-slate-900 tracking-tight">
+                InvestorHub
+              </span>
+            </Link>
+            <p className="mt-4 text-sm text-slate-600 leading-relaxed">
+              Connecting investors and entrepreneurs for mutual growth and
+              success.
+            </p>
           </div>
-          <p className="text-sm leading-relaxed">
-            Connecting investors and entrepreneurs for mutual growth and
-            success. Build meaningful partnerships today.
-          </p>
-        </div>
-        <div>
-          <h4 className="text-white font-semibold mb-3">Quick Links</h4>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link
-                to="/"
-                className="hover:text-accent-green transition-colors"
-              >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/finding-goal"
-                className="hover:text-accent-green transition-colors"
-              >
-                Finding Goal
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/contact"
-                className="hover:text-accent-green transition-colors"
-              >
-                Contact
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div>
-          <h4 className="text-white font-semibold mb-3">Account</h4>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link
-                to="/login"
-                className="hover:text-accent-green transition-colors"
-              >
-                Login
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/register"
-                className="hover:text-accent-green transition-colors"
-              >
-                Register
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard"
-                className="hover:text-accent-green transition-colors"
-              >
-                Dashboard
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div>
-          <h4 className="text-white font-semibold mb-3">Follow Us</h4>
-          <div className="flex space-x-4">
-            <a href="#" className="hover:text-accent-green transition-colors">
-              Facebook
-            </a>
-            <a href="#" className="hover:text-accent-green transition-colors">
-              Twitter
-            </a>
-            <a href="#" className="hover:text-accent-green transition-colors">
-              LinkedIn
-            </a>
+
+          <div>
+            <h4 className="text-sm font-semibold text-slate-900 mb-3">Product</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/" className="text-slate-600 hover:text-slate-900">Home</Link>
+              </li>
+              <li>
+                <Link to="/finding-goal" className="text-slate-600 hover:text-slate-900">Finding Goal</Link>
+              </li>
+              <li>
+                <Link to="/contact" className="text-slate-600 hover:text-slate-900">Contact</Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-semibold text-slate-900 mb-3">Account</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/login" className="text-slate-600 hover:text-slate-900">Log in</Link>
+              </li>
+              <li>
+                <Link to="/register" className="text-slate-600 hover:text-slate-900">Get started</Link>
+              </li>
+              <li>
+                <Link to="/dashboard" className="text-slate-600 hover:text-slate-900">Dashboard</Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-semibold text-slate-900 mb-3">Social</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="#" className="text-slate-600 hover:text-slate-900">LinkedIn</a>
+              </li>
+              <li>
+                <a href="#" className="text-slate-600 hover:text-slate-900">Twitter</a>
+              </li>
+              <li>
+                <a href="#" className="text-slate-600 hover:text-slate-900">Facebook</a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
-      <div className="border-t border-white/5 text-center py-4 text-sm text-gray-500">
-        <p>
-          &copy; {new Date().getFullYear()} InvestorHub. All rights reserved.
-        </p>
+
+      <div className="border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <p className="text-sm text-slate-500">
+            &copy; {new Date().getFullYear()} InvestorHub. All rights reserved.
+          </p>
+          <p className="text-sm text-slate-400">Investor &amp; business matching</p>
+        </div>
       </div>
     </footer>
   );

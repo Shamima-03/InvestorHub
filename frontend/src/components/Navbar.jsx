@@ -1,256 +1,247 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { Search, Menu, X, LogOut, LayoutDashboard } from 'lucide-react';
-import { logout } from '../features/auth/authSlice';
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { Search, Menu, X, LogOut, LayoutDashboard } from "lucide-react";
+import { logout } from "../store";
+import { canAccessDashboard } from "./Layout";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const { user, isAuthenticated } = useSelector(state => state.auth);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
     setMobileOpen(false);
+    setSearchOpen(false);
   }, [location]);
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/login');
+    navigate("/login");
   };
 
-  const handleSearch = e => {
+  const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(
-        `/finding-goal?search=${encodeURIComponent(searchQuery.trim())}`,
-      );
-      setSearchQuery('');
-      setSearchOpen(false);
-    }
+    if (!searchQuery.trim()) return;
+    navigate(`/finding-goal?search=${encodeURIComponent(searchQuery.trim())}`);
+    setSearchQuery("");
+    setSearchOpen(false);
   };
 
   const navLinks = [
-    { label: 'Home', to: '/' },
-    { label: 'Finding Goal', to: '/finding-goal' },
-    { label: 'Contact', to: '/contact' },
+    { label: "Home", to: "/" },
+    { label: "Finding Goal", to: "/finding-goal" },
+    { label: "Contact", to: "/contact" },
   ];
 
-  const isActive = path => location.pathname === path;
+  const isActive = (path) => location.pathname === path;
 
   return (
-    <>
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <div className="mx-4 mt-4 lg:mx-8">
-          <nav
-            className={`relative flex items-center justify-between px-4 lg:px-6 h-16 rounded-2xl transition-all duration-500 ${
-              scrolled
-                ? 'bg-slate-900/95 backdrop-blur-xl shadow-lg shadow-black/30'
-                : 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur-md'
-            }`}
-          >
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 shrink-0">
-              <div className="bg-white rounded-xl px-3 py-1.5 shadow-md">
-                <span className="text-primary font-extrabold text-lg tracking-tight">
-                  IH
-                </span>
-              </div>
-              <span className="text-white font-bold text-xl hidden sm:block">
-                InvestorHub
-              </span>
-            </Link>
+    <header
+      className={`sticky top-0 z-50 bg-white transition-shadow duration-200 ${
+        scrolled ? "shadow-sm" : ""
+      }`}
+    >
+      <nav className="border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6">
+          <Link to="/" className="flex items-center gap-2.5 shrink-0">
+            <span className="w-8 h-8 rounded-lg bg-emerald-600 text-white text-sm font-bold flex items-center justify-center">
+              IH
+            </span>
+            <span className="text-[17px] font-semibold text-slate-900 tracking-tight">
+              InvestorHub
+            </span>
+          </Link>
 
-            {/* Desktop Nav */}
-            <div className="hidden lg:flex items-center gap-1">
-              {navLinks.map(link => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className={`relative px-4 py-2 text-sm font-medium rounded-xl transition-all duration-300 ${
-                    isActive(link.to)
-                      ? 'text-white bg-white/20'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  {link.label}
-                  {isActive(link.to) && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-accent-green rounded-full" />
-                  )}
-                </Link>
-              ))}
-            </div>
-
-            {/* Right Side */}
-            <div className="flex items-center gap-2">
-              {/* Search Toggle */}
-              {searchOpen ? (
-                <form
-                  onSubmit={handleSearch}
-                  className="flex items-center bg-white/15 backdrop-blur-sm rounded-xl overflow-hidden"
-                >
-                  <input
-                    autoFocus
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    placeholder="Search..."
-                    className="bg-transparent text-white placeholder-white/50 px-3 py-2 text-sm outline-none w-40 lg:w-56"
-                  />
-                  <button
-                    type="submit"
-                    className="text-white/80 hover:text-white px-2 py-2"
-                  >
-                    <Search size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchOpen(false);
-                      setSearchQuery('');
-                    }}
-                    className="text-white/60 hover:text-white px-2 py-2"
-                  >
-                    <X size={14} />
-                  </button>
-                </form>
-              ) : (
-                <button
-                  onClick={() => setSearchOpen(true)}
-                  className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-xl transition-all duration-300"
-                >
-                  <Search size={18} />
-                </button>
-              )}
-
-              {/* Auth Buttons - Desktop */}
-              {isAuthenticated ? (
-                <div className="hidden lg:flex items-center gap-2">
-                  <Link
-                    to="/dashboard"
-                    className="flex items-center gap-1.5 bg-accent-green/20 text-accent-green hover:bg-accent-green/30 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300"
-                  >
-                    <LayoutDashboard size={14} />
-                    Dashboard
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-1.5 text-white/70 hover:text-red-400 hover:bg-white/10 px-3 py-2 rounded-xl text-sm transition-all duration-300"
-                  >
-                    <LogOut size={14} />
-                  </button>
-                </div>
-              ) : (
-                <div className="hidden lg:flex items-center gap-2">
-                  <Link
-                    to="/login"
-                    className="text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="bg-green-400 text-white hover:bg-green-500 px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-green-400/20"
-                  >
-                    Register
-                  </Link>
-                </div>
-              )}
-
-              {/* Hamburger */}
-              <button
-                onClick={() => setMobileOpen(!mobileOpen)}
-                className="lg:hidden bg-white text-primary p-2 rounded-xl hover:bg-gray-100 transition-all duration-300 shadow-md"
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                  isActive(link.to)
+                    ? "text-emerald-700 font-semibold"
+                    : "text-slate-600 font-medium hover:text-slate-900"
+                }`}
               >
-                {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
-            </div>
-          </nav>
+                {link.label}
+              </Link>
+            ))}
+          </div>
 
-          {/* Mobile Menu */}
-          <div
-            className={`lg:hidden transition-all duration-500 overflow-hidden ${
-              mobileOpen ? 'max-h-96 opacity-100 mt-2' : 'max-h-0 opacity-0'
-            }`}
-          >
-            <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 mx-0 space-y-1">
+          <div className="flex items-center gap-2">
+            {searchOpen ? (
               <form
                 onSubmit={handleSearch}
-                className="flex items-center border border-gray-200 rounded-xl overflow-hidden mb-2"
+                className="hidden sm:flex items-center h-9 w-56 border border-gray-200 rounded-lg bg-gray-50 overflow-hidden focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/20"
               >
+                <Search size={15} className="ml-2.5 text-slate-400 shrink-0" />
                 <input
+                  autoFocus
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search..."
-                  className="flex-1 text-gray-800 placeholder-gray-400 px-4 py-2.5 text-sm outline-none"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search posts..."
+                  className="flex-1 bg-transparent px-2 text-sm text-slate-800 placeholder-slate-400 outline-none"
                 />
                 <button
-                  type="submit"
-                  className="text-gray-400 hover:text-primary px-3"
+                  type="button"
+                  onClick={() => {
+                    setSearchOpen(false);
+                    setSearchQuery("");
+                  }}
+                  className="px-2 text-slate-400 hover:text-slate-600"
                 >
-                  <Search size={16} />
+                  <X size={14} />
                 </button>
               </form>
-              {navLinks.map(link => (
+            ) : (
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="hidden sm:flex w-9 h-9 items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 hover:bg-gray-100 transition-colors"
+                aria-label="Search"
+              >
+                <Search size={18} />
+              </button>
+            )}
+
+            {isAuthenticated ? (
+              <div className="hidden md:flex items-center gap-2">
+                <Link
+                  to={canAccessDashboard(user) ? "/dashboard" : "/pending"}
+                  className="inline-flex items-center gap-1.5 h-9 px-3 text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <LayoutDashboard size={16} />
+                  {canAccessDashboard(user) ? "Dashboard" : "Account status"}
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  title="Log out"
+                >
+                  <LogOut size={16} />
+                </button>
+                <div
+                  className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold flex items-center justify-center border border-emerald-100"
+                  title={user?.name}
+                >
+                  {user?.name?.charAt(0)?.toUpperCase()}
+                </div>
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className={`h-9 px-3 inline-flex items-center text-sm font-medium rounded-lg transition-colors ${
+                    location.pathname === "/login"
+                      ? "text-emerald-700 bg-emerald-50"
+                      : "text-slate-700 hover:text-slate-900 hover:bg-gray-100"
+                  }`}
+                >
+                  Log in
+                </Link>
+                <Link
+                  to="/register"
+                  className={`h-9 px-4 inline-flex items-center text-sm font-semibold rounded-lg transition-colors ${
+                    location.pathname === "/register"
+                      ? "text-white bg-emerald-700"
+                      : "text-white bg-emerald-600 hover:bg-emerald-700"
+                  }`}
+                >
+                  Get started
+                </Link>
+              </div>
+            )}
+
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg text-slate-700 hover:bg-gray-100"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
+
+        {mobileOpen && (
+          <div className="md:hidden border-t border-gray-200 bg-white">
+            <div className="max-w-7xl mx-auto px-4 py-3 space-y-1">
+              <form
+                onSubmit={handleSearch}
+                className="flex items-center h-10 mb-2 border border-gray-200 rounded-lg bg-gray-50 overflow-hidden"
+              >
+                <Search size={15} className="ml-3 text-slate-400" />
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search posts..."
+                  className="flex-1 bg-transparent px-2 text-sm text-slate-800 placeholder-slate-400 outline-none"
+                />
+              </form>
+
+              {navLinks.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`block px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                  className={`block px-3 py-2.5 rounded-lg text-sm ${
                     isActive(link.to)
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? "bg-emerald-50 text-emerald-700 font-semibold"
+                      : "text-slate-700 font-medium hover:bg-gray-50"
                   }`}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="border-t my-2" />
+
+              <div className="border-t border-gray-100 my-2" />
+
               {isAuthenticated ? (
                 <>
                   <Link
-                    to="/dashboard"
-                    className="block px-4 py-3 rounded-xl text-sm font-medium text-primary hover:bg-primary/10"
+                    to={canAccessDashboard(user) ? "/dashboard" : "/pending"}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-gray-50"
                   >
-                    Dashboard
+                    <LayoutDashboard size={16} />
+                    {canAccessDashboard(user) ? "Dashboard" : "Account status"}
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50"
+                    className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50"
                   >
-                    Logout
+                    <LogOut size={16} />
+                    Log out
                   </button>
                 </>
               ) : (
-                <>
+                <div className="flex flex-col gap-2 pt-1">
                   <Link
                     to="/login"
-                    className="block px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100"
+                    className="block text-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 border border-gray-200 hover:bg-gray-50"
                   >
-                    Login
+                    Log in
                   </Link>
                   <Link
                     to="/register"
-                    className="block text-center bg-primary text-white py-3 rounded-xl text-sm font-bold hover:bg-primary-dark transition-all"
+                    className="block text-center px-3 py-2.5 rounded-lg text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700"
                   >
-                    Register
+                    Get started
                   </Link>
-                </>
+                </div>
               )}
             </div>
           </div>
-        </div>
-      </div>
-      {/* Spacer */}
-      <div className="h-24" />
-    </>
+        )}
+      </nav>
+    </header>
   );
 }
