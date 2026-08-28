@@ -1,6 +1,5 @@
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
 const { protect, requireActive } = require("./middleware");
 
 const router = express.Router();
@@ -9,14 +8,27 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|gif|webp/;
-    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
-    const mime = allowed.test(file.mimetype);
-    cb(null, ext && mime);
+    // Trust the mimetype: browser images often have odd extensions (.jfif, .avif, none)
+    if (/^image\/(jpe?g|pjpeg|png|gif|webp|avif|bmp)$/.test(file.mimetype)) {
+      return cb(null, true);
+    }
+    const err = new Error("Only image files are allowed (JPG, PNG, GIF, WEBP, AVIF, BMP)");
+    err.statusCode = 400;
+    cb(err);
   },
 });
 
-router.post("/", protect, requireActive, upload.single("image"), async (req, res) => {
+const handleUpload = (req, res, next) => {
+  upload.single("image")(req, res, (err) => {
+    if (err) {
+      const message = err.code === "LIMIT_FILE_SIZE" ? "Image must be under 5MB" : err.message || "Upload failed";
+      return res.status(400).json({ success: false, message });
+    }
+    next();
+  });
+};
+
+router.post("/", protect, requireActive, handleUpload, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No image provided" });

@@ -58,6 +58,60 @@ router.delete("/users/:id", async (req, res, next) => {
   }
 });
 
+router.get("/posts", async (req, res, next) => {
+  try {
+    const { page = 1, limit = 20, status, type, search } = req.query;
+    const query = {};
+    if (status) query.status = status;
+    if (type) query.type = type;
+    if (search) {
+      const rx = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
+      query.$or = [{ title: rx }, { description: rx }];
+    }
+
+    const posts = await Post.find(query)
+      .populate("authorId", "name email avatar role")
+      .sort({ createdAt: -1 })
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit));
+    const total = await Post.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: posts,
+      pagination: { page: Number(page), limit: Number(limit), total, pages: Math.ceil(total / Number(limit)) },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put("/posts/:id/status", async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    if (!["pending", "active", "rejected", "closed", "under_review"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+    const post = await Post.findByIdAndUpdate(req.params.id, { status }, { new: true })
+      .populate("authorId", "name email avatar role");
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    res.json({ success: true, data: post });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/posts/:id", async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    await post.deleteOne();
+    res.json({ success: true, message: "Post deleted" });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/reports", async (req, res, next) => {
   try {
     const reports = await Report.find().populate("reporterId", "name email").sort({ createdAt: -1 });
@@ -83,6 +137,7 @@ router.get("/analytics", async (req, res, next) => {
       totalUsers, totalInvestors, totalBusinessmen, totalAdmins,
       pendingUsers, activeUsers, suspendedUsers, blockedUsers,
       totalPosts, investorPosts, businessPosts,
+      pendingPosts, activePosts, rejectedPosts,
       totalMatches, pendingMatches, acceptedMatches, rejectedMatches,
       totalReports, pendingReports, resolvedReports, dismissedReports,
     ] = await Promise.all([
@@ -97,6 +152,9 @@ router.get("/analytics", async (req, res, next) => {
       Post.countDocuments(),
       Post.countDocuments({ type: "investor_post" }),
       Post.countDocuments({ type: "business_post" }),
+      Post.countDocuments({ status: "pending" }),
+      Post.countDocuments({ status: "active" }),
+      Post.countDocuments({ status: "rejected" }),
       Match.countDocuments(),
       Match.countDocuments({ status: "pending" }),
       Match.countDocuments({ status: "accepted" }),
@@ -111,10 +169,10 @@ router.get("/analytics", async (req, res, next) => {
       success: true,
       data: {
         users: { total: totalUsers, investor: totalInvestors, businessman: totalBusinessmen, admin: totalAdmins, pending: pendingUsers, active: activeUsers, suspended: suspendedUsers, blocked: blockedUsers },
-        posts: { total: totalPosts, investor: investorPosts, business: businessPosts },
+        posts: { total: totalPosts, investor: investorPosts, business: businessPosts, pending: pendingPosts, active: activePosts, rejected: rejectedPosts },
         matches: { total: totalMatches, pending: pendingMatches, accepted: acceptedMatches, rejected: rejectedMatches },
         reports: { total: totalReports, pending: pendingReports, resolved: resolvedReports, dismissed: dismissedReports },
-        totalUsers, totalInvestors, totalBusinessmen, totalPosts, totalMatches, acceptedMatches, pendingReports,
+        totalUsers, totalInvestors, totalBusinessmen, totalPosts, totalMatches, acceptedMatches, pendingReports, pendingPosts,
       },
     });
   } catch (error) {

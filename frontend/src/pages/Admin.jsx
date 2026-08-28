@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   UsersRound, FileText, Handshake, AlertTriangle, ArrowRight, Search,
   Shield, BarChart3, ChevronDown, Trash2, Check, X, LayoutGrid, LayoutList,
+  Clock, Eye, Tag,
 } from "lucide-react";
 import API from "../api";
 
@@ -14,6 +15,9 @@ const statusClass = {
   pending: "bg-amber-50 text-amber-700",
   suspended: "bg-amber-50 text-amber-700",
   blocked: "bg-red-50 text-red-600",
+  rejected: "bg-red-50 text-red-600",
+  closed: "bg-slate-100 text-slate-600",
+  under_review: "bg-amber-50 text-amber-700",
   resolved: "bg-emerald-50 text-emerald-700",
   reviewed: "bg-slate-100 text-slate-700",
   dismissed: "bg-slate-100 text-slate-600",
@@ -83,12 +87,13 @@ export function Overview({ user }) {
 
   const cards = [
     { label: "Total users", value: stats?.totalUsers ?? 0, to: "/dashboard/users", icon: UsersRound },
-    { label: "Listings", value: stats?.totalPosts ?? 0, to: "/finding-goal", icon: FileText },
-    { label: "Matches", value: stats?.totalMatches ?? 0, to: "/dashboard/analytics", icon: Handshake },
+    { label: "Listings", value: stats?.totalPosts ?? 0, to: "/dashboard/listings", icon: FileText },
+    { label: "Pending posts", value: stats?.pendingPosts ?? 0, to: "/dashboard/listings", icon: Clock },
     { label: "Pending reports", value: stats?.pendingReports ?? 0, to: "/dashboard/reports", icon: AlertTriangle },
   ];
 
   const actions = [
+    { to: "/dashboard/listings", icon: FileText, title: "Approve posts", desc: "Review and publish pending listings." },
     { to: "/dashboard/users", icon: Shield, title: "Manage users", desc: "Activate, suspend, or remove accounts." },
     { to: "/dashboard/reports", icon: AlertTriangle, title: "Review reports", desc: "Resolve or dismiss flagged content." },
     { to: "/dashboard/analytics", icon: BarChart3, title: "View analytics", desc: "See platform totals and activity." },
@@ -624,6 +629,239 @@ export function Reports() {
   );
 }
 
+export function Listings() {
+  const [posts, setPosts] = useState([]);
+  const [counts, setCounts] = useState(null);
+  const [pagination, setPagination] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("pending");
+  const [page, setPage] = useState(1);
+  const [acting, setActing] = useState("");
+
+  const fetchCounts = () => {
+    API.get("/admin/analytics")
+      .then((res) => setCounts(res.data.data?.posts || null))
+      .catch(() => {});
+  };
+
+  const fetchPosts = (nextPage = 1, status = filter) => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    params.set("page", String(nextPage));
+    params.set("limit", "10");
+    if (status !== "all") params.set("status", status);
+    API.get(`/admin/posts?${params}`)
+      .then((res) => {
+        setPosts(res.data.data || []);
+        setPagination(res.data.pagination || {});
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchCounts();
+    fetchPosts(1, "pending");
+  }, []);
+
+  const switchFilter = (f) => {
+    setFilter(f);
+    setPage(1);
+    fetchPosts(1, f);
+  };
+
+  const goPage = (p) => {
+    setPage(p);
+    fetchPosts(p, filter);
+  };
+
+  const setStatus = async (id, status) => {
+    setActing(id);
+    try {
+      await API.put(`/admin/posts/${id}/status`, { status });
+      fetchPosts(page, filter);
+      fetchCounts();
+    } finally {
+      setActing("");
+    }
+  };
+
+  const deletePost = async (id) => {
+    if (!confirm("Delete this post? This cannot be undone.")) return;
+    setActing(id);
+    try {
+      await API.delete(`/admin/posts/${id}`);
+      fetchPosts(page, filter);
+      fetchCounts();
+    } finally {
+      setActing("");
+    }
+  };
+
+  const summary = [
+    { label: "Total", value: counts?.total ?? 0 },
+    { label: "Pending", value: counts?.pending ?? 0 },
+    { label: "Active", value: counts?.active ?? 0 },
+    { label: "Rejected", value: counts?.rejected ?? 0 },
+  ];
+
+  const filters = [
+    { id: "pending", label: "Pending" },
+    { id: "active", label: "Active" },
+    { id: "rejected", label: "Rejected" },
+    { id: "all", label: "All" },
+  ];
+
+  return (
+    <div>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Admin</p>
+        <h1 className="mt-1 text-2xl font-bold text-slate-900 tracking-tight">Post approvals</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Investor and business posts stay hidden until you approve them.
+        </p>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {summary.map((s) => (
+          <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-4">
+            <p className="text-2xl font-bold text-slate-900">{s.value}</p>
+            <p className="mt-0.5 text-sm text-slate-500">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 flex gap-1 p-1 bg-white border border-gray-200 rounded-lg w-fit">
+        {filters.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => switchFilter(f.id)}
+            className={`h-8 px-3 rounded-md text-sm font-medium ${
+              filter === f.id ? "bg-emerald-600 text-white" : "text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <Spinner label="Loading posts..." />
+      ) : posts.length === 0 ? (
+        <div className="mt-4 bg-white border border-gray-200 rounded-xl py-16 text-center">
+          <p className="text-sm font-medium text-slate-800">
+            No {filter === "all" ? "" : filter} posts
+          </p>
+          <p className="mt-1 text-sm text-slate-500">
+            {filter === "pending" ? "New posts awaiting approval will show up here." : "Nothing to show for this filter."}
+          </p>
+        </div>
+      ) : (
+        <div className="mt-4 space-y-3">
+          {posts.map((p) => (
+            <div key={p._id} className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 hover:border-emerald-200 transition-colors">
+              <div className="flex gap-4">
+                {p.image ? (
+                  <img src={p.image} alt="" className="hidden sm:block w-28 h-20 object-cover rounded-lg shrink-0 bg-slate-100" />
+                ) : (
+                  <div className="hidden sm:flex w-28 h-20 rounded-lg shrink-0 bg-slate-100 items-center justify-center text-slate-300">
+                    <Tag size={22} />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${
+                          p.type === "investor_post" ? "bg-emerald-50 text-emerald-700" : "bg-slate-800 text-white"
+                        }`}>
+                          {p.type === "investor_post" ? "Investor" : "Business"}
+                        </span>
+                        <span className={`text-[11px] font-medium capitalize px-2 py-0.5 rounded-md ${statusClass[p.status] || "bg-slate-100 text-slate-600"}`}>
+                          {p.status}
+                        </span>
+                      </div>
+                      <h3 className="mt-1.5 text-base font-semibold text-slate-900 truncate">{p.title}</h3>
+                      <p className="mt-1 text-sm text-slate-600 line-clamp-2">{p.description}</p>
+                      <p className="mt-2 text-xs text-slate-400 truncate">
+                        {p.authorId?.name || "Unknown"}
+                        {p.authorId?.email ? ` · ${p.authorId.email}` : ""}
+                        {p.createdAt ? ` · ${new Date(p.createdAt).toLocaleDateString()}` : ""}
+                        {p.budget > 0 ? ` · BDT ${Number(p.budget).toLocaleString()}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <Link
+                        to={`/post/${p._id}`}
+                        className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50"
+                      >
+                        <Eye size={14} />
+                        View
+                      </Link>
+                      {p.status !== "rejected" && (
+                        <button
+                          onClick={() => setStatus(p._id, "rejected")}
+                          disabled={acting === p._id}
+                          className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-red-100 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                        >
+                          <X size={14} />
+                          Reject
+                        </button>
+                      )}
+                      {p.status !== "active" && (
+                        <button
+                          onClick={() => setStatus(p._id, "active")}
+                          disabled={acting === p._id}
+                          className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
+                        >
+                          <Check size={14} />
+                          Approve
+                        </button>
+                      )}
+                      <button
+                        onClick={() => deletePost(p._id)}
+                        disabled={acting === p._id}
+                        className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-50"
+                        title="Delete post"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {pagination.pages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-slate-500">
+              <span>
+                Page {pagination.page} of {pagination.pages} · {pagination.total} posts
+              </span>
+              <div className="flex gap-2">
+                <button
+                  disabled={page <= 1}
+                  onClick={() => goPage(page - 1)}
+                  className="h-8 px-3 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
+                >
+                  Previous
+                </button>
+                <button
+                  disabled={page >= pagination.pages}
+                  onClick={() => goPage(page + 1)}
+                  className="h-8 px-3 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Analytics() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -637,7 +875,7 @@ export function Analytics() {
 
   const kpis = [
     { label: "Total users", value: data?.users?.total ?? data?.totalUsers ?? 0, icon: UsersRound, to: "/dashboard/users" },
-    { label: "Listings", value: data?.posts?.total ?? data?.totalPosts ?? 0, icon: FileText, to: "/finding-goal" },
+    { label: "Listings", value: data?.posts?.total ?? data?.totalPosts ?? 0, icon: FileText, to: "/dashboard/listings" },
     { label: "Matches", value: data?.matches?.total ?? data?.totalMatches ?? 0, icon: Handshake },
     { label: "Pending reports", value: data?.reports?.pending ?? data?.pendingReports ?? 0, icon: AlertTriangle, to: "/dashboard/reports" },
   ];
@@ -705,6 +943,9 @@ export function Analytics() {
               <div className="mt-4 space-y-4">
                 <BarRow label="Investor posts" value={data.posts?.investor || 0} total={data.posts?.total || 0} />
                 <BarRow label="Business posts" value={data.posts?.business || 0} total={data.posts?.total || 0} />
+                <BarRow label="Pending approval" value={data.posts?.pending || 0} total={data.posts?.total || 0} />
+                <BarRow label="Approved" value={data.posts?.active || 0} total={data.posts?.total || 0} />
+                <BarRow label="Rejected" value={data.posts?.rejected || 0} total={data.posts?.total || 0} />
               </div>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl p-5">

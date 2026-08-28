@@ -45,6 +45,7 @@ const userLinks = [
 
 const adminLinks = [
   { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { to: "/dashboard/listings", label: "Post Approvals", icon: FileText },
   { to: "/dashboard/users", label: "Manage Users", icon: Shield },
   { to: "/dashboard/reports", label: "Reports", icon: AlertTriangle },
   { to: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },

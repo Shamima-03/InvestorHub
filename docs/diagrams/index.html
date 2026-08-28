@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>InvestorHub — Project Diagrams</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    main {
+      max-width: 720px;
+      margin: 48px auto;
+      padding: 0 20px;
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    p { color: #475569; line-height: 1.55; }
+    .cards { display: grid; gap: 14px; margin-top: 24px; }
+    a.card {
+      display: block;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px 20px;
+      text-decoration: none;
+      color: inherit;
+    }
+    a.card:hover { border-color: #0f766e; }
+    a.card h2 { margin: 0 0 6px; font-size: 18px; color: #0f766e; }
+    a.card p { margin: 0; font-size: 14px; }
+    ol { color: #475569; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>InvestorHub diagrams</h1>
+    <p>University submission diagrams generated from the actual Mongoose models and app routes.</p>
+
+    <div class="cards">
+      <a class="card" href="erd.html">
+        <h2>1. Entity Relationship Diagram</h2>
+        <p>Crow’s Foot ERD: User, profiles, Post, Match, Conversation, Message, Report.</p>
+      </a>
+      <a class="card" href="usecase.html">
+        <h2>2. Use Case Diagram</h2>
+        <p>UML use cases for Guest, Registered User, Investor, Businessman, and Administrator.</p>
+      </a>
+    </div>
+
+    <h2 style="margin-top:32px;font-size:16px">How to put these in the report</h2>
+    <ol>
+      <li>Open a diagram in the browser.</li>
+      <li>Click <b>Print / Save as PDF</b>.</li>
+      <li>Choose destination <b>Save as PDF</b>, paper size <b>A3 landscape</b> (or A4 landscape).</li>
+      <li>Insert that PDF/screenshot into the thesis or slide.</li>
+    </ol>
+    <p>Mermaid sources are in <code>erd.mmd</code> and <code>usecase.mmd</code> if you want to edit them on <a href="https://mermaid.live">mermaid.live</a>.</p>
+  </main>
+</body>
+</html>

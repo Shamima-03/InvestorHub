@@ -90,7 +90,13 @@ export default function PostForm() {
       if (isEdit) await API.put(`/posts/${id}`, payload);
       else await API.post("/posts", payload);
 
-      navigate("/dashboard/posts");
+      navigate("/dashboard/posts", {
+        state: {
+          notice: isEdit
+            ? "Your changes were saved. The post is pending admin approval before it goes public again."
+            : "Your post was submitted. It will be visible to others once an admin approves it.",
+        },
+      });
     } catch (err) {
       setError(err.response?.data?.message || (isEdit ? "Failed to update" : "Failed to create post"));
     } finally {

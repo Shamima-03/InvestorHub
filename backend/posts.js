@@ -12,8 +12,7 @@ router.get("/", optionalAuth, async (req, res, next) => {
       sortBy = "newest", minBudget, maxBudget, my,
     } = req.query;
 
-    const query = my === "true" ? {} : { status: "active" };
-    if (my === "true" && req.user) query.authorId = req.user._id;
+    const query = my === "true" && req.user ? { authorId: req.user._id } : { status: "active" };
     if (type) query.type = type;
     if (category) query.category = { $in: category.split(",") };
     if (minBudget || maxBudget) {
@@ -78,19 +77,34 @@ router.post(
         budget: budget || 0,
         image: image || (req.file ? `/uploads/${req.file.filename}` : ""),
         attachments: req.body.attachments || [],
+        status: "pending",
       });
 
-      res.status(201).json({ success: true, data: post });
+      res.status(201).json({
+        success: true,
+        data: post,
+        message: "Post submitted. It will be visible once an admin approves it.",
+      });
     } catch (error) {
       next(error);
     }
   }
 );
 
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", optionalAuth, async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id).populate("authorId", "name avatar role location");
     if (!post) return res.status(404).json({ message: "Post not found" });
+
+    if (post.status !== "active") {
+      const postAuthorId = (post.authorId?._id || post.authorId).toString();
+      const isOwner = req.user && postAuthorId === req.user._id.toString();
+      const isAdmin = req.user?.role === "admin";
+      if (!isOwner && !isAdmin) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+    }
+
     post.viewsCount += 1;
     await post.save();
 
@@ -134,14 +148,24 @@ router.put("/:id", protect, requireActive, async (req, res, next) => {
       return res.status(403).json({ message: "Not authorized to update this post" });
     }
 
-    const updateData = { ...req.body };
+    const allowed = ["title", "description", "category", "budget", "image", "attachments"];
+    const updateData = {};
+    for (const field of allowed) {
+      if (req.body[field] !== undefined) updateData[field] = req.body[field];
+    }
     if (req.file) updateData.image = `/uploads/${req.file.filename}`;
     if (updateData.category && typeof updateData.category === "string") {
       updateData.category = updateData.category.split(",").map((c) => c.trim());
     }
+    // Edited posts must be re-approved by an admin before going public again
+    updateData.status = "pending";
 
     post = await Post.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
-    res.json({ success: true, data: post });
+    res.json({
+      success: true,
+      data: post,
+      message: "Post updated. It will be visible once an admin approves it.",
+    });
   } catch (error) {
     next(error);
   }

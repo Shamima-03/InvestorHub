@@ -81,13 +81,14 @@ const postSchema = new mongoose.Schema(
     budget: { type: Number, default: 0 },
     image: { type: String, default: "" },
     attachments: [{ type: String }],
-    status: { type: String, enum: ["active", "closed", "under_review"], default: "active" },
+    status: { type: String, enum: ["pending", "active", "rejected", "closed", "under_review"], default: "pending" },
     likesCount: { type: Number, default: 0 },
     viewsCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
 
+postSchema.index({ status: 1, createdAt: -1 });
 postSchema.index({ category: 1 });
 postSchema.index({ authorRole: 1 });
 postSchema.index({ type: 1 });

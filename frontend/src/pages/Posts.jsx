@@ -1,9 +1,34 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { PlusCircle, Eye, Pencil, Trash2, LayoutGrid, LayoutList, Tag } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { PlusCircle, Eye, Pencil, Trash2, LayoutGrid, LayoutList, Tag, Clock, X } from "lucide-react";
 import API from "../api";
 
 const VIEW_KEY = "myPostsView";
+
+const statusBadge = {
+  pending: "bg-amber-50 text-amber-700",
+  active: "bg-emerald-50 text-emerald-700",
+  rejected: "bg-red-50 text-red-600",
+  closed: "bg-slate-100 text-slate-600",
+  under_review: "bg-amber-50 text-amber-700",
+};
+
+const statusLabel = {
+  pending: "Pending approval",
+  active: "Approved",
+  rejected: "Rejected",
+  closed: "Closed",
+  under_review: "Under review",
+};
+
+function StatusBadge({ status }) {
+  if (!status) return null;
+  return (
+    <span className={`text-[11px] font-medium px-2 py-0.5 rounded-md ${statusBadge[status] || "bg-slate-100 text-slate-600"}`}>
+      {statusLabel[status] || status}
+    </span>
+  );
+}
 
 function Badge({ post }) {
   const isInvestor = post.type === "investor_post";
@@ -50,8 +75,9 @@ function GridCard({ post, onDelete }) {
             <Tag size={28} />
           </div>
         )}
-        <span className="absolute top-3 left-3">
+        <span className="absolute top-3 left-3 flex items-center gap-1.5">
           <Badge post={post} />
+          <StatusBadge status={post.status} />
         </span>
       </div>
       <div className="p-4 flex flex-col flex-1">
@@ -85,9 +111,7 @@ function ListRow({ post, onDelete }) {
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge post={post} />
-                {post.status && (
-                  <span className="text-[11px] font-medium text-slate-500 capitalize">{post.status}</span>
-                )}
+                <StatusBadge status={post.status} />
               </div>
               <h3 className="mt-1.5 text-base font-semibold text-slate-900 truncate">{post.title}</h3>
               <p className="mt-1 text-sm text-slate-600 line-clamp-2">{post.description}</p>
@@ -109,9 +133,15 @@ function ListRow({ post, onDelete }) {
 }
 
 export default function MyPosts() {
+  const location = useLocation();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState(() => localStorage.getItem(VIEW_KEY) || "grid");
+  const [notice, setNotice] = useState(location.state?.notice || "");
+
+  useEffect(() => {
+    if (location.state?.notice) window.history.replaceState({}, "");
+  }, [location.state]);
 
   useEffect(() => {
     API.get("/posts?limit=50&my=true")
@@ -137,6 +167,15 @@ export default function MyPosts() {
 
   return (
     <div>
+      {notice && (
+        <div className="mb-5 flex items-start gap-3 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm">
+          <Clock size={16} className="mt-0.5 shrink-0" />
+          <p className="flex-1">{notice}</p>
+          <button onClick={() => setNotice("")} className="shrink-0 text-amber-500 hover:text-amber-700" title="Dismiss">
+            <X size={15} />
+          </button>
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Content</p>

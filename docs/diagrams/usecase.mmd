@@ -1,0 +1,85 @@
+flowchart LR
+    guest((Guest))
+    investor((Investor))
+    businessman((Businessman))
+    regUser((Registered User))
+    admin((Administrator))
+
+    investor --> regUser
+    businessman --> regUser
+
+    subgraph investorHub ["InvestorHub"]
+        direction TB
+
+        subgraph publicArea ["Public"]
+            register[Register Account]
+            login[Login]
+            browse[Browse Posts]
+            viewPost[View Post Details]
+            contact[Contact Support]
+            createProfile[Create Role Profile]
+            search[Search / Filter Posts]
+            pending[View Approval Status]
+        end
+
+        subgraph memberArea ["Member"]
+            profile[Update Profile]
+            createPost[Create Post]
+            managePosts[Manage Own Posts]
+            sendMatch[Send Match Request]
+            respondMatch[Respond to Match]
+            chat[Real-time Chat]
+            upload[Upload Image]
+            logout[Logout]
+            editPost[Edit / Delete Post]
+            sendMsg[Send Message]
+            seen[Mark Messages Seen]
+        end
+
+        subgraph adminArea ["Admin"]
+            approve[Approve User Account]
+            status[Change User Status]
+            deleteUser[Delete User]
+            review[Review Reports]
+            reportStatus[Update Report Status]
+            analytics[View Analytics]
+        end
+
+        register -.->|"include"| createProfile
+        browse -.->|"extend"| search
+        viewPost -.->|"extend"| sendMatch
+        managePosts -.->|"include"| editPost
+        chat -.->|"include"| sendMsg
+        chat -.->|"include"| seen
+        createPost -.->|"extend"| upload
+    end
+
+    guest --- register
+    guest --- login
+    guest --- browse
+    guest --- viewPost
+    guest --- contact
+
+    regUser --- login
+    regUser --- pending
+    regUser --- profile
+    regUser --- createPost
+    regUser --- managePosts
+    regUser --- sendMatch
+    regUser --- respondMatch
+    regUser --- chat
+    regUser --- upload
+    regUser --- logout
+
+    admin --- login
+    admin --- approve
+    admin --- status
+    admin --- deleteUser
+    admin --- review
+    admin --- reportStatus
+    admin --- analytics
+
+    style investorHub fill:#F0FDFA,stroke:#0F766E
+    style publicArea fill:#ECFDF5,stroke:#0F766E
+    style memberArea fill:#F8FAFC,stroke:#334155
+    style adminArea fill:#FFF7ED,stroke:#B45309

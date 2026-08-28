@@ -15,7 +15,7 @@ import PostForm from "./pages/PostForm";
 import Profile from "./pages/Profile";
 import Matches from "./pages/Matches";
 import Chat from "./pages/Chat";
-import { Users, Reports, Analytics } from "./pages/Admin";
+import { Users, Reports, Analytics, Listings } from "./pages/Admin";
 import PostDetail from "./pages/PostDetail";
 
 function App() {
@@ -46,6 +46,7 @@ function App() {
           <Route path="matches" element={<Matches />} />
           <Route path="chat" element={<Chat />} />
           <Route path="users" element={<ProtectedRoute roles={["admin"]}><Users /></ProtectedRoute>} />
+          <Route path="listings" element={<ProtectedRoute roles={["admin"]}><Listings /></ProtectedRoute>} />
           <Route path="reports" element={<ProtectedRoute roles={["admin"]}><Reports /></ProtectedRoute>} />
           <Route path="analytics" element={<ProtectedRoute roles={["admin"]}><Analytics /></ProtectedRoute>} />
         </Route>

@@ -106,6 +106,17 @@ export default function PostDetail() {
           Back to listings
         </Link>
 
+        {post.status === "pending" && (
+          <div className="mt-5 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm">
+            This post is pending admin approval and is not visible to other users yet.
+          </div>
+        )}
+        {post.status === "rejected" && (
+          <div className="mt-5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+            This post was rejected by an admin and is not visible to other users. You can edit and resubmit it.
+          </div>
+        )}
+
         <div className="mt-5 grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-5">
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
