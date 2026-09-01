@@ -264,34 +264,40 @@
         <path d="M140 720 L140 620 L90 620" fill="none" stroke="#334155" stroke-width="1.35"/>
         <text x="118" y="610" font-size="10" fill="#334155">&lt;&lt;generalization&gt;&gt;</text>
 
-        <!-- Guest associations (short, left column only) -->
-        <line x1="110" y1="210" x2="322" y2="145" stroke="#334155" stroke-width="1.15"/>
-        <line x1="110" y1="220" x2="322" y2="210" stroke="#334155" stroke-width="1.15"/>
-        <line x1="110" y1="230" x2="322" y2="280" stroke="#334155" stroke-width="1.15"/>
-        <line x1="110" y1="240" x2="322" y2="350" stroke="#334155" stroke-width="1.15"/>
-        <line x1="110" y1="250" x2="322" y2="420" stroke="#334155" stroke-width="1.15"/>
+        <!-- Actor association bus lines (avoid fan-out overlap) -->
+        <line x1="175" y1="120" x2="175" y2="720" stroke="#e2e8f0" stroke-width="2"/>
+        <line x1="1325" y1="120" x2="1325" y2="600" stroke="#e2e8f0" stroke-width="2"/>
 
-        <!-- Registered User: login, pending, member set, logout -->
-        <line x1="110" y1="430" x2="322" y2="210" stroke="#334155" stroke-width="1.1"/>
-        <line x1="110" y1="450" x2="312" y2="700" stroke="#334155" stroke-width="1.15"/>
-        <line x1="110" y1="420" x2="632" y2="140" stroke="#0f766e" stroke-width="1.15"/>
-        <line x1="110" y1="428" x2="632" y2="210" stroke="#0f766e" stroke-width="1.15"/>
-        <line x1="110" y1="436" x2="632" y2="280" stroke="#0f766e" stroke-width="1.15"/>
-        <line x1="110" y1="444" x2="632" y2="350" stroke="#0f766e" stroke-width="1.15"/>
-        <line x1="110" y1="452" x2="632" y2="420" stroke="#0f766e" stroke-width="1.15"/>
-        <line x1="110" y1="460" x2="632" y2="490" stroke="#0f766e" stroke-width="1.15"/>
-        <line x1="110" y1="468" x2="632" y2="560" stroke="#0f766e" stroke-width="1.15"/>
-        <line x1="110" y1="476" x2="632" y2="630" stroke="#0f766e" stroke-width="1.15"/>
+        <!-- Guest → public use cases (via left bus) -->
+        <path d="M105 230 L175 230 L175 140 L322 140" stroke="#334155" fill="none" stroke-width="1.15"/>
+        <path d="M105 230 L175 230 L175 210 L322 210" stroke="#334155" fill="none" stroke-width="1.15"/>
+        <path d="M105 230 L175 230 L175 280 L322 280" stroke="#334155" fill="none" stroke-width="1.15"/>
+        <path d="M105 230 L175 230 L175 350 L322 350" stroke="#334155" fill="none" stroke-width="1.15"/>
+        <path d="M105 230 L175 230 L175 420 L322 420" stroke="#334155" fill="none" stroke-width="1.15"/>
 
-        <!-- Admin associations -->
-        <line x1="1395" y1="270" x2="1188" y2="160" stroke="#b45309" stroke-width="1.2"/>
-        <line x1="1395" y1="280" x2="1188" y2="240" stroke="#b45309" stroke-width="1.2"/>
-        <line x1="1395" y1="290" x2="1188" y2="320" stroke="#b45309" stroke-width="1.2"/>
-        <line x1="1395" y1="300" x2="1188" y2="400" stroke="#b45309" stroke-width="1.2"/>
-        <line x1="1395" y1="310" x2="1188" y2="480" stroke="#b45309" stroke-width="1.2"/>
-        <line x1="1395" y1="320" x2="1188" y2="560" stroke="#b45309" stroke-width="1.2"/>
-        <line x1="1395" y1="260" x2="1188" y2="140" stroke="#94a3b8" stroke-width="1.05"/>
-        <text x="1320" y="132" font-size="10" fill="#64748b">also Login</text>
+        <!-- Registered User → login + pending only (member cases via generalization) -->
+        <path d="M105 460 L175 460 L175 210 L322 210" stroke="#0f766e" fill="none" stroke-width="1.15"/>
+        <path d="M105 460 L175 460 L175 700 L312 700" stroke="#0f766e" fill="none" stroke-width="1.15"/>
+
+        <!-- Investor → member use cases (via left bus, separate y slots) -->
+        <path d="M63 746 L175 746 L175 140 L632 140" stroke="#334155" fill="none" stroke-width="1.1"/>
+        <path d="M63 746 L175 746 L175 210 L632 210" stroke="#334155" fill="none" stroke-width="1.1"/>
+        <path d="M63 746 L175 746 L175 280 L632 280" stroke="#334155" fill="none" stroke-width="1.1"/>
+        <path d="M63 746 L175 746 L175 350 L632 350" stroke="#334155" fill="none" stroke-width="1.1"/>
+        <path d="M63 746 L175 746 L175 420 L632 420" stroke="#334155" fill="none" stroke-width="1.1"/>
+        <path d="M63 746 L175 746 L175 490 L632 490" stroke="#334155" fill="none" stroke-width="1.1"/>
+        <path d="M63 746 L175 746 L175 560 L632 560" stroke="#334155" fill="none" stroke-width="1.1"/>
+        <path d="M63 746 L175 746 L175 630 L632 630" stroke="#334155" fill="none" stroke-width="1.1"/>
+
+        <!-- Admin → admin use cases (via right bus) -->
+        <path d="M1395 310 L1325 310 L1325 160 L1188 160" stroke="#b45309" fill="none" stroke-width="1.15"/>
+        <path d="M1395 310 L1325 310 L1325 240 L1188 240" stroke="#b45309" fill="none" stroke-width="1.15"/>
+        <path d="M1395 310 L1325 310 L1325 320 L1188 320" stroke="#b45309" fill="none" stroke-width="1.15"/>
+        <path d="M1395 310 L1325 310 L1325 400 L1188 400" stroke="#b45309" fill="none" stroke-width="1.15"/>
+        <path d="M1395 310 L1325 310 L1325 480 L1188 480" stroke="#b45309" fill="none" stroke-width="1.15"/>
+        <path d="M1395 310 L1325 310 L1325 560 L1188 560" stroke="#b45309" fill="none" stroke-width="1.15"/>
+        <path d="M1395 310 L1325 310 L1325 210 L322 210" stroke="#94a3b8" fill="none" stroke-width="1.05" stroke-dasharray="4 3"/>
+        <text x="820" y="200" font-size="10" fill="#64748b">also Login</text>
       </svg>
     </div>
 

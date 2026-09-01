@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
-  ArrowLeft, Eye, Calendar, MapPin, MessageCircle, UserPlus, Pencil, Tag,
+  ArrowLeft, Eye, Calendar, MapPin, MessageCircle, UserPlus, Pencil, Tag, Banknote,
 } from "lucide-react";
 import API from "../api";
 
@@ -21,6 +21,9 @@ export default function PostDetail() {
   const [contacting, setContacting] = useState(false);
   const [matching, setMatching] = useState(false);
   const [error, setError] = useState("");
+  const [investOpen, setInvestOpen] = useState(false);
+  const [investAmount, setInvestAmount] = useState("");
+  const [investing, setInvesting] = useState(false);
 
   useEffect(() => {
     API.get(`/posts/${id}`)
@@ -65,6 +68,31 @@ export default function PostDetail() {
       setError(err.response?.data?.message || "Failed to send match request");
     } finally {
       setMatching(false);
+    }
+  };
+
+  const canInvest = canContact && user?.role === "investor" && !isInvestorPost && post.status === "active";
+
+  const openInvest = () => {
+    if (!investAmount && post.budget > 0) setInvestAmount(String(post.budget));
+    setInvestOpen(true);
+  };
+
+  const startInvest = async (e) => {
+    e.preventDefault();
+    const amount = Number(investAmount);
+    if (!amount || amount < 10) {
+      setError("Enter an amount of at least BDT 10");
+      return;
+    }
+    setInvesting(true);
+    setError("");
+    try {
+      const { data } = await API.post("/payments/init", { postId: post._id, amount });
+      window.location.href = data.data.gatewayUrl;
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to start payment");
+      setInvesting(false);
     }
   };
 
@@ -113,7 +141,17 @@ export default function PostDetail() {
         )}
         {post.status === "rejected" && (
           <div className="mt-5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-            This post was rejected by an admin and is not visible to other users. You can edit and resubmit it.
+            <p>This post was rejected by an admin and is not visible to other users. You can edit and resubmit it.</p>
+            {post.rejectionReason && (
+              <p className="mt-1.5">
+                <span className="font-semibold">Reason:</span> {post.rejectionReason}
+              </p>
+            )}
+          </div>
+        )}
+        {post.status === "completed" && (
+          <div className="mt-5 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl text-sm">
+            This listing is fully funded. The requested amount has been raised, so it no longer appears in listings or accepts new investments.
           </div>
         )}
 
@@ -254,6 +292,24 @@ export default function PostDetail() {
               <p className="mt-1 text-2xl font-bold text-slate-900">
                 {post.budget > 0 ? formatBdt(post.budget) : "Not specified"}
               </p>
+              {!isInvestorPost && post.budget > 0 && post.raisedAmount > 0 && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-500">Raised</span>
+                    <span className="font-semibold text-emerald-700">{formatBdt(post.raisedAmount)}</span>
+                  </div>
+                  <div className="mt-1.5 h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-600 rounded-full"
+                      style={{ width: `${Math.min(100, Math.round((post.raisedAmount / post.budget) * 100))}%` }}
+                    />
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    {Math.min(100, Math.round((post.raisedAmount / post.budget) * 100))}% of goal
+                    {post.status === "completed" ? " · Fully funded" : ""}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="bg-white border border-gray-200 rounded-xl p-5">
@@ -313,6 +369,52 @@ export default function PostDetail() {
                 </div>
               ) : canContact ? (
                 <div className="space-y-2">
+                  {canInvest &&
+                    (investOpen ? (
+                      <form onSubmit={startInvest} className="border border-emerald-100 bg-emerald-50/60 rounded-lg p-3 space-y-2">
+                        <label htmlFor="invest-amount" className="block text-xs font-medium text-slate-600">
+                          Investment amount (BDT)
+                        </label>
+                        <input
+                          id="invest-amount"
+                          type="number"
+                          min="10"
+                          required
+                          value={investAmount}
+                          onChange={(e) => setInvestAmount(e.target.value)}
+                          placeholder="e.g. 50000"
+                          className="w-full h-11 px-3.5 text-sm bg-white border border-gray-200 rounded-lg outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            type="submit"
+                            disabled={investing}
+                            className="h-11 flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
+                          >
+                            <Banknote size={16} />
+                            {investing ? "Redirecting..." : "Pay with SSLCommerz"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setInvestOpen(false)}
+                            className="h-11 px-3 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          You will be redirected to SSLCommerz to pay securely (card, bKash, Nagad, bank).
+                        </p>
+                      </form>
+                    ) : (
+                      <button
+                        onClick={openInvest}
+                        className="h-11 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold"
+                      >
+                        <Banknote size={16} />
+                        Invest Now
+                      </button>
+                    ))}
                   <button
                     onClick={startMessage}
                     disabled={contacting}

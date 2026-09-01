@@ -11,6 +11,7 @@ const statusBadge = {
   rejected: "bg-red-50 text-red-600",
   closed: "bg-slate-100 text-slate-600",
   under_review: "bg-amber-50 text-amber-700",
+  completed: "bg-emerald-600 text-white",
 };
 
 const statusLabel = {
@@ -19,6 +20,7 @@ const statusLabel = {
   rejected: "Rejected",
   closed: "Closed",
   under_review: "Under review",
+  completed: "Fully funded",
 };
 
 function StatusBadge({ status }) {
@@ -91,6 +93,11 @@ function GridCard({ post, onDelete }) {
           <span className="truncate">{post.category?.[0] || "No category"}</span>
           {post.budget > 0 && <span>BDT {Number(post.budget).toLocaleString()}</span>}
         </div>
+        {post.status === "rejected" && post.rejectionReason && (
+          <div className="mt-3 bg-red-50 border border-red-100 text-red-700 px-3 py-2 rounded-lg text-xs">
+            <span className="font-semibold">Rejection reason:</span> {post.rejectionReason}
+          </div>
+        )}
         <div className="mt-3 pt-3 border-t border-gray-100">
           <Actions id={post._id} onDelete={onDelete} />
         </div>
@@ -123,6 +130,11 @@ function ListRow({ post, onDelete }) {
                 <span>{post.category?.join(", ") || "No category"}</span>
                 {post.budget > 0 && <span>BDT {Number(post.budget).toLocaleString()}</span>}
               </div>
+              {post.status === "rejected" && post.rejectionReason && (
+                <div className="mt-2.5 bg-red-50 border border-red-100 text-red-700 px-3 py-2 rounded-lg text-xs">
+                  <span className="font-semibold">Rejection reason:</span> {post.rejectionReason}
+                </div>
+              )}
             </div>
             <Actions id={post._id} onDelete={onDelete} />
           </div>

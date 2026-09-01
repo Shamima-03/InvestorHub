@@ -1,6 +1,6 @@
 const express = require("express");
 const { protect, checkRole } = require("./middleware");
-const { User, Post, Match, Report } = require("./models");
+const { User, Post, Match, Report, Investment } = require("./models");
 
 const router = express.Router();
 
@@ -39,9 +39,25 @@ router.get("/users", async (req, res, next) => {
 
 router.put("/users/:id/status", async (req, res, next) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json({ success: true, data: user });
+    const { status, reason } = req.body;
+    if (!["pending", "active", "suspended", "blocked", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+    if (status === "rejected" && !reason?.trim()) {
+      return res.status(400).json({ message: "A rejection note is required" });
+    }
+
+    const target = await User.findById(req.params.id);
+    if (!target) return res.status(404).json({ message: "User not found" });
+    if (target.role === "admin") {
+      return res.status(400).json({ message: "Admin accounts cannot be moderated" });
+    }
+
+    // The note is shown to the user; clear it when the account leaves the rejected state.
+    target.status = status;
+    target.rejectionReason = status === "rejected" ? reason.trim().slice(0, 1000) : "";
+    await target.save();
+    res.json({ success: true, data: target });
   } catch (error) {
     next(error);
   }
@@ -88,11 +104,16 @@ router.get("/posts", async (req, res, next) => {
 
 router.put("/posts/:id/status", async (req, res, next) => {
   try {
-    const { status } = req.body;
-    if (!["pending", "active", "rejected", "closed", "under_review"].includes(status)) {
+    const { status, reason } = req.body;
+    if (!["pending", "active", "rejected", "closed", "under_review", "completed"].includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
-    const post = await Post.findByIdAndUpdate(req.params.id, { status }, { new: true })
+    if (status === "rejected" && !reason?.trim()) {
+      return res.status(400).json({ message: "A rejection reason is required" });
+    }
+    // The reason is shown to the author; clear it when the post leaves the rejected state.
+    const update = { status, rejectionReason: status === "rejected" ? reason.trim().slice(0, 1000) : "" };
+    const post = await Post.findByIdAndUpdate(req.params.id, update, { new: true })
       .populate("authorId", "name email avatar role");
     if (!post) return res.status(404).json({ message: "Post not found" });
     res.json({ success: true, data: post });
@@ -131,6 +152,34 @@ router.put("/reports/:id", async (req, res, next) => {
   }
 });
 
+router.get("/investments", async (req, res, next) => {
+  try {
+    const { page = 1, limit = 20, status, search } = req.query;
+    const query = {};
+    if (status) query.status = status;
+    if (search) {
+      query.tranId = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
+    }
+
+    const investments = await Investment.find(query)
+      .populate("investorId", "name email avatar")
+      .populate("businessmanId", "name email avatar")
+      .populate("postId", "title")
+      .sort({ createdAt: -1 })
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit));
+    const total = await Investment.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: investments,
+      pagination: { page: Number(page), limit: Number(limit), total, pages: Math.ceil(total / Number(limit)) },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/analytics", async (req, res, next) => {
   try {
     const [
@@ -140,6 +189,7 @@ router.get("/analytics", async (req, res, next) => {
       pendingPosts, activePosts, rejectedPosts,
       totalMatches, pendingMatches, acceptedMatches, rejectedMatches,
       totalReports, pendingReports, resolvedReports, dismissedReports,
+      totalInvestments, completedInvestments, pendingInvestments, failedInvestments, cancelledInvestments, investmentSum,
     ] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ role: "investor" }),
@@ -163,6 +213,12 @@ router.get("/analytics", async (req, res, next) => {
       Report.countDocuments({ status: "pending" }),
       Report.countDocuments({ status: "resolved" }),
       Report.countDocuments({ status: "dismissed" }),
+      Investment.countDocuments(),
+      Investment.countDocuments({ status: "completed" }),
+      Investment.countDocuments({ status: "pending" }),
+      Investment.countDocuments({ status: "failed" }),
+      Investment.countDocuments({ status: "cancelled" }),
+      Investment.aggregate([{ $match: { status: "completed" } }, { $group: { _id: null, sum: { $sum: "$amount" } } }]),
     ]);
 
     res.json({
@@ -172,6 +228,7 @@ router.get("/analytics", async (req, res, next) => {
         posts: { total: totalPosts, investor: investorPosts, business: businessPosts, pending: pendingPosts, active: activePosts, rejected: rejectedPosts },
         matches: { total: totalMatches, pending: pendingMatches, accepted: acceptedMatches, rejected: rejectedMatches },
         reports: { total: totalReports, pending: pendingReports, resolved: resolvedReports, dismissed: dismissedReports },
+        payments: { total: totalInvestments, completed: completedInvestments, pending: pendingInvestments, failed: failedInvestments, cancelled: cancelledInvestments, totalAmount: investmentSum[0]?.sum || 0 },
         totalUsers, totalInvestors, totalBusinessmen, totalPosts, totalMatches, acceptedMatches, pendingReports, pendingPosts,
       },
     });

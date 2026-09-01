@@ -1,0 +1,36 @@
+flowchart TB
+    start((Start)) --> login[Login]
+    login --> newUser{New user?}
+    newUser -->|yes| register[Register]
+    register --> login
+    newUser -->|no| auth[Authentication]
+    auth --> valid{Valid?}
+    valid -->|invalid| login
+    valid -->|valid| active{Active?}
+    active -->|no| pending[View Pending]
+    active -->|yes| fork{{fork}}
+
+    fork --> browse[Browse Posts]
+    fork --> search[Search / Filter]
+    fork --> createPost[Create Post]
+    fork --> upload[Upload Image]
+    fork --> sendMatch[Send Match]
+    fork --> profile[Update Profile]
+    fork --> managePosts[Manage Posts]
+    fork --> matches[View Matches]
+
+    sendMatch --> matchOk{Accepted?}
+    matchOk -->|yes| chat[Real-time Chat]
+    matchOk -->|no| sendMatch
+
+    browse --> join{{join}}
+    search --> join
+    createPost --> join
+    upload --> join
+    chat --> join
+    profile --> join
+    managePosts --> join
+    matches --> join
+
+    join --> logout[Logout]
+    logout --> endNode(((End)))

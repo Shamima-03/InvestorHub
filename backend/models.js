@@ -8,8 +8,10 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: [true, "Email is required"], unique: true, lowercase: true, trim: true },
     password: { type: String, required: [true, "Password is required"], minlength: 6, select: false },
     role: { type: String, enum: ["admin", "investor", "businessman"], required: [true, "Role is required"] },
-    status: { type: String, enum: ["pending", "active", "suspended", "blocked"], default: "pending" },
+    status: { type: String, enum: ["pending", "active", "suspended", "blocked", "rejected"], default: "pending" },
+    rejectionReason: { type: String, default: "", maxlength: 1000 },
     isVerified: { type: Boolean, default: false },
+    nidImage: { type: String, default: "" },
     avatar: { type: String, default: "" },
     phone: { type: String, default: "" },
     location: { type: String, default: "" },
@@ -81,7 +83,8 @@ const postSchema = new mongoose.Schema(
     budget: { type: Number, default: 0 },
     image: { type: String, default: "" },
     attachments: [{ type: String }],
-    status: { type: String, enum: ["pending", "active", "rejected", "closed", "under_review"], default: "pending" },
+    status: { type: String, enum: ["pending", "active", "rejected", "closed", "under_review", "completed"], default: "pending" },
+    rejectionReason: { type: String, default: "", maxlength: 1000 },
     likesCount: { type: Number, default: 0 },
     viewsCount: { type: Number, default: 0 },
   },
@@ -99,6 +102,7 @@ const matchSchema = new mongoose.Schema(
     investorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     businessmanId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     postId: { type: mongoose.Schema.Types.ObjectId, ref: "Post", default: null },
+    requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     status: { type: String, enum: ["pending", "accepted", "rejected", "finalized"], default: "pending" },
   },
   { timestamps: true }
@@ -129,6 +133,26 @@ const messageSchema = new mongoose.Schema(
 
 messageSchema.index({ conversationId: 1, createdAt: -1 });
 
+const investmentSchema = new mongoose.Schema(
+  {
+    investorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    businessmanId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    postId: { type: mongoose.Schema.Types.ObjectId, ref: "Post", required: true },
+    amount: { type: Number, required: [true, "Amount is required"], min: 10 },
+    currency: { type: String, default: "BDT" },
+    tranId: { type: String, required: true, unique: true },
+    valId: { type: String, default: "" },
+    status: { type: String, enum: ["pending", "completed", "failed", "cancelled"], default: "pending" },
+    paymentMethod: { type: String, default: "" },
+    bankTranId: { type: String, default: "" },
+    paidAt: { type: Date, default: null },
+  },
+  { timestamps: true }
+);
+
+investmentSchema.index({ investorId: 1, createdAt: -1 });
+investmentSchema.index({ businessmanId: 1, createdAt: -1 });
+
 const reportSchema = new mongoose.Schema(
   {
     reporterId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -149,4 +173,5 @@ module.exports = {
   Conversation: mongoose.model("Conversation", conversationSchema),
   Message: mongoose.model("Message", messageSchema),
   Report: mongoose.model("Report", reportSchema),
+  Investment: mongoose.model("Investment", investmentSchema),
 };

@@ -1,5 +1,5 @@
 import { configureStore, createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import API from "./api";
+import API, { disconnectSocket } from "./api";
 
 export const login = createAsyncThunk("auth/login", async (credentials, { rejectWithValue }) => {
   try {
@@ -32,10 +32,20 @@ export const getMe = createAsyncThunk("auth/getMe", async (_, { rejectWithValue 
 
 const authSlice = createSlice({
   name: "auth",
-  initialState: { user: null, loading: false, error: null, isAuthenticated: false },
+  // authChecked stays false on reload while a stored token is being verified via getMe,
+  // so ProtectedRoute can wait instead of redirecting to /login too early.
+  initialState: {
+    user: null,
+    loading: false,
+    error: null,
+    isAuthenticated: false,
+    authChecked: !localStorage.getItem("token"),
+  },
   reducers: {
     logout: (state) => {
       localStorage.removeItem("token");
+      // Drop the socket so the next login can't inherit this user's identity
+      disconnectSocket();
       state.user = null;
       state.isAuthenticated = false;
       state.error = null;
@@ -53,6 +63,7 @@ const authSlice = createSlice({
       state.loading = false;
       state.user = action.payload;
       state.isAuthenticated = true;
+      state.authChecked = true;
     };
     const rejected = (state, action) => {
       state.loading = false;
@@ -66,11 +77,15 @@ const authSlice = createSlice({
       .addCase(register.pending, pending)
       .addCase(register.fulfilled, fulfilled)
       .addCase(register.rejected, rejected)
+      .addCase(getMe.pending, (state) => {
+        state.loading = true;
+      })
       .addCase(getMe.fulfilled, fulfilled)
       .addCase(getMe.rejected, (state) => {
         state.user = null;
         state.isAuthenticated = false;
         state.loading = false;
+        state.authChecked = true;
       });
   },
 });

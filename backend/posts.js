@@ -1,7 +1,7 @@
 const express = require("express");
 const { body } = require("express-validator");
 const { protect, optionalAuth, validate, requireActive } = require("./middleware");
-const { Post, InvestorProfile, BusinessmanProfile } = require("./models");
+const { Post, InvestorProfile, BusinessmanProfile, Investment } = require("./models");
 
 const router = express.Router();
 
@@ -96,7 +96,9 @@ router.get("/:id", optionalAuth, async (req, res, next) => {
     const post = await Post.findById(req.params.id).populate("authorId", "name avatar role location");
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    if (post.status !== "active") {
+    // Fully funded (completed) posts stay reachable by direct link — for investment
+    // history and invoices — but are excluded from public listings above.
+    if (!["active", "completed"].includes(post.status)) {
       const postAuthorId = (post.authorId?._id || post.authorId).toString();
       const isOwner = req.user && postAuthorId === req.user._id.toString();
       const isAdmin = req.user?.role === "admin";
@@ -134,7 +136,16 @@ router.get("/:id", optionalAuth, async (req, res, next) => {
       }
     }
 
-    res.json({ success: true, data: { ...post.toObject(), authorProfile } });
+    let raisedAmount = 0;
+    if (post.type === "business_post") {
+      const agg = await Investment.aggregate([
+        { $match: { postId: post._id, status: "completed" } },
+        { $group: { _id: null, sum: { $sum: "$amount" } } },
+      ]);
+      raisedAmount = agg[0]?.sum || 0;
+    }
+
+    res.json({ success: true, data: { ...post.toObject(), authorProfile, raisedAmount } });
   } catch (error) {
     next(error);
   }
@@ -159,6 +170,7 @@ router.put("/:id", protect, requireActive, async (req, res, next) => {
     }
     // Edited posts must be re-approved by an admin before going public again
     updateData.status = "pending";
+    updateData.rejectionReason = "";
 
     post = await Post.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
     res.json({

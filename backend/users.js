@@ -56,6 +56,21 @@ router.put("/me", protect, requireActive, async (req, res, next) => {
   }
 });
 
+// No requireActive: pending users submit their NID during onboarding,
+// before an admin activates the account.
+router.put("/me/nid", protect, async (req, res, next) => {
+  try {
+    const { nidImage } = req.body;
+    if (!nidImage || !/^https?:\/\//.test(nidImage)) {
+      return res.status(400).json({ message: "A valid NID image URL is required" });
+    }
+    const user = await User.findByIdAndUpdate(req.user._id, { nidImage }, { new: true });
+    res.json({ success: true, data: user, message: "NID submitted for verification" });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.put("/me/investor-profile", protect, requireActive, async (req, res, next) => {
   try {
     const profile = await InvestorProfile.findOneAndUpdate(

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link, Navigate } from "react-router-dom";
-import { Clock, ShieldCheck, LogOut } from "lucide-react";
+import { Clock, ShieldCheck, LogOut, XCircle } from "lucide-react";
 import { getMe, logout } from "../store";
 
 export default function Pending() {
@@ -43,6 +43,7 @@ export default function Pending() {
   };
 
   const blocked = status === "suspended" || status === "blocked";
+  const rejected = status === "rejected";
 
   return (
     <div className="bg-slate-50 py-12 sm:py-20">
@@ -50,13 +51,26 @@ export default function Pending() {
         <div className="bg-white border border-gray-200 rounded-xl p-6 sm:p-8 text-center">
           <div
             className={`w-14 h-14 rounded-full mx-auto flex items-center justify-center ${
-              blocked ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-700"
+              blocked || rejected ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-700"
             }`}
           >
-            {blocked ? <ShieldCheck size={26} /> : <Clock size={26} />}
+            {rejected ? <XCircle size={26} /> : blocked ? <ShieldCheck size={26} /> : <Clock size={26} />}
           </div>
 
-          {blocked ? (
+          {rejected ? (
+            <>
+              <h1 className="mt-4 text-xl font-semibold text-slate-900">Application rejected</h1>
+              <p className="mt-2 text-sm text-slate-500 leading-relaxed">
+                An admin reviewed your account and rejected it. Please check the note below — after you
+                fix the issue (for example, uploading a clearer NID), an admin can review your account again.
+              </p>
+              {user?.rejectionReason && (
+                <div className="mt-4 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-lg text-sm text-left">
+                  <span className="font-semibold">Admin's note:</span> {user.rejectionReason}
+                </div>
+              )}
+            </>
+          ) : blocked ? (
             <>
               <h1 className="mt-4 text-xl font-semibold text-slate-900">Account {status}</h1>
               <p className="mt-2 text-sm text-slate-500 leading-relaxed">
@@ -78,6 +92,21 @@ export default function Pending() {
               </p>
             </>
           )}
+
+          {!blocked &&
+            (user?.nidImage ? (
+              <div className="mt-5 bg-emerald-50 border border-emerald-100 text-emerald-800 px-4 py-3 rounded-lg text-sm text-left">
+                <span className="font-semibold">NID submitted.</span> Your identity document is awaiting admin review.
+              </div>
+            ) : (
+              <div className="mt-5 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm text-left">
+                <span className="font-semibold">NID not submitted yet.</span> Uploading your National ID helps the
+                admin verify and approve your account faster.{" "}
+                <Link to="/onboarding" className="font-semibold underline hover:no-underline">
+                  Upload NID
+                </Link>
+              </div>
+            ))}
 
           <div className="mt-6 bg-slate-50 border border-gray-100 rounded-lg p-4 text-left text-sm">
             <p className="text-slate-700">

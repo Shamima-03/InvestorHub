@@ -24,11 +24,29 @@ API.interceptors.response.use(
 );
 
 let socket = null;
+let socketToken = null;
 
 export const connectSocket = (token) => {
-  if (socket?.connected) return socket;
+  // Reuse only a socket opened with the SAME token. The server stamps the
+  // user's identity once at handshake, so a stale socket from a previous
+  // login would send every message as the old user (and misalign the chat).
+  if (socket && socketToken === token && socket.connected) return socket;
+  if (socket) {
+    socket.removeAllListeners();
+    socket.disconnect();
+  }
+  socketToken = token;
   socket = io("/", { auth: { token }, transports: ["websocket", "polling"] });
   return socket;
+};
+
+export const disconnectSocket = () => {
+  if (socket) {
+    socket.removeAllListeners();
+    socket.disconnect();
+    socket = null;
+    socketToken = null;
+  }
 };
 
 export const getSocket = () => socket;

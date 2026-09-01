@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   UsersRound, FileText, Handshake, AlertTriangle, ArrowRight, Search,
   Shield, BarChart3, ChevronDown, Trash2, Check, X, LayoutGrid, LayoutList,
-  Clock, Eye, Tag,
+  Clock, Eye, Tag, Banknote,
 } from "lucide-react";
 import API from "../api";
 
@@ -21,7 +21,12 @@ const statusClass = {
   resolved: "bg-emerald-50 text-emerald-700",
   reviewed: "bg-slate-100 text-slate-700",
   dismissed: "bg-slate-100 text-slate-600",
+  completed: "bg-emerald-50 text-emerald-700",
+  failed: "bg-red-50 text-red-600",
+  cancelled: "bg-slate-100 text-slate-600",
 };
+
+const formatBdt = (n) => `BDT ${Number(n || 0).toLocaleString()}`;
 
 const roleClass = {
   investor: "bg-emerald-50 text-emerald-700",
@@ -227,6 +232,9 @@ export function Users() {
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
   const [acting, setActing] = useState("");
+  const [nidView, setNidView] = useState(null);
+  const [rejectUser, setRejectUser] = useState(null);
+  const [rejectUserNote, setRejectUserNote] = useState("");
 
   const fetchUsers = (nextPage = page) => {
     setLoading(true);
@@ -256,13 +264,26 @@ export function Users() {
     fetchUsers(1);
   };
 
-  const updateStatus = async (id, status) => {
+  const updateStatus = async (id, status, reason) => {
     setActing(id);
     try {
-      await API.put(`/admin/users/${id}/status`, { status });
+      await API.put(`/admin/users/${id}/status`, reason ? { status, reason } : { status });
       fetchUsers(page);
+      return true;
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to update user status");
+      return false;
     } finally {
       setActing("");
+    }
+  };
+
+  const confirmRejectUser = async () => {
+    if (!rejectUser || !rejectUserNote.trim()) return;
+    const ok = await updateStatus(rejectUser._id, "rejected", rejectUserNote.trim());
+    if (ok) {
+      setRejectUser(null);
+      setRejectUserNote("");
     }
   };
 
@@ -312,6 +333,7 @@ export function Users() {
           <option value="active">Active</option>
           <option value="suspended">Suspended</option>
           <option value="blocked">Blocked</option>
+          <option value="rejected">Rejected</option>
         </Select>
         <button type="submit" className="h-10 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shrink-0">
           Search
@@ -334,6 +356,7 @@ export function Users() {
                   <th className="px-4 py-3">User</th>
                   <th className="px-4 py-3">Role</th>
                   <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">NID</th>
                   <th className="px-4 py-3">Joined</th>
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
@@ -358,9 +381,30 @@ export function Users() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-[11px] font-medium capitalize px-2 py-0.5 rounded-md ${statusClass[u.status] || "bg-slate-100 text-slate-600"}`}>
+                      <span
+                        title={u.status === "rejected" && u.rejectionReason ? `Note: ${u.rejectionReason}` : undefined}
+                        className={`text-[11px] font-medium capitalize px-2 py-0.5 rounded-md ${statusClass[u.status] || "bg-slate-100 text-slate-600"}`}
+                      >
                         {u.status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {u.nidImage ? (
+                        <button
+                          onClick={() => setNidView(u)}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                          title="View NID"
+                        >
+                          <Eye size={12} />
+                          View
+                        </button>
+                      ) : u.role === "admin" ? (
+                        <span className="text-xs text-slate-300">—</span>
+                      ) : (
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-500">
+                          Missing
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}
@@ -369,13 +413,22 @@ export function Users() {
                       <div className="flex items-center justify-end gap-2">
                         <Select
                           value={u.status}
-                          onChange={(e) => updateStatus(u._id, e.target.value)}
+                          onChange={(e) => {
+                            const next = e.target.value;
+                            if (next === "rejected") {
+                              setRejectUser(u);
+                              setRejectUserNote("");
+                            } else {
+                              updateStatus(u._id, next);
+                            }
+                          }}
                           className="w-32"
                         >
                           <option value="pending">Pending</option>
                           <option value="active">Active</option>
                           <option value="suspended">Suspended</option>
                           <option value="blocked">Blocked</option>
+                          <option value="rejected">Rejected</option>
                         </Select>
                         <button
                           onClick={() => deleteUser(u._id)}
@@ -415,6 +468,98 @@ export function Users() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {rejectUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40" onClick={() => setRejectUser(null)} />
+          <div className="relative w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-xl p-6">
+            <h3 className="text-lg font-bold text-slate-900">Reject user</h3>
+            <p className="mt-1 text-sm text-slate-500 truncate">
+              {rejectUser.name} · {rejectUser.email}
+            </p>
+            <label htmlFor="reject-user-note" className="block mt-4 text-xs font-medium text-slate-600">
+              Note <span className="text-red-500">*</span> (shown to the user)
+            </label>
+            <textarea
+              id="reject-user-note"
+              value={rejectUserNote}
+              onChange={(e) => setRejectUserNote(e.target.value)}
+              rows={4}
+              maxLength={1000}
+              autoFocus
+              placeholder="e.g. Your NID photo is unreadable — please upload a clearer photo, or the information does not match your profile..."
+              className="mt-1.5 w-full px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 bg-white border border-gray-200 rounded-lg outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 resize-none"
+            />
+            <p className="mt-1 text-[11px] text-slate-400 text-right">{rejectUserNote.length}/1000</p>
+            <div className="mt-3 flex justify-end gap-2">
+              <button
+                onClick={() => setRejectUser(null)}
+                className="h-10 px-4 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRejectUser}
+                disabled={!rejectUserNote.trim() || acting === rejectUser._id}
+                className="h-10 px-4 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-50"
+              >
+                {acting === rejectUser._id ? "Rejecting..." : "Reject user"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {nidView && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/50" onClick={() => setNidView(null)} />
+          <div className="relative w-full max-w-lg bg-white rounded-2xl border border-gray-200 shadow-xl p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="text-lg font-bold text-slate-900">National ID</h3>
+                <p className="text-sm text-slate-500 truncate">
+                  {nidView.name} · {nidView.email}
+                </p>
+              </div>
+              <button
+                onClick={() => setNidView(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-gray-100 shrink-0"
+                title="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="mt-4 border border-gray-200 rounded-xl overflow-hidden bg-slate-50">
+              <img src={nidView.nidImage} alt={`NID of ${nidView.name}`} className="w-full max-h-[420px] object-contain" />
+            </div>
+            <div className="mt-4 flex items-center justify-between gap-2">
+              <a
+                href={nidView.nidImage}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
+              >
+                Open full size
+              </a>
+              {nidView.status !== "active" && nidView.role !== "admin" && (
+                <button
+                  onClick={async () => {
+                    await updateStatus(nidView._id, "active");
+                    setNidView(null);
+                  }}
+                  disabled={acting === nidView._id}
+                  className="h-10 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check size={14} />
+                    Approve account
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -637,6 +782,8 @@ export function Listings() {
   const [filter, setFilter] = useState("pending");
   const [page, setPage] = useState(1);
   const [acting, setActing] = useState("");
+  const [rejectTarget, setRejectTarget] = useState(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const fetchCounts = () => {
     API.get("/admin/analytics")
@@ -675,14 +822,27 @@ export function Listings() {
     fetchPosts(p, filter);
   };
 
-  const setStatus = async (id, status) => {
+  const setStatus = async (id, status, reason) => {
     setActing(id);
     try {
-      await API.put(`/admin/posts/${id}/status`, { status });
+      await API.put(`/admin/posts/${id}/status`, reason ? { status, reason } : { status });
       fetchPosts(page, filter);
       fetchCounts();
+      return true;
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to update post status");
+      return false;
     } finally {
       setActing("");
+    }
+  };
+
+  const confirmReject = async () => {
+    if (!rejectTarget || !rejectReason.trim()) return;
+    const ok = await setStatus(rejectTarget._id, "rejected", rejectReason.trim());
+    if (ok) {
+      setRejectTarget(null);
+      setRejectReason("");
     }
   };
 
@@ -708,6 +868,7 @@ export function Listings() {
   const filters = [
     { id: "pending", label: "Pending" },
     { id: "active", label: "Active" },
+    { id: "completed", label: "Funded" },
     { id: "rejected", label: "Rejected" },
     { id: "all", label: "All" },
   ];
@@ -800,7 +961,10 @@ export function Listings() {
                       </Link>
                       {p.status !== "rejected" && (
                         <button
-                          onClick={() => setStatus(p._id, "rejected")}
+                          onClick={() => {
+                            setRejectTarget(p);
+                            setRejectReason("");
+                          }}
                           disabled={acting === p._id}
                           className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-red-100 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
                         >
@@ -837,6 +1001,274 @@ export function Listings() {
             <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-slate-500">
               <span>
                 Page {pagination.page} of {pagination.pages} · {pagination.total} posts
+              </span>
+              <div className="flex gap-2">
+                <button
+                  disabled={page <= 1}
+                  onClick={() => goPage(page - 1)}
+                  className="h-8 px-3 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
+                >
+                  Previous
+                </button>
+                <button
+                  disabled={page >= pagination.pages}
+                  onClick={() => goPage(page + 1)}
+                  className="h-8 px-3 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {rejectTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40" onClick={() => setRejectTarget(null)} />
+          <div className="relative w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-xl p-6">
+            <h3 className="text-lg font-bold text-slate-900">Reject post</h3>
+            <p className="mt-1 text-sm text-slate-500 truncate">"{rejectTarget.title}"</p>
+            <label htmlFor="reject-reason" className="block mt-4 text-xs font-medium text-slate-600">
+              Reason <span className="text-red-500">*</span> (shown to the author)
+            </label>
+            <textarea
+              id="reject-reason"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              rows={4}
+              maxLength={1000}
+              autoFocus
+              placeholder="e.g. The description is incomplete, the budget looks unrealistic, or the images are missing..."
+              className="mt-1.5 w-full px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 bg-white border border-gray-200 rounded-lg outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 resize-none"
+            />
+            <p className="mt-1 text-[11px] text-slate-400 text-right">{rejectReason.length}/1000</p>
+            <div className="mt-3 flex justify-end gap-2">
+              <button
+                onClick={() => setRejectTarget(null)}
+                className="h-10 px-4 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmReject}
+                disabled={!rejectReason.trim() || acting === rejectTarget._id}
+                className="h-10 px-4 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-50"
+              >
+                {acting === rejectTarget._id ? "Rejecting..." : "Reject post"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function Payments() {
+  const [items, setItems] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [pagination, setPagination] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  const fetchStats = () => {
+    API.get("/admin/analytics")
+      .then((res) => setStats(res.data.data?.payments || null))
+      .catch(() => {});
+  };
+
+  const fetchPayments = (nextPage = 1, status = filter, q = search) => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    params.set("page", String(nextPage));
+    params.set("limit", "15");
+    if (status !== "all") params.set("status", status);
+    if (q) params.set("search", q);
+    API.get(`/admin/investments?${params}`)
+      .then((res) => {
+        setItems(res.data.data || []);
+        setPagination(res.data.pagination || {});
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchStats();
+    fetchPayments(1, "all", "");
+  }, []);
+
+  const switchFilter = (f) => {
+    setFilter(f);
+    setPage(1);
+    fetchPayments(1, f);
+  };
+
+  const applySearch = (e) => {
+    e?.preventDefault();
+    setPage(1);
+    fetchPayments(1, filter, search);
+  };
+
+  const goPage = (p) => {
+    setPage(p);
+    fetchPayments(p, filter);
+  };
+
+  const summary = [
+    { label: "Total received", value: formatBdt(stats?.totalAmount) },
+    { label: "Total payments", value: stats?.total ?? 0 },
+    { label: "Completed", value: stats?.completed ?? 0 },
+    { label: "Pending", value: stats?.pending ?? 0 },
+  ];
+
+  const filters = [
+    { id: "all", label: "All" },
+    { id: "completed", label: "Completed" },
+    { id: "pending", label: "Pending" },
+    { id: "failed", label: "Failed" },
+    { id: "cancelled", label: "Cancelled" },
+  ];
+
+  return (
+    <div>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Admin</p>
+        <h1 className="mt-1 text-2xl font-bold text-slate-900 tracking-tight">Payments</h1>
+        <p className="mt-1 text-sm text-slate-500">All investment payments made through SSLCommerz.</p>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {summary.map((s) => (
+          <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-4">
+            <p className="text-2xl font-bold text-slate-900">{s.value}</p>
+            <p className="mt-0.5 text-sm text-slate-500">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 flex flex-col lg:flex-row lg:items-center gap-3">
+        <div className="flex gap-1 p-1 bg-white border border-gray-200 rounded-lg w-fit overflow-x-auto">
+          {filters.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => switchFilter(f.id)}
+              className={`h-8 px-3 rounded-md text-sm font-medium whitespace-nowrap ${
+                filter === f.id ? "bg-emerald-600 text-white" : "text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <form onSubmit={applySearch} className="flex gap-2 lg:ml-auto">
+          <div className="relative flex-1 lg:w-64">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by transaction ID"
+              className={`${inputClass} w-full pl-9`}
+            />
+          </div>
+          <button type="submit" className="h-10 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shrink-0">
+            Search
+          </button>
+        </form>
+      </div>
+
+      {loading ? (
+        <Spinner label="Loading payments..." />
+      ) : items.length === 0 ? (
+        <div className="mt-4 bg-white border border-gray-200 rounded-xl py-16 text-center">
+          <Banknote size={28} className="mx-auto text-slate-300" />
+          <p className="mt-3 text-sm font-medium text-slate-800">No {filter === "all" ? "" : filter} payments found</p>
+          <p className="mt-1 text-sm text-slate-500">Investment payments will show up here.</p>
+        </div>
+      ) : (
+        <div className="mt-4 bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-50 border-b border-gray-200 text-left">
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Investor</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Business</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Listing</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Date</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Method</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Transaction ID</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">Amount</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">Invoice</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {items.map((inv) => (
+                  <tr key={inv._id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="px-4 py-3.5">
+                      <div className="min-w-[140px]">
+                        <p className="font-medium text-slate-900 truncate">{inv.investorId?.name || "Unknown"}</p>
+                        <p className="text-xs text-slate-500 truncate">{inv.investorId?.email || ""}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="min-w-[140px]">
+                        <p className="font-medium text-slate-900 truncate">{inv.businessmanId?.name || "Unknown"}</p>
+                        <p className="text-xs text-slate-500 truncate">{inv.businessmanId?.email || ""}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 max-w-[200px]">
+                      {inv.postId?._id ? (
+                        <Link to={`/post/${inv.postId._id}`} className="text-slate-600 hover:text-emerald-700 truncate block">
+                          {inv.postId.title || "Listing"}
+                        </Link>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5 text-slate-500 whitespace-nowrap">
+                      {new Date(inv.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3.5 text-slate-500 whitespace-nowrap">{inv.paymentMethod || "—"}</td>
+                    <td className="px-4 py-3.5 text-xs text-slate-400 font-mono whitespace-nowrap">{inv.tranId}</td>
+                    <td className="px-4 py-3.5">
+                      <span
+                        className={`inline-block text-[11px] font-medium capitalize px-2 py-0.5 rounded-md ${
+                          statusClass[inv.status] || "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {inv.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-right font-semibold text-slate-900 whitespace-nowrap">
+                      {formatBdt(inv.amount)}
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      {inv.status === "completed" ? (
+                        <Link
+                          to={`/dashboard/invoice/${inv._id}`}
+                          title="View invoice"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                        >
+                          <FileText size={14} />
+                          View
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-slate-300">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {pagination.pages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-slate-500">
+              <span>
+                Page {pagination.page} of {pagination.pages} · {pagination.total} payments
               </span>
               <div className="flex gap-2">
                 <button
@@ -954,6 +1386,22 @@ export function Analytics() {
                 <BarRow label="Pending" value={data.matches?.pending || 0} total={data.matches?.total || 0} />
                 <BarRow label="Accepted" value={data.matches?.accepted || 0} total={data.matches?.total || 0} />
                 <BarRow label="Rejected" value={data.matches?.rejected || 0} total={data.matches?.total || 0} />
+              </div>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-5">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold text-slate-900">Payments</h2>
+                <Link to="/dashboard/payments" className="text-xs font-semibold text-emerald-700 hover:text-emerald-800">
+                  View all
+                </Link>
+              </div>
+              <p className="mt-3 text-2xl font-bold text-slate-900">{formatBdt(data.payments?.totalAmount)}</p>
+              <p className="text-xs text-slate-500">received via SSLCommerz</p>
+              <div className="mt-4 space-y-4">
+                <BarRow label="Completed" value={data.payments?.completed || 0} total={data.payments?.total || 0} />
+                <BarRow label="Pending" value={data.payments?.pending || 0} total={data.payments?.total || 0} />
+                <BarRow label="Failed" value={data.payments?.failed || 0} total={data.payments?.total || 0} />
+                <BarRow label="Cancelled" value={data.payments?.cancelled || 0} total={data.payments?.total || 0} />
               </div>
             </div>
           </div>

@@ -38,6 +38,7 @@ app.use("/api/matches", require("./matches"));
 app.use("/api/conversations", require("./chat"));
 app.use("/api/admin", require("./admin"));
 app.use("/api/upload", require("./upload"));
+app.use("/api/payments", require("./payments"));
 
 app.get("/", (req, res) => {
   res.json({ message: "InvestorHub API running" });

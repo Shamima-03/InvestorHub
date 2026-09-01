@@ -7,7 +7,7 @@ import Footer from "./Footer";
 import {
   LayoutDashboard, FileText, PlusCircle, UsersRound, MessageCircle,
   UserCircle, Shield, AlertTriangle, BarChart3, LogOut, ChevronLeft,
-  ChevronRight, Search, Bell, Menu,
+  ChevronRight, Search, Bell, Menu, Banknote,
 } from "lucide-react";
 
 export function canAccessDashboard(user) {
@@ -17,7 +17,15 @@ export function canAccessDashboard(user) {
 }
 
 export function ProtectedRoute({ children, roles }) {
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isAuthenticated, authChecked } = useSelector((state) => state.auth);
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
+        <div className="w-8 h-8 border-2 border-gray-200 border-t-emerald-600 rounded-full animate-spin" />
+        <p className="mt-3 text-sm text-slate-500">Loading...</p>
+      </div>
+    );
+  }
   if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
   if (roles && !roles.includes(user.role)) return <Navigate to="/" replace />;
   if (!canAccessDashboard(user)) return <Navigate to="/pending" replace />;
@@ -39,6 +47,7 @@ const userLinks = [
   { to: "/dashboard/posts", label: "My Posts", icon: FileText },
   { to: "/dashboard/create-post", label: "Create Post", icon: PlusCircle },
   { to: "/dashboard/matches", label: "Matches", icon: UsersRound },
+  { to: "/dashboard/investments", label: "Investments", icon: Banknote },
   { to: "/dashboard/chat", label: "Messages", icon: MessageCircle },
   { to: "/dashboard/profile", label: "Profile", icon: UserCircle },
 ];
@@ -48,6 +57,7 @@ const adminLinks = [
   { to: "/dashboard/listings", label: "Post Approvals", icon: FileText },
   { to: "/dashboard/users", label: "Manage Users", icon: Shield },
   { to: "/dashboard/reports", label: "Reports", icon: AlertTriangle },
+  { to: "/dashboard/payments", label: "Payments", icon: Banknote },
   { to: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
 ];
 

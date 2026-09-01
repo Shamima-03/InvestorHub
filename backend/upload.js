@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { protect, requireActive } = require("./middleware");
+const { protect } = require("./middleware");
 
 const router = express.Router();
 
@@ -28,7 +28,9 @@ const handleUpload = (req, res, next) => {
   });
 };
 
-router.post("/", protect, requireActive, handleUpload, async (req, res) => {
+// Note: pending (not yet approved) users must also be able to upload — they
+// submit their NID during onboarding — so this route requires auth only.
+router.post("/", protect, handleUpload, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No image provided" });
@@ -37,8 +39,9 @@ router.post("/", protect, requireActive, handleUpload, async (req, res) => {
     const formData = new URLSearchParams();
     formData.append("image", req.file.buffer.toString("base64"));
 
+    const apiKey = process.env.IMGBB_API_KEY || "346b5a9d98b086e8adf2450957eb52d4";
     const response = await fetch(
-      `https://api.imgbb.com/1/upload?key=346b5a9d98b086e8adf2450957eb52d4`,
+      `https://api.imgbb.com/1/upload?key=${apiKey}`,
       { method: "POST", body: formData }
     );
     const data = await response.json();

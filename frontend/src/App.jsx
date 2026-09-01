@@ -9,13 +9,17 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Pending from "./pages/Pending";
+import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import Posts from "./pages/Posts";
 import PostForm from "./pages/PostForm";
 import Profile from "./pages/Profile";
 import Matches from "./pages/Matches";
+import Investments from "./pages/Investments";
+import PaymentResult from "./pages/PaymentResult";
+import Invoice from "./pages/Invoice";
 import Chat from "./pages/Chat";
-import { Users, Reports, Analytics, Listings } from "./pages/Admin";
+import { Users, Reports, Analytics, Listings, Payments } from "./pages/Admin";
 import PostDetail from "./pages/PostDetail";
 
 function App() {
@@ -35,7 +39,11 @@ function App() {
         <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
         <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
         <Route path="/pending" element={<PublicLayout><Pending /></PublicLayout>} />
+        <Route path="/onboarding" element={<PublicLayout><Onboarding /></PublicLayout>} />
         <Route path="/post/:id" element={<PublicLayout><PostDetail /></PublicLayout>} />
+        <Route path="/payment/success" element={<PublicLayout><PaymentResult status="success" /></PublicLayout>} />
+        <Route path="/payment/fail" element={<PublicLayout><PaymentResult status="fail" /></PublicLayout>} />
+        <Route path="/payment/cancel" element={<PublicLayout><PaymentResult status="cancel" /></PublicLayout>} />
 
         <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
@@ -44,10 +52,13 @@ function App() {
           <Route path="edit-post/:id" element={<PostForm />} />
           <Route path="profile" element={<Profile />} />
           <Route path="matches" element={<Matches />} />
+          <Route path="investments" element={<Investments />} />
+          <Route path="invoice/:id" element={<Invoice />} />
           <Route path="chat" element={<Chat />} />
           <Route path="users" element={<ProtectedRoute roles={["admin"]}><Users /></ProtectedRoute>} />
           <Route path="listings" element={<ProtectedRoute roles={["admin"]}><Listings /></ProtectedRoute>} />
           <Route path="reports" element={<ProtectedRoute roles={["admin"]}><Reports /></ProtectedRoute>} />
+          <Route path="payments" element={<ProtectedRoute roles={["admin"]}><Payments /></ProtectedRoute>} />
           <Route path="analytics" element={<ProtectedRoute roles={["admin"]}><Analytics /></ProtectedRoute>} />
         </Route>
 

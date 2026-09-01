@@ -164,8 +164,12 @@ function BusinessView({ user }) {
     API.get("/matches/my")
       .then((res) => {
         const matches = res.data.data || [];
-        setStats((s) => ({ ...s, pending: matches.filter((m) => m.status === "pending").length }));
-        setPendingMatches(matches.filter((m) => m.status === "pending").slice(0, 5));
+        // Only requests sent TO this user — not the ones they sent themselves
+        const incoming = matches.filter(
+          (m) => m.status === "pending" && String(m.requestedBy?._id || m.requestedBy) !== String(user?._id)
+        );
+        setStats((s) => ({ ...s, pending: incoming.length }));
+        setPendingMatches(incoming.slice(0, 5));
       })
       .catch(() => {});
     API.get("/conversations")

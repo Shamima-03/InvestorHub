@@ -25,7 +25,7 @@ export default function ChatPage() {
   const activeRef = useRef(null);
   const openedFromQuery = useRef(false);
 
-  const getOther = (conv) => conv?.participants?.find((p) => p._id !== user?._id);
+  const getOther = (conv) => conv?.participants?.find((p) => String(p._id) !== String(user?._id));
 
   useEffect(() => {
     activeRef.current = activeConv;
@@ -205,7 +205,10 @@ export default function ChatPage() {
                   <p className="text-sm text-slate-400 text-center py-8">No messages yet. Say hello.</p>
                 ) : (
                   messages.map((msg) => {
-                    const mine = (msg.senderId?._id || msg.senderId) === user?._id;
+                    // senderId can be a populated object (REST/socket) or a raw id string —
+                    // normalize both sides so the sender's bubbles always stay on the right
+                    const senderId = String(msg.senderId?._id ?? msg.senderId ?? "");
+                    const mine = senderId !== "" && senderId === String(user?._id ?? "");
                     return (
                       <div key={msg._id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                         <div

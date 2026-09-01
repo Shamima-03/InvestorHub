@@ -5,59 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>InvestorHub — Project Diagrams</title>
   <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: #f8fafc;
-      color: #0f172a;
-    }
-    main {
-      max-width: 720px;
-      margin: 48px auto;
-      padding: 0 20px;
-    }
-    h1 { margin: 0 0 8px; font-size: 28px; }
-    p { color: #475569; line-height: 1.55; }
-    .cards { display: grid; gap: 14px; margin-top: 24px; }
+    body { margin:0; font-family:"Segoe UI",Arial,sans-serif; background:#f8fafc; color:#0f172a; }
+    main { max-width:760px; margin:48px auto; padding:0 20px; }
+    h1 { margin:0 0 8px; font-size:28px; }
+    p, ol { color:#475569; line-height:1.6; }
+    .section { margin-top:28px; }
+    .section h2 { font-size:15px; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; margin:0 0 10px; }
+    .cards { display:grid; gap:12px; }
     a.card {
-      display: block;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 18px 20px;
-      text-decoration: none;
-      color: inherit;
+      display:block; background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+      padding:16px 18px; text-decoration:none; color:inherit;
     }
-    a.card:hover { border-color: #0f766e; }
-    a.card h2 { margin: 0 0 6px; font-size: 18px; color: #0f766e; }
-    a.card p { margin: 0; font-size: 14px; }
-    ol { color: #475569; line-height: 1.6; }
+    a.card:hover { border-color:#0f766e; }
+    a.card h3 { margin:0 0 5px; font-size:17px; color:#0f766e; }
+    a.card p { margin:0; font-size:14px; }
+    code { background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:13px; }
   </style>
 </head>
 <body>
   <main>
     <h1>InvestorHub diagrams</h1>
-    <p>University submission diagrams generated from the actual Mongoose models and app routes.</p>
+    <p>University submission diagrams based on the actual InvestorHub codebase (MongoDB models, Express API, React frontend, Socket.IO chat).</p>
 
-    <div class="cards">
-      <a class="card" href="erd.html">
-        <h2>1. Entity Relationship Diagram</h2>
-        <p>Crow’s Foot ERD: User, profiles, Post, Match, Conversation, Message, Report.</p>
-      </a>
-      <a class="card" href="usecase.html">
-        <h2>2. Use Case Diagram</h2>
-        <p>UML use cases for Guest, Registered User, Investor, Businessman, and Administrator.</p>
-      </a>
+    <div class="section">
+      <h2>Structural</h2>
+      <div class="cards">
+        <a class="card" href="erd.html">
+          <h3>1. Entity Relationship Diagram (ERD)</h3>
+          <p>User, profiles, Post, Match, Conversation, Message, Report — Crow's Foot notation.</p>
+        </a>
+        <a class="card" href="usecase.html">
+          <h3>2. Use Case Diagram</h3>
+          <p>Guest, Registered User, Investor, Businessman, Administrator — include / extend.</p>
+        </a>
+      </div>
     </div>
 
-    <h2 style="margin-top:32px;font-size:16px">How to put these in the report</h2>
+    <div class="section">
+      <h2>Behavioral &amp; Data Flow</h2>
+      <div class="cards">
+        <a class="card" href="swimlane.html">
+          <h3>3. Swimlane Diagram</h3>
+          <p>Guest/Member, Administrator, and System lanes with cross-lane interactions.</p>
+        </a>
+        <a class="card" href="activity.html">
+          <h3>4. Activity Diagram</h3>
+          <p>Member and Admin behavioral flows with fork/join parallel activities.</p>
+        </a>
+        <a class="card" href="sequence.html">
+          <h3>5. Sequence Diagram</h3>
+          <p>Registration &amp; approval, match request, and real-time chat (Socket.IO).</p>
+        </a>
+        <a class="card" href="dfd.html">
+          <h3>6. Data Flow Diagram (DFD)</h3>
+          <p>Level 0 (context), Level 1 (decomposition), Level 2 (Match Management detail).</p>
+        </a>
+      </div>
+    </div>
+
+    <h2 style="margin-top:32px;font-size:16px;color:#0f172a">Export for report</h2>
     <ol>
-      <li>Open a diagram in the browser.</li>
+      <li>Open any diagram in the browser.</li>
       <li>Click <b>Print / Save as PDF</b>.</li>
-      <li>Choose destination <b>Save as PDF</b>, paper size <b>A3 landscape</b> (or A4 landscape).</li>
-      <li>Insert that PDF/screenshot into the thesis or slide.</li>
+      <li>Paper size: <b>A3 landscape</b> (or A4 landscape).</li>
+      <li>Insert the PDF into your thesis or presentation.</li>
     </ol>
-    <p>Mermaid sources are in <code>erd.mmd</code> and <code>usecase.mmd</code> if you want to edit them on <a href="https://mermaid.live">mermaid.live</a>.</p>
+    <p>Mermaid source files (<code>*.mmd</code>) are included for editing on <a href="https://mermaid.live">mermaid.live</a>.</p>
   </main>
 </body>
 </html>
