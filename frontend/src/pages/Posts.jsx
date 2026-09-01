@@ -49,6 +49,13 @@ function Actions({ id, onDelete }) {
   return (
     <div className="flex items-center gap-1">
       <Link
+        to={`/post/${id}`}
+        className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-gray-50 hover:text-slate-900"
+      >
+        <Eye size={14} />
+        View
+      </Link>
+      <Link
         to={`/dashboard/edit-post/${id}`}
         className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-gray-50 hover:text-slate-900"
       >
@@ -69,7 +76,7 @@ function Actions({ id, onDelete }) {
 function GridCard({ post, onDelete }) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-emerald-200 hover:shadow-sm transition-all flex flex-col">
-      <div className="relative h-40 bg-slate-100">
+      <Link to={`/post/${post._id}`} className="block relative h-40 bg-slate-100">
         {post.image ? (
           <img src={post.image} alt="" className="w-full h-full object-cover" />
         ) : (
@@ -81,9 +88,11 @@ function GridCard({ post, onDelete }) {
           <Badge post={post} />
           <StatusBadge status={post.status} />
         </span>
-      </div>
+      </Link>
       <div className="p-4 flex flex-col flex-1">
-        <h3 className="font-semibold text-slate-900 line-clamp-2 leading-snug">{post.title}</h3>
+        <Link to={`/post/${post._id}`}>
+          <h3 className="font-semibold text-slate-900 line-clamp-2 leading-snug hover:text-emerald-700">{post.title}</h3>
+        </Link>
         <p className="mt-1.5 text-sm text-slate-600 line-clamp-2 flex-1">{post.description}</p>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 text-xs text-slate-400">
           <span className="inline-flex items-center gap-1">
@@ -111,7 +120,9 @@ function ListRow({ post, onDelete }) {
     <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 hover:border-emerald-200 transition-colors">
       <div className="flex gap-4">
         {post.image ? (
-          <img src={post.image} alt="" className="hidden sm:block w-28 h-20 object-cover rounded-lg shrink-0 bg-slate-100" />
+          <Link to={`/post/${post._id}`} className="hidden sm:block shrink-0">
+            <img src={post.image} alt="" className="w-28 h-20 object-cover rounded-lg bg-slate-100" />
+          </Link>
         ) : null}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-3">
@@ -120,7 +131,9 @@ function ListRow({ post, onDelete }) {
                 <Badge post={post} />
                 <StatusBadge status={post.status} />
               </div>
-              <h3 className="mt-1.5 text-base font-semibold text-slate-900 truncate">{post.title}</h3>
+              <Link to={`/post/${post._id}`} className="block">
+                <h3 className="mt-1.5 text-base font-semibold text-slate-900 truncate hover:text-emerald-700">{post.title}</h3>
+              </Link>
               <p className="mt-1 text-sm text-slate-600 line-clamp-2">{post.description}</p>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2.5 text-xs text-slate-400">
                 <span className="inline-flex items-center gap-1">

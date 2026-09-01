@@ -71,6 +71,12 @@ export default function PaymentResult({ status }) {
               <span className="text-slate-500">Business</span>
               <span className="font-medium text-slate-800">{investment.businessmanId?.name || "—"}</span>
             </div>
+            {investment.platformFee > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Platform fee (10%)</span>
+                <span className="font-medium text-slate-800">{formatBdt(investment.platformFee)}</span>
+              </div>
+            )}
             {investment.paymentMethod && (
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Method</span>

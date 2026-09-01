@@ -20,19 +20,19 @@ const statusClass = {
   finalized: "bg-slate-100 text-slate-700",
 };
 
-function Actions({ match, isSender, busy, onAccept, onReject, onChat }) {
+function Actions({ match, isSender, busy, onAccept, onReject, onChat, onWithdraw }) {
   if (match.status === "pending") {
     if (isSender) {
       return (
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-slate-400">Awaiting response</span>
           <button
-            onClick={() => onReject(match._id)}
+            onClick={() => onWithdraw(match._id)}
             disabled={busy}
-            className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50 disabled:opacity-50"
+            className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-red-100 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
           >
             <X size={14} />
-            Withdraw
+            {busy ? "Withdrawing..." : "Withdraw"}
           </button>
         </div>
       );
@@ -73,7 +73,7 @@ function Actions({ match, isSender, busy, onAccept, onReject, onChat }) {
   return null;
 }
 
-function GridCard({ match, other, otherRole, isSender, busy, onAccept, onReject, onChat }) {
+function GridCard({ match, other, otherRole, isSender, busy, onAccept, onReject, onChat, onWithdraw }) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-5 hover:border-emerald-200 hover:shadow-sm transition-all flex flex-col">
       <div className="flex items-start justify-between gap-3">
@@ -89,13 +89,13 @@ function GridCard({ match, other, otherRole, isSender, busy, onAccept, onReject,
       <p className="mt-2 text-sm text-slate-600 line-clamp-2 flex-1">{match.postId?.title || "General match"}</p>
       <p className="mt-2 text-xs text-slate-400">{new Date(match.createdAt).toLocaleDateString()}</p>
       <div className="mt-4 pt-3 border-t border-gray-100">
-        <Actions match={match} isSender={isSender} busy={busy} onAccept={onAccept} onReject={onReject} onChat={onChat} />
+        <Actions match={match} isSender={isSender} busy={busy} onAccept={onAccept} onReject={onReject} onChat={onChat} onWithdraw={onWithdraw} />
       </div>
     </div>
   );
 }
 
-function ListRow({ match, other, otherRole, isSender, busy, onAccept, onReject, onChat }) {
+function ListRow({ match, other, otherRole, isSender, busy, onAccept, onReject, onChat, onWithdraw }) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 hover:border-emerald-200 transition-colors">
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -122,7 +122,7 @@ function ListRow({ match, other, otherRole, isSender, busy, onAccept, onReject, 
           </div>
         </div>
         <div className="shrink-0 sm:ml-auto">
-          <Actions match={match} isSender={isSender} busy={busy} onAccept={onAccept} onReject={onReject} onChat={onChat} />
+          <Actions match={match} isSender={isSender} busy={busy} onAccept={onAccept} onReject={onReject} onChat={onChat} onWithdraw={onWithdraw} />
         </div>
       </div>
     </div>
@@ -174,6 +174,18 @@ export default function MatchesPage() {
     }
   };
 
+  const withdraw = async (id) => {
+    setActing(id);
+    try {
+      await API.delete(`/matches/${id}`);
+      fetchMatches();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to withdraw the request");
+    } finally {
+      setActing("");
+    }
+  };
+
   const startChat = async (match) => {
     const otherUserId = user?.role === "investor" ? match.businessmanId?._id : match.investorId?._id;
     if (!otherUserId) return;
@@ -208,6 +220,7 @@ export default function MatchesPage() {
       onAccept: accept,
       onReject: reject,
       onChat: startChat,
+      onWithdraw: withdraw,
     };
   };
 

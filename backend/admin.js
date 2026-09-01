@@ -218,7 +218,10 @@ router.get("/analytics", async (req, res, next) => {
       Investment.countDocuments({ status: "pending" }),
       Investment.countDocuments({ status: "failed" }),
       Investment.countDocuments({ status: "cancelled" }),
-      Investment.aggregate([{ $match: { status: "completed" } }, { $group: { _id: null, sum: { $sum: "$amount" } } }]),
+      Investment.aggregate([
+        { $match: { status: "completed" } },
+        { $group: { _id: null, sum: { $sum: "$amount" }, fees: { $sum: "$platformFee" } } },
+      ]),
     ]);
 
     res.json({
@@ -228,7 +231,7 @@ router.get("/analytics", async (req, res, next) => {
         posts: { total: totalPosts, investor: investorPosts, business: businessPosts, pending: pendingPosts, active: activePosts, rejected: rejectedPosts },
         matches: { total: totalMatches, pending: pendingMatches, accepted: acceptedMatches, rejected: rejectedMatches },
         reports: { total: totalReports, pending: pendingReports, resolved: resolvedReports, dismissed: dismissedReports },
-        payments: { total: totalInvestments, completed: completedInvestments, pending: pendingInvestments, failed: failedInvestments, cancelled: cancelledInvestments, totalAmount: investmentSum[0]?.sum || 0 },
+        payments: { total: totalInvestments, completed: completedInvestments, pending: pendingInvestments, failed: failedInvestments, cancelled: cancelledInvestments, totalAmount: investmentSum[0]?.sum || 0, feeRevenue: investmentSum[0]?.fees || 0 },
         totalUsers, totalInvestors, totalBusinessmen, totalPosts, totalMatches, acceptedMatches, pendingReports, pendingPosts,
       },
     });

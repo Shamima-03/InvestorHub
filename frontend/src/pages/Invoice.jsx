@@ -200,6 +200,14 @@ export default function Invoice() {
               <dt className="text-slate-500">Bank transaction ID</dt>
               <dd className="font-medium text-slate-800 break-all">{inv.bankTranId || "—"}</dd>
             </div>
+            <div className="flex justify-between sm:block">
+              <dt className="text-slate-500">Platform fee (10%)</dt>
+              <dd className="font-medium text-slate-800">{formatBdt(inv.platformFee || 0)}</dd>
+            </div>
+            <div className="flex justify-between sm:block">
+              <dt className="text-slate-500">Business receives</dt>
+              <dd className="font-semibold text-emerald-700">{formatBdt(inv.netAmount || inv.amount)}</dd>
+            </div>
           </dl>
         </div>
 

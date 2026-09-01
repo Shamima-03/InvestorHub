@@ -122,4 +122,27 @@ router.put("/:id/reject", async (req, res, next) => {
   }
 });
 
+// Withdraw: the sender deletes their own pending request entirely,
+// so a fresh request can be sent later.
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const match = await Match.findById(req.params.id);
+    if (!match) return res.status(404).json({ message: "Match not found" });
+
+    const isParty = [match.investorId.toString(), match.businessmanId.toString()].includes(req.user._id.toString());
+    if (!isParty) return res.status(403).json({ message: "Not authorized" });
+    if (match.status !== "pending") {
+      return res.status(400).json({ message: "Only pending requests can be withdrawn" });
+    }
+    if (match.requestedBy && match.requestedBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Only the sender can withdraw a match request" });
+    }
+
+    await match.deleteOne();
+    res.json({ success: true, message: "Match request withdrawn" });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

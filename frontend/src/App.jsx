@@ -19,7 +19,7 @@ import Investments from "./pages/Investments";
 import PaymentResult from "./pages/PaymentResult";
 import Invoice from "./pages/Invoice";
 import Chat from "./pages/Chat";
-import { Users, Reports, Analytics, Listings, Payments } from "./pages/Admin";
+import { Users, Reports, Analytics, Listings, Payments, UserProfile } from "./pages/Admin";
 import PostDetail from "./pages/PostDetail";
 
 function App() {
@@ -56,6 +56,7 @@ function App() {
           <Route path="invoice/:id" element={<Invoice />} />
           <Route path="chat" element={<Chat />} />
           <Route path="users" element={<ProtectedRoute roles={["admin"]}><Users /></ProtectedRoute>} />
+          <Route path="users/:id" element={<ProtectedRoute roles={["admin"]}><UserProfile /></ProtectedRoute>} />
           <Route path="listings" element={<ProtectedRoute roles={["admin"]}><Listings /></ProtectedRoute>} />
           <Route path="reports" element={<ProtectedRoute roles={["admin"]}><Reports /></ProtectedRoute>} />
           <Route path="payments" element={<ProtectedRoute roles={["admin"]}><Payments /></ProtectedRoute>} />

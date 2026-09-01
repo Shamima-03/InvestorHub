@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
-  ArrowLeft, Eye, Calendar, MapPin, MessageCircle, UserPlus, Pencil, Tag, Banknote,
+  ArrowLeft, Eye, Calendar, MapPin, MessageCircle, UserPlus, Pencil, Tag, Banknote, X,
 } from "lucide-react";
 import API from "../api";
 
@@ -17,7 +17,9 @@ export default function PostDetail() {
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [matchSent, setMatchSent] = useState(false);
+  const [existingMatch, setExistingMatch] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
   const [contacting, setContacting] = useState(false);
   const [matching, setMatching] = useState(false);
   const [error, setError] = useState("");
@@ -31,6 +33,29 @@ export default function PostDetail() {
       .catch(() => navigate("/finding-goal"))
       .finally(() => setLoading(false));
   }, [id, navigate]);
+
+  // Load any existing match with the post author so the request/withdraw
+  // state survives a page reload
+  useEffect(() => {
+    if (!post || !user || user.status !== "active") return;
+    const postAuthor = post.authorId || {};
+    const authorRoleNow = postAuthor.role || post.authorRole;
+    if (!postAuthor._id || postAuthor._id === user._id) return;
+    const complementary =
+      (user.role === "investor" && authorRoleNow === "businessman") ||
+      (user.role === "businessman" && authorRoleNow === "investor");
+    if (!complementary) return;
+
+    API.get("/matches/my")
+      .then((res) => {
+        const found = (res.data.data || []).find((m) => {
+          const other = user.role === "investor" ? m.businessmanId : m.investorId;
+          return String(other?._id || other) === String(postAuthor._id);
+        });
+        if (found && found.status !== "rejected") setExistingMatch(found);
+      })
+      .catch(() => {});
+  }, [post, user]);
 
   if (loading) {
     return (
@@ -54,6 +79,11 @@ export default function PostDetail() {
     ((user?.role === "investor" && authorRole === "businessman") ||
       (user?.role === "businessman" && authorRole === "investor"));
 
+  const iSentTheRequest =
+    existingMatch &&
+    (!existingMatch.requestedBy ||
+      String(existingMatch.requestedBy?._id || existingMatch.requestedBy) === String(user?._id));
+
   const sendMatchRequest = async () => {
     if (!canContact) return;
     setMatching(true);
@@ -62,12 +92,28 @@ export default function PostDetail() {
       const body = { postId: post._id };
       if (user.role === "investor") body.businessmanId = author._id;
       else body.investorId = author._id;
-      await API.post("/matches/request", body);
-      setMatchSent(true);
+      const { data } = await API.post("/matches/request", body);
+      setExistingMatch(data.data);
+      setConfirmOpen(false);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to send match request");
+      setConfirmOpen(false);
     } finally {
       setMatching(false);
+    }
+  };
+
+  const withdrawMatch = async () => {
+    if (!existingMatch) return;
+    setWithdrawing(true);
+    setError("");
+    try {
+      await API.delete(`/matches/${existingMatch._id}`);
+      setExistingMatch(null);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to withdraw the request");
+    } finally {
+      setWithdrawing(false);
     }
   };
 
@@ -385,6 +431,18 @@ export default function PostDetail() {
                           placeholder="e.g. 50000"
                           className="w-full h-11 px-3.5 text-sm bg-white border border-gray-200 rounded-lg outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20"
                         />
+                        {Number(investAmount) >= 10 && (
+                          <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs space-y-1">
+                            <div className="flex justify-between text-slate-500">
+                              <span>Platform fee (10%)</span>
+                              <span>{formatBdt(Math.round(Number(investAmount) * 10) / 100)}</span>
+                            </div>
+                            <div className="flex justify-between font-semibold text-slate-700">
+                              <span>Business receives</span>
+                              <span>{formatBdt(Number(investAmount) - Math.round(Number(investAmount) * 10) / 100)}</span>
+                            </div>
+                          </div>
+                        )}
                         <div className="flex gap-2">
                           <button
                             type="submit"
@@ -423,18 +481,43 @@ export default function PostDetail() {
                     <MessageCircle size={16} />
                     {contacting ? "Opening..." : "Message"}
                   </button>
-                  {matchSent ? (
-                    <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-lg">
-                      Match request sent.
-                    </p>
+                  {existingMatch ? (
+                    existingMatch.status === "pending" ? (
+                      iSentTheRequest ? (
+                        <div className="space-y-2">
+                          <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-lg">
+                            Match request sent. Waiting for a response.
+                          </p>
+                          <button
+                            onClick={withdrawMatch}
+                            disabled={withdrawing}
+                            className="h-11 w-full inline-flex items-center justify-center gap-2 rounded-lg border border-red-100 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                          >
+                            <X size={16} />
+                            {withdrawing ? "Withdrawing..." : "Withdraw request"}
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg">
+                          This member sent you a match request.{" "}
+                          <Link to="/dashboard/matches" className="font-semibold underline hover:no-underline">
+                            Respond in Matches
+                          </Link>
+                        </p>
+                      )
+                    ) : (
+                      <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-lg">
+                        You are matched with this member.
+                      </p>
+                    )
                   ) : (
                     <button
-                      onClick={sendMatchRequest}
+                      onClick={() => setConfirmOpen(true)}
                       disabled={matching}
                       className="h-11 w-full inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50 disabled:opacity-50"
                     >
                       <UserPlus size={16} />
-                      {matching ? "Sending..." : "Send match request"}
+                      Send match request
                     </button>
                   )}
                 </div>
@@ -447,6 +530,40 @@ export default function PostDetail() {
           </aside>
         </div>
       </div>
+
+      {confirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40" onClick={() => !matching && setConfirmOpen(false)} />
+          <div className="relative w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-xl p-6">
+            <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center">
+              <UserPlus size={22} />
+            </div>
+            <h3 className="mt-4 text-lg font-bold text-slate-900">Send match request?</h3>
+            <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">
+              A match request will be sent to{" "}
+              <span className="font-semibold text-slate-800">{author.name || "this member"}</span> for
+              "{post.title}". They will be notified and can accept or decline. You can withdraw the
+              request anytime.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmOpen(false)}
+                disabled={matching}
+                className="h-10 px-4 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={sendMatchRequest}
+                disabled={matching}
+                className="h-10 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
+              >
+                {matching ? "Sending..." : "Yes, send request"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -13,6 +13,9 @@ const STORE_ID = process.env.SSLCOMMERZ_STORE_ID || "testbox";
 const STORE_PASSWD = process.env.SSLCOMMERZ_STORE_PASSWD || "qwerty";
 const SERVER_URL = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
+// Platform commission: deducted from what the business receives, not added on
+// top of the investor's payment.
+const PLATFORM_FEE_PERCENT = Number(process.env.PLATFORM_FEE_PERCENT || 10);
 
 // SSLCommerz redirects the customer's browser back with a POST, so callbacks
 // answer with a 303 redirect to the frontend result page (/payment/success|fail|cancel).
@@ -117,11 +120,17 @@ router.post(
 
       const tranId = `IH${Date.now().toString(36)}${crypto.randomBytes(5).toString("hex")}`.toUpperCase();
 
+      const amountNum = Number(amount);
+      const platformFee = Math.round(amountNum * PLATFORM_FEE_PERCENT) / 100;
+      const netAmount = Math.round((amountNum - platformFee) * 100) / 100;
+
       const investment = await Investment.create({
         investorId: req.user._id,
         businessmanId: post.authorId._id,
         postId: post._id,
-        amount: Number(amount),
+        amount: amountNum,
+        platformFee,
+        netAmount,
         tranId,
       });
 
@@ -316,6 +325,7 @@ router.get("/:id/invoice", protect, requireActive, async (req, res, next) => {
     doc.fontSize(11).font("Helvetica-Bold").fillColor(slate).text("Total paid", 320, tableTop + 72);
     doc.fontSize(13).font("Helvetica-Bold").fillColor(emerald).text(bdt(investment.amount), 0, tableTop + 70, { align: "right", width: 535 });
 
+    const feePct = investment.amount ? Math.round(((investment.platformFee || 0) / investment.amount) * 100) : 0;
     const payTop = tableTop + 115;
     doc.fontSize(9).font("Helvetica-Bold").fillColor(muted).text("PAYMENT DETAILS", 50, payTop);
     doc
@@ -326,7 +336,9 @@ router.get("/:id/invoice", protect, requireActive, async (req, res, next) => {
       .text(`Method: ${investment.paymentMethod || "—"}`, 50)
       .text(`Transaction ID: ${investment.tranId}`, 50)
       .text(`Bank transaction ID: ${investment.bankTranId || "—"}`, 50)
-      .text(`Currency: ${investment.currency}`, 50);
+      .text(`Currency: ${investment.currency}`, 50)
+      .text(`Platform fee (${feePct}%): ${bdt(investment.platformFee || 0)}`, 50)
+      .text(`Business receives: ${bdt(investment.netAmount || investment.amount)}`, 50);
 
     doc
       .fontSize(8)

@@ -139,6 +139,8 @@ const investmentSchema = new mongoose.Schema(
     businessmanId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     postId: { type: mongoose.Schema.Types.ObjectId, ref: "Post", required: true },
     amount: { type: Number, required: [true, "Amount is required"], min: 10 },
+    platformFee: { type: Number, default: 0 },
+    netAmount: { type: Number, default: 0 },
     currency: { type: String, default: "BDT" },
     tranId: { type: String, required: true, unique: true },
     valId: { type: String, default: "" },

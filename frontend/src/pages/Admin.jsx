@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
-  UsersRound, FileText, Handshake, AlertTriangle, ArrowRight, Search,
+  UsersRound, FileText, Handshake, AlertTriangle, ArrowRight, ArrowLeft, Search,
   Shield, BarChart3, ChevronDown, Trash2, Check, X, LayoutGrid, LayoutList,
-  Clock, Eye, Tag, Banknote,
+  Clock, Eye, Tag, Banknote, Mail, Phone, MapPin, Briefcase, ShieldCheck,
 } from "lucide-react";
 import API from "../api";
 
@@ -41,6 +41,15 @@ function Select({ value, onChange, children, className = "" }) {
         {children}
       </select>
       <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+    </div>
+  );
+}
+
+function Field({ label, value }) {
+  return (
+    <div>
+      <dt className="text-[11px] font-medium uppercase tracking-wide text-slate-400">{label}</dt>
+      <dd className="mt-0.5 text-sm text-slate-800 capitalize break-words">{value || "—"}</dd>
     </div>
   );
 }
@@ -370,7 +379,13 @@ export function Users() {
                           {u.name?.charAt(0)?.toUpperCase() || "?"}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-medium text-slate-900 truncate">{u.name}</p>
+                          <Link
+                            to={`/dashboard/users/${u._id}`}
+                            title="View professional profile"
+                            className="block max-w-full font-medium text-slate-900 truncate hover:text-emerald-700 hover:underline"
+                          >
+                            {u.name}
+                          </Link>
                           <p className="text-xs text-slate-500 truncate">{u.email}</p>
                         </div>
                       </div>
@@ -559,6 +574,246 @@ export function Users() {
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+export function UserProfile() {
+  const { id } = useParams();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    API.get(`/users/${id}`)
+      .then((res) => setData(res.data.data))
+      .catch((err) => setError(err.response?.data?.message || "User not found"))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) return <Spinner label="Loading profile..." />;
+
+  if (!data) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-red-50 text-red-700 border border-red-100 px-4 py-3 rounded-xl text-sm">
+          {error || "User not found"}
+        </div>
+        <Link
+          to="/dashboard/users"
+          className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-emerald-700"
+        >
+          <ArrowLeft size={16} />
+          Back to users
+        </Link>
+      </div>
+    );
+  }
+
+  const p = data.profile;
+  const isInvestorUser = data.role === "investor";
+  const joined = data.createdAt
+    ? new Date(data.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+    : "—";
+
+  const contactRows = [
+    { icon: Mail, label: "Email", value: data.email },
+    { icon: Phone, label: "Phone", value: data.phone || "Not provided" },
+    { icon: MapPin, label: "Location", value: data.location || "Not provided" },
+  ];
+
+  const highlights = isInvestorUser
+    ? [
+        { label: "Investment type", value: p?.investmentType || "—" },
+        {
+          label: "Investment range",
+          value:
+            p?.investmentRange?.min || p?.investmentRange?.max
+              ? `${formatBdt(p.investmentRange?.min)} – ${formatBdt(p.investmentRange?.max)}`
+              : "—",
+        },
+      ]
+    : [
+        { label: "Business stage", value: p?.businessStage || "—" },
+        { label: "Funding needed", value: p?.fundingNeeded > 0 ? formatBdt(p.fundingNeeded) : "—" },
+      ];
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <Link
+        to="/dashboard/users"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-emerald-700"
+      >
+        <ArrowLeft size={16} />
+        Back to users
+      </Link>
+
+      <div className="mt-4 bg-white border border-gray-200 rounded-2xl overflow-hidden">
+        <div className="h-24 bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-500" />
+        <div className="px-6 sm:px-8 pb-6">
+          <div className="flex flex-wrap items-end justify-between gap-3 -mt-10">
+            <div className="w-20 h-20 rounded-2xl bg-emerald-50 text-emerald-700 text-2xl font-bold flex items-center justify-center border-4 border-white shadow-sm">
+              {data.name?.charAt(0)?.toUpperCase() || "?"}
+            </div>
+            <div className="flex items-center gap-1.5 pb-1">
+              <span className={`text-[11px] font-semibold capitalize px-2.5 py-1 rounded-md ${roleClass[data.role] || "bg-slate-100 text-slate-600"}`}>
+                {data.role === "businessman" ? "Business" : data.role}
+              </span>
+              <span className={`text-[11px] font-semibold capitalize px-2.5 py-1 rounded-md ${statusClass[data.status] || "bg-slate-100 text-slate-600"}`}>
+                {data.status}
+              </span>
+            </div>
+          </div>
+          <h1 className="mt-3 text-2xl font-bold text-slate-900 tracking-tight">{data.name}</h1>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+            <span className="inline-flex items-center gap-1.5">
+              <Mail size={14} className="text-slate-400" />
+              {data.email}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock size={14} className="text-slate-400" />
+              Joined {joined}
+            </span>
+          </div>
+          {data.status === "rejected" && data.rejectionReason && (
+            <div className="mt-4 bg-red-50 border border-red-100 text-red-700 px-3.5 py-2.5 rounded-lg text-sm">
+              <span className="font-semibold">Rejection note:</span> {data.rejectionReason}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 grid sm:grid-cols-2 gap-4">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6">
+          <h2 className="text-sm font-semibold text-slate-900">Contact information</h2>
+          <div className="mt-4 space-y-4">
+            {contactRows.map((row) => {
+              const Icon = row.icon;
+              return (
+                <div key={row.label} className="flex items-center gap-3 min-w-0">
+                  <span className="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0">
+                    <Icon size={16} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">{row.label}</p>
+                    <p className="text-sm font-medium text-slate-800 truncate">{row.value}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6">
+          <h2 className="text-sm font-semibold text-slate-900">Verification</h2>
+          <div className="mt-4 space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0">
+                  <ShieldCheck size={16} />
+                </span>
+                <p className="text-sm font-medium text-slate-800">National ID</p>
+              </div>
+              {data.nidImage ? (
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700">Submitted</span>
+              ) : (
+                <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-500">Not submitted</span>
+              )}
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0">
+                  <Shield size={16} />
+                </span>
+                <p className="text-sm font-medium text-slate-800">Account status</p>
+              </div>
+              <span className={`text-[11px] font-semibold capitalize px-2 py-0.5 rounded-md ${statusClass[data.status] || "bg-slate-100 text-slate-600"}`}>
+                {data.status}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0">
+                  <Clock size={16} />
+                </span>
+                <p className="text-sm font-medium text-slate-800">Member since</p>
+              </div>
+              <span className="text-sm text-slate-600">{joined}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 bg-white border border-gray-200 rounded-2xl p-5 sm:p-6">
+        <div className="flex items-center gap-2.5">
+          <span className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+            <Briefcase size={17} />
+          </span>
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">
+              {isInvestorUser ? "Investor profile" : "Business profile"}
+            </h2>
+            <p className="text-xs text-slate-400">Professional details submitted by the user</p>
+          </div>
+        </div>
+
+        {!p ? (
+          <p className="mt-5 text-sm text-slate-500 bg-slate-50 border border-gray-100 rounded-lg px-4 py-3">
+            No professional profile submitted yet.
+          </p>
+        ) : (
+          <>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              {highlights.map((h) => (
+                <div key={h.label} className="bg-slate-50 border border-gray-100 rounded-xl p-4">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">{h.label}</p>
+                  <p className="mt-1 text-base font-bold text-slate-900 capitalize">{h.value}</p>
+                </div>
+              ))}
+            </div>
+            <dl className="mt-5 grid sm:grid-cols-2 gap-x-6 gap-y-4">
+              {isInvestorUser ? (
+                <>
+                  <Field label="Preferred industries" value={p.preferredIndustries?.join(", ")} />
+                  <Field label="Experience" value={p.experience} />
+                  <Field label="Past investments" value={p.pastInvestments?.join(", ")} />
+                </>
+              ) : (
+                <>
+                  <Field label="Company" value={p.companyName} />
+                  <Field label="Industry" value={p.industry} />
+                </>
+              )}
+            </dl>
+            {p.bio && (
+              <div className="mt-5 pt-4 border-t border-gray-100">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Bio</p>
+                <p className="mt-1.5 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{p.bio}</p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {data.nidImage && (
+        <div className="mt-4 bg-white border border-gray-200 rounded-2xl p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold text-slate-900">National ID</h2>
+            <a
+              href={data.nidImage}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+            >
+              Open full size
+            </a>
+          </div>
+          <div className="mt-4 border border-gray-200 rounded-xl overflow-hidden bg-slate-50 flex items-center justify-center">
+            <img src={data.nidImage} alt={`NID of ${data.name}`} className="max-h-[380px] w-auto max-w-full object-contain" />
           </div>
         </div>
       )}
@@ -1119,8 +1374,8 @@ export function Payments() {
   };
 
   const summary = [
-    { label: "Total received", value: formatBdt(stats?.totalAmount) },
-    { label: "Total payments", value: stats?.total ?? 0 },
+    { label: "Total volume", value: formatBdt(stats?.totalAmount) },
+    { label: "Platform revenue (10%)", value: formatBdt(stats?.feeRevenue) },
     { label: "Completed", value: stats?.completed ?? 0 },
     { label: "Pending", value: stats?.pending ?? 0 },
   ];
@@ -1202,6 +1457,7 @@ export function Payments() {
                   <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Transaction ID</th>
                   <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
                   <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">Amount</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">Fee (10%)</th>
                   <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">Invoice</th>
                 </tr>
               </thead>
@@ -1245,6 +1501,9 @@ export function Payments() {
                     </td>
                     <td className="px-4 py-3.5 text-right font-semibold text-slate-900 whitespace-nowrap">
                       {formatBdt(inv.amount)}
+                    </td>
+                    <td className="px-4 py-3.5 text-right text-emerald-700 font-medium whitespace-nowrap">
+                      {inv.platformFee > 0 ? formatBdt(inv.platformFee) : "—"}
                     </td>
                     <td className="px-4 py-3.5 text-right">
                       {inv.status === "completed" ? (
@@ -1396,7 +1655,10 @@ export function Analytics() {
                 </Link>
               </div>
               <p className="mt-3 text-2xl font-bold text-slate-900">{formatBdt(data.payments?.totalAmount)}</p>
-              <p className="text-xs text-slate-500">received via SSLCommerz</p>
+              <p className="text-xs text-slate-500">
+                total volume via SSLCommerz · Platform revenue (10%):{" "}
+                <span className="font-semibold text-emerald-700">{formatBdt(data.payments?.feeRevenue)}</span>
+              </p>
               <div className="mt-4 space-y-4">
                 <BarRow label="Completed" value={data.payments?.completed || 0} total={data.payments?.total || 0} />
                 <BarRow label="Pending" value={data.payments?.pending || 0} total={data.payments?.total || 0} />

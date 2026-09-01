@@ -60,7 +60,12 @@ export default function Investments() {
   }, []);
 
   const completed = investments.filter((i) => i.status === "completed");
-  const totalCompleted = completed.reduce((sum, i) => sum + (i.amount || 0), 0);
+  // Investors see the gross amount they paid; businesses see what they actually
+  // receive after the 10% platform fee (netAmount falls back to amount for old records)
+  const totalCompleted = completed.reduce(
+    (sum, i) => sum + (isInvestor ? i.amount || 0 : i.netAmount || i.amount || 0),
+    0
+  );
   const visible = filter === "all" ? investments : investments.filter((i) => i.status === filter);
   const counts = Object.fromEntries(
     FILTERS.map((f) => [f.id, f.id === "all" ? investments.length : investments.filter((i) => i.status === f.id).length])
