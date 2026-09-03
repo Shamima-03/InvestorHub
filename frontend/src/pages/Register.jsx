@@ -33,7 +33,7 @@ export default function RegisterPage() {
       register({ name: form.name, email: form.email, password: form.password, role: form.role })
     );
     if (result.meta.requestStatus === "fulfilled") {
-      navigate("/onboarding");
+      navigate("/entry-fee");
     }
   };
 

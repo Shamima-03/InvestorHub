@@ -26,7 +26,9 @@ socketHandler(io);
 
 app.use(helmet());
 app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173", credentials: true }));
-app.use("/api", rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: "Too many requests, please try again later" }));
+// Generous limit: a normal SPA session fires many small requests (dashboard
+// stats, chat, status polling), so 100/15min locked users out mid-session.
+app.use("/api", rateLimit({ windowMs: 15 * 60 * 1000, max: 1000, message: "Too many requests, please try again later" }));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: false }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -39,6 +41,7 @@ app.use("/api/conversations", require("./chat"));
 app.use("/api/admin", require("./admin"));
 app.use("/api/upload", require("./upload"));
 app.use("/api/payments", require("./payments"));
+app.use("/api/reports", require("./reports"));
 
 app.get("/", (req, res) => {
   res.json({ message: "InvestorHub API running" });

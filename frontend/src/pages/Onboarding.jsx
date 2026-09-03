@@ -1,24 +1,27 @@
 import { useState } from "react";
-import { useNavigate, Navigate, Link } from "react-router-dom";
+import { useNavigate, Navigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { ShieldCheck, UploadCloud, CheckCircle2, X } from "lucide-react";
-import { getMe } from "../store";
+import { ShieldCheck, UploadCloud, X, LogOut } from "lucide-react";
+import { getMe, logout } from "../store";
 import API from "../api";
 
 export default function Onboarding() {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const feePaidNow = searchParams.get("fee") === "success";
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [done, setDone] = useState(false);
 
   if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
   if (user.role === "admin") return <Navigate to="/dashboard" replace />;
+  // Entry fee comes first in the signup sequence
+  if (user.status === "pending" && !user.entryFeePaid) return <Navigate to="/entry-fee" replace />;
 
-  const alreadySubmitted = Boolean(user.nidImage) && !done;
+  const alreadySubmitted = Boolean(user.nidImage);
 
   const pickFile = (e) => {
     const f = e.target.files?.[0];
@@ -53,38 +56,13 @@ export default function Onboarding() {
 
       await API.put("/users/me/nid", { nidImage: url });
       await dispatch(getMe());
-      setDone(true);
+      navigate("/pending", { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Could not submit your NID. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
-
-  if (done) {
-    return (
-      <div className="bg-slate-50 py-12 sm:py-20 min-h-[60vh]">
-        <div className="max-w-[520px] mx-auto px-4">
-          <div className="bg-white border border-gray-200 rounded-xl p-6 sm:p-8 text-center">
-            <div className="w-14 h-14 rounded-full mx-auto flex items-center justify-center bg-emerald-50 text-emerald-600">
-              <CheckCircle2 size={26} />
-            </div>
-            <h1 className="mt-4 text-xl font-semibold text-slate-900">NID submitted</h1>
-            <p className="mt-2 text-sm text-slate-500 leading-relaxed">
-              Your National ID has been submitted for verification. An admin will review it and
-              activate your account shortly.
-            </p>
-            <button
-              onClick={() => navigate("/pending")}
-              className="mt-6 w-full h-11 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold"
-            >
-              Check account status
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-slate-50 py-12 sm:py-20 min-h-[60vh]">
@@ -95,7 +73,7 @@ export default function Onboarding() {
               <ShieldCheck size={26} />
             </div>
             <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-emerald-700">
-              Step 2 of 2 · Identity verification
+              Step 3 of 3 · Identity verification
             </p>
             <h1 className="mt-1 text-xl font-semibold text-slate-900">
               Upload your National ID{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
@@ -105,6 +83,13 @@ export default function Onboarding() {
               is verified. Upload a clear photo of your NID card — an admin reviews it before activating your account.
             </p>
           </div>
+
+          {feePaidNow && (
+            <div className="mt-5 bg-emerald-50 border border-emerald-100 text-emerald-800 px-4 py-3 rounded-lg text-sm">
+              <span className="font-semibold">Entry fee paid successfully.</span> One last step — upload your NID
+              so an admin can verify and activate your account.
+            </div>
+          )}
 
           {alreadySubmitted && (
             <div className="mt-5 bg-emerald-50 border border-emerald-100 text-emerald-800 px-4 py-3 rounded-lg text-sm">
@@ -148,9 +133,16 @@ export default function Onboarding() {
           </form>
 
           <div className="mt-4 text-center">
-            <Link to="/pending" className="text-sm font-medium text-slate-500 hover:text-slate-800">
-              Skip for now — I'll do this later
-            </Link>
+            <button
+              onClick={() => {
+                dispatch(logout());
+                navigate("/login");
+              }}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-red-600"
+            >
+              <LogOut size={14} />
+              Log out — continue later
+            </button>
           </div>
         </div>
       </div>

@@ -22,11 +22,19 @@ export const register = createAsyncThunk("auth/register", async (userData, { rej
 });
 
 export const getMe = createAsyncThunk("auth/getMe", async (_, { rejectWithValue }) => {
-  try {
-    const { data } = await API.get("/auth/me");
-    return data.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message || "Failed to fetch user");
+  // Retry transient failures (rate limit, network, server hiccup) so a reload
+  // doesn't bounce a logged-in user to /login. A real 401 stops immediately.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const { data } = await API.get("/auth/me");
+      return data.data;
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 401 || attempt >= 2) {
+        return rejectWithValue(error.response?.data?.message || "Failed to fetch user");
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1500 * (attempt + 1)));
+    }
   }
 });
 

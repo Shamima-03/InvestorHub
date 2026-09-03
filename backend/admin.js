@@ -1,6 +1,6 @@
 const express = require("express");
 const { protect, checkRole } = require("./middleware");
-const { User, Post, Match, Report, Investment } = require("./models");
+const { User, Post, Match, Report, Investment, FeePayment } = require("./models");
 
 const router = express.Router();
 
@@ -111,6 +111,14 @@ router.put("/posts/:id/status", async (req, res, next) => {
     if (status === "rejected" && !reason?.trim()) {
       return res.status(400).json({ message: "A rejection reason is required" });
     }
+
+    const existing = await Post.findById(req.params.id);
+    if (!existing) return res.status(404).json({ message: "Post not found" });
+    // A fully funded post must not be re-opened for new investments.
+    if (existing.status === "completed") {
+      return res.status(400).json({ message: "This post is fully funded and can no longer be moderated" });
+    }
+
     // The reason is shown to the author; clear it when the post leaves the rejected state.
     const update = { status, rejectionReason: status === "rejected" ? reason.trim().slice(0, 1000) : "" };
     const post = await Post.findByIdAndUpdate(req.params.id, update, { new: true })
@@ -136,7 +144,26 @@ router.delete("/posts/:id", async (req, res, next) => {
 router.get("/reports", async (req, res, next) => {
   try {
     const reports = await Report.find().populate("reporterId", "name email").sort({ createdAt: -1 });
-    res.json({ success: true, data: reports });
+
+    // Attach the reported post/user so the admin can see and open the target
+    const postIds = reports.filter((r) => r.targetType === "post").map((r) => r.targetId);
+    const userIds = reports.filter((r) => r.targetType === "user").map((r) => r.targetId);
+    const [posts, users] = await Promise.all([
+      Post.find({ _id: { $in: postIds } }).select("title status type"),
+      User.find({ _id: { $in: userIds } }).select("name email role status"),
+    ]);
+    const postMap = new Map(posts.map((p) => [p._id.toString(), p]));
+    const userMap = new Map(users.map((u) => [u._id.toString(), u]));
+
+    const data = reports.map((r) => ({
+      ...r.toObject(),
+      target:
+        r.targetType === "post"
+          ? postMap.get(r.targetId.toString()) || null
+          : userMap.get(r.targetId.toString()) || null,
+    }));
+
+    res.json({ success: true, data });
   } catch (error) {
     next(error);
   }
@@ -144,7 +171,11 @@ router.get("/reports", async (req, res, next) => {
 
 router.put("/reports/:id", async (req, res, next) => {
   try {
-    const report = await Report.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
+    const { status } = req.body;
+    if (!["pending", "reviewed", "resolved", "dismissed"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+    const report = await Report.findByIdAndUpdate(req.params.id, { status }, { new: true });
     if (!report) return res.status(404).json({ message: "Report not found" });
     res.json({ success: true, data: report });
   } catch (error) {
@@ -180,16 +211,43 @@ router.get("/investments", async (req, res, next) => {
   }
 });
 
+router.get("/entry-fees", async (req, res, next) => {
+  try {
+    const { page = 1, limit = 20, status, search } = req.query;
+    const query = {};
+    if (status) query.status = status;
+    if (search) {
+      query.tranId = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
+    }
+
+    const fees = await FeePayment.find(query)
+      .populate("userId", "name email role")
+      .sort({ createdAt: -1 })
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit));
+    const total = await FeePayment.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: fees,
+      pagination: { page: Number(page), limit: Number(limit), total, pages: Math.ceil(total / Number(limit)) },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/analytics", async (req, res, next) => {
   try {
     const [
       totalUsers, totalInvestors, totalBusinessmen, totalAdmins,
       pendingUsers, activeUsers, suspendedUsers, blockedUsers,
       totalPosts, investorPosts, businessPosts,
-      pendingPosts, activePosts, rejectedPosts,
+      pendingPosts, activePosts, rejectedPosts, completedPosts,
       totalMatches, pendingMatches, acceptedMatches, rejectedMatches,
       totalReports, pendingReports, resolvedReports, dismissedReports,
       totalInvestments, completedInvestments, pendingInvestments, failedInvestments, cancelledInvestments, investmentSum,
+      entryFeeAgg,
     ] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ role: "investor" }),
@@ -205,6 +263,7 @@ router.get("/analytics", async (req, res, next) => {
       Post.countDocuments({ status: "pending" }),
       Post.countDocuments({ status: "active" }),
       Post.countDocuments({ status: "rejected" }),
+      Post.countDocuments({ status: "completed" }),
       Match.countDocuments(),
       Match.countDocuments({ status: "pending" }),
       Match.countDocuments({ status: "accepted" }),
@@ -222,16 +281,20 @@ router.get("/analytics", async (req, res, next) => {
         { $match: { status: "completed" } },
         { $group: { _id: null, sum: { $sum: "$amount" }, fees: { $sum: "$platformFee" } } },
       ]),
+      FeePayment.aggregate([
+        { $match: { status: "completed" } },
+        { $group: { _id: null, count: { $sum: 1 }, amount: { $sum: "$amount" } } },
+      ]),
     ]);
 
     res.json({
       success: true,
       data: {
         users: { total: totalUsers, investor: totalInvestors, businessman: totalBusinessmen, admin: totalAdmins, pending: pendingUsers, active: activeUsers, suspended: suspendedUsers, blocked: blockedUsers },
-        posts: { total: totalPosts, investor: investorPosts, business: businessPosts, pending: pendingPosts, active: activePosts, rejected: rejectedPosts },
+        posts: { total: totalPosts, investor: investorPosts, business: businessPosts, pending: pendingPosts, active: activePosts, rejected: rejectedPosts, completed: completedPosts },
         matches: { total: totalMatches, pending: pendingMatches, accepted: acceptedMatches, rejected: rejectedMatches },
         reports: { total: totalReports, pending: pendingReports, resolved: resolvedReports, dismissed: dismissedReports },
-        payments: { total: totalInvestments, completed: completedInvestments, pending: pendingInvestments, failed: failedInvestments, cancelled: cancelledInvestments, totalAmount: investmentSum[0]?.sum || 0, feeRevenue: investmentSum[0]?.fees || 0 },
+        payments: { total: totalInvestments, completed: completedInvestments, pending: pendingInvestments, failed: failedInvestments, cancelled: cancelledInvestments, totalAmount: investmentSum[0]?.sum || 0, feeRevenue: investmentSum[0]?.fees || 0, entryFeeCount: entryFeeAgg[0]?.count || 0, entryFeeAmount: entryFeeAgg[0]?.amount || 0 },
         totalUsers, totalInvestors, totalBusinessmen, totalPosts, totalMatches, acceptedMatches, pendingReports, pendingPosts,
       },
     });

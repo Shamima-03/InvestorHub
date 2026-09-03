@@ -21,11 +21,17 @@ export default function Pending() {
     if (!isAuthenticated) return;
     const id = setInterval(() => {
       dispatch(getMe());
-    }, 8000);
+    }, 15000);
     return () => clearInterval(id);
   }, [dispatch, isAuthenticated]);
 
   if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
+
+  // Enforce the signup sequence: entry fee → NID submission → pending review
+  if (user.role !== "admin" && status === "pending") {
+    if (!user.entryFeePaid) return <Navigate to="/entry-fee" replace />;
+    if (!user.nidImage) return <Navigate to="/onboarding" replace />;
+  }
 
   const checkNow = async () => {
     setChecking(true);
@@ -91,6 +97,16 @@ export default function Pending() {
                 An admin will activate it shortly. After that you can use the dashboard, posts, matches, and messages.
               </p>
             </>
+          )}
+
+          {!blocked && !user?.entryFeePaid && user?.role !== "admin" && (
+            <div className="mt-5 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-lg text-sm text-left">
+              <span className="font-semibold">Entry fee not paid.</span> Your account review starts after the
+              one-time BDT 100 entry fee.{" "}
+              <Link to="/entry-fee" className="font-semibold underline hover:no-underline">
+                Pay entry fee
+              </Link>
+            </div>
           )}
 
           {!blocked &&

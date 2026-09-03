@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   UsersRound, FileText, Handshake, AlertTriangle, ArrowRight, ArrowLeft, Search,
   Shield, BarChart3, ChevronDown, Trash2, Check, X, LayoutGrid, LayoutList,
-  Clock, Eye, Tag, Banknote, Mail, Phone, MapPin, Briefcase, ShieldCheck,
+  Clock, Eye, Tag, Banknote, Mail, Phone, MapPin, Briefcase, ShieldCheck, RefreshCw,
 } from "lucide-react";
 import API from "../api";
 
@@ -54,6 +54,68 @@ function Field({ label, value }) {
   );
 }
 
+function ReportTarget({ r }) {
+  if (r.targetType === "post") {
+    return r.target ? (
+      <p className="mt-2 text-sm min-w-0">
+        <span className="text-slate-400">Reported listing: </span>
+        <Link to={`/post/${r.target._id}`} className="font-medium text-emerald-700 hover:underline break-words">
+          {r.target.title}
+        </Link>
+        <span className={`ml-2 text-[11px] font-medium capitalize px-1.5 py-0.5 rounded ${statusClass[r.target.status] || "bg-slate-100 text-slate-600"}`}>
+          {r.target.status}
+        </span>
+      </p>
+    ) : (
+      <p className="mt-2 text-sm text-slate-400 italic">Reported listing no longer exists</p>
+    );
+  }
+  return r.target ? (
+    <p className="mt-2 text-sm min-w-0">
+      <span className="text-slate-400">Reported user: </span>
+      <Link to={`/dashboard/users/${r.target._id}`} className="font-medium text-emerald-700 hover:underline">
+        {r.target.name}
+      </Link>
+      {r.target.email ? <span className="text-slate-400"> · {r.target.email}</span> : null}
+    </p>
+  ) : (
+    <p className="mt-2 text-sm text-slate-400 italic">Reported user no longer exists</p>
+  );
+}
+
+function ReportActions({ r, busy, onSet }) {
+  return (
+    <>
+      {r.status === "pending" && (
+        <button
+          onClick={() => onSet(r._id, "reviewed")}
+          disabled={busy}
+          className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50 disabled:opacity-50"
+        >
+          <Eye size={14} />
+          Reviewed
+        </button>
+      )}
+      <button
+        onClick={() => onSet(r._id, "dismissed")}
+        disabled={busy}
+        className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50 disabled:opacity-50"
+      >
+        <X size={14} />
+        Dismiss
+      </button>
+      <button
+        onClick={() => onSet(r._id, "resolved")}
+        disabled={busy}
+        className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
+      >
+        <Check size={14} />
+        Resolve
+      </button>
+    </>
+  );
+}
+
 function Spinner({ label }) {
   return (
     <div className="py-16 text-center">
@@ -63,17 +125,58 @@ function Spinner({ label }) {
   );
 }
 
-function BarRow({ label, value, total }) {
-  const pct = total ? Math.round((value / total) * 100) : 0;
+// Segment colors: emerald/blue/amber/red validated for adjacent CVD separation;
+// the neutral gray is a deliberate "inactive" bucket — identity is always
+// carried by the visible dot + label + value in the legend, never color alone.
+const SEG_COLORS = {
+  good: "#059669",
+  info: "#2a78d6",
+  warn: "#f59e0b",
+  bad: "#ef4444",
+  neutral: "#94a3b8",
+};
+
+function PropBar({ segments, total }) {
+  const visible = segments.filter((s) => s.value > 0);
+  if (!total || visible.length === 0) {
+    return <div className="h-2.5 rounded-full bg-slate-100" />;
+  }
   return (
-    <div>
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-slate-600">{label}</span>
-        <span className="font-medium text-slate-900 tabular-nums">{value} · {pct}%</span>
-      </div>
-      <div className="mt-1.5 h-2 bg-slate-100 rounded-full overflow-hidden">
-        <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${pct}%` }} />
-      </div>
+    <div className="flex h-2.5 gap-[3px]">
+      {visible.map((s) => (
+        <div
+          key={s.label}
+          title={`${s.label}: ${s.value} (${Math.round((s.value / total) * 100)}%)`}
+          className="rounded-full transition-all duration-500"
+          style={{ width: `${(s.value / total) * 100}%`, minWidth: 8, background: s.color }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function SegmentLegend({ segments, total }) {
+  return (
+    <div className="space-y-2.5">
+      {segments.map((s) => {
+        const pct = total ? Math.round((s.value / total) * 100) : 0;
+        return (
+          <div
+            key={s.label}
+            className="flex items-center justify-between gap-3 text-sm"
+            title={`${s.label}: ${s.value} of ${total} (${pct}%)`}
+          >
+            <span className="flex items-center gap-2.5 min-w-0">
+              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: s.color }} />
+              <span className="text-slate-600 truncate">{s.label}</span>
+            </span>
+            <span className="tabular-nums shrink-0">
+              <span className="font-semibold text-slate-900">{s.value}</span>
+              <span className="ml-1.5 text-xs text-slate-400 inline-block w-9 text-right">{pct}%</span>
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -724,6 +827,21 @@ export function UserProfile() {
                 <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-500">Not submitted</span>
               )}
             </div>
+            {data.role !== "admin" && (
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0">
+                    <Banknote size={16} />
+                  </span>
+                  <p className="text-sm font-medium text-slate-800">Entry fee (BDT 100)</p>
+                </div>
+                {data.entryFeePaid ? (
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700">Paid</span>
+                ) : (
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700">Unpaid</span>
+                )}
+              </div>
+            )}
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <span className="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0">
@@ -858,18 +976,20 @@ export function Reports() {
   const counts = {
     all: reports.length,
     pending: reports.filter((r) => r.status === "pending").length,
+    reviewed: reports.filter((r) => r.status === "reviewed").length,
     resolved: reports.filter((r) => r.status === "resolved").length,
     dismissed: reports.filter((r) => r.status === "dismissed").length,
   };
   const filters = [
     { id: "all", label: "All" },
     { id: "pending", label: "Pending" },
+    { id: "reviewed", label: "Reviewed" },
     { id: "resolved", label: "Resolved" },
     { id: "dismissed", label: "Dismissed" },
   ];
   const summary = [
-    { label: "Total", value: counts.all },
     { label: "Pending", value: counts.pending },
+    { label: "Under review", value: counts.reviewed },
     { label: "Resolved", value: counts.resolved },
     { label: "Dismissed", value: counts.dismissed },
   ];
@@ -951,29 +1071,15 @@ export function Reports() {
                   {r.status}
                 </span>
               </div>
-              <p className="mt-3 text-sm text-slate-800 line-clamp-4 flex-1">{r.reason}</p>
+              <ReportTarget r={r} />
+              <p className="mt-2 text-sm text-slate-800 line-clamp-4 flex-1">{r.reason}</p>
               <p className="mt-3 text-xs text-slate-400">
-                {r.reporterId?.name || "Unknown"}
+                Reported by {r.reporterId?.name || "Unknown"}
                 {r.createdAt ? ` · ${new Date(r.createdAt).toLocaleDateString()}` : ""}
               </p>
-              {r.status === "pending" && (
-                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center gap-2">
-                  <button
-                    onClick={() => resolve(r._id, "dismissed")}
-                    disabled={acting === r._id}
-                    className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    <X size={14} />
-                    Dismiss
-                  </button>
-                  <button
-                    onClick={() => resolve(r._id, "resolved")}
-                    disabled={acting === r._id}
-                    className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
-                  >
-                    <Check size={14} />
-                    Resolve
-                  </button>
+              {(r.status === "pending" || r.status === "reviewed") && (
+                <div className="mt-4 pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2">
+                  <ReportActions r={r} busy={acting === r._id} onSet={resolve} />
                 </div>
               )}
             </div>
@@ -993,6 +1099,7 @@ export function Reports() {
                       {r.status}
                     </span>
                   </div>
+                  <ReportTarget r={r} />
                   <p className="mt-2 text-sm text-slate-800">{r.reason}</p>
                   <p className="mt-2 text-xs text-slate-400">
                     Reported by {r.reporterId?.name || "Unknown"}
@@ -1000,24 +1107,9 @@ export function Reports() {
                     {r.createdAt ? ` · ${new Date(r.createdAt).toLocaleDateString()}` : ""}
                   </p>
                 </div>
-                {r.status === "pending" && (
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      onClick={() => resolve(r._id, "dismissed")}
-                      disabled={acting === r._id}
-                      className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      <X size={14} />
-                      Dismiss
-                    </button>
-                    <button
-                      onClick={() => resolve(r._id, "resolved")}
-                      disabled={acting === r._id}
-                      className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
-                    >
-                      <Check size={14} />
-                      Resolve
-                    </button>
+                {(r.status === "pending" || r.status === "reviewed") && (
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <ReportActions r={r} busy={acting === r._id} onSet={resolve} />
                   </div>
                 )}
               </div>
@@ -1117,13 +1209,14 @@ export function Listings() {
     { label: "Total", value: counts?.total ?? 0 },
     { label: "Pending", value: counts?.pending ?? 0 },
     { label: "Active", value: counts?.active ?? 0 },
+    { label: "Completed", value: counts?.completed ?? 0 },
     { label: "Rejected", value: counts?.rejected ?? 0 },
   ];
 
   const filters = [
     { id: "pending", label: "Pending" },
     { id: "active", label: "Active" },
-    { id: "completed", label: "Funded" },
+    { id: "completed", label: "Completed" },
     { id: "rejected", label: "Rejected" },
     { id: "all", label: "All" },
   ];
@@ -1138,7 +1231,7 @@ export function Listings() {
         </p>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="mt-5 grid grid-cols-2 lg:grid-cols-5 gap-3">
         {summary.map((s) => (
           <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-4">
             <p className="text-2xl font-bold text-slate-900">{s.value}</p>
@@ -1214,28 +1307,37 @@ export function Listings() {
                         <Eye size={14} />
                         View
                       </Link>
-                      {p.status !== "rejected" && (
-                        <button
-                          onClick={() => {
-                            setRejectTarget(p);
-                            setRejectReason("");
-                          }}
-                          disabled={acting === p._id}
-                          className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-red-100 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
-                        >
-                          <X size={14} />
-                          Reject
-                        </button>
-                      )}
-                      {p.status !== "active" && (
-                        <button
-                          onClick={() => setStatus(p._id, "active")}
-                          disabled={acting === p._id}
-                          className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
-                        >
+                      {p.status === "completed" ? (
+                        <span className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-sm font-semibold text-emerald-700">
                           <Check size={14} />
-                          Approve
-                        </button>
+                          Fully funded
+                        </span>
+                      ) : (
+                        <>
+                          {p.status !== "rejected" && (
+                            <button
+                              onClick={() => {
+                                setRejectTarget(p);
+                                setRejectReason("");
+                              }}
+                              disabled={acting === p._id}
+                              className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-red-100 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                            >
+                              <X size={14} />
+                              Reject
+                            </button>
+                          )}
+                          {p.status !== "active" && (
+                            <button
+                              onClick={() => setStatus(p._id, "active")}
+                              disabled={acting === p._id}
+                              className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
+                            >
+                              <Check size={14} />
+                              Approve
+                            </button>
+                          )}
+                        </>
                       )}
                       <button
                         onClick={() => deletePost(p._id)}
@@ -1321,6 +1423,7 @@ export function Listings() {
 }
 
 export function Payments() {
+  const [view, setView] = useState("investments");
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState(null);
   const [pagination, setPagination] = useState({});
@@ -1335,14 +1438,14 @@ export function Payments() {
       .catch(() => {});
   };
 
-  const fetchPayments = (nextPage = 1, status = filter, q = search) => {
+  const fetchPayments = (nextPage = 1, status = filter, q = search, v = view) => {
     setLoading(true);
     const params = new URLSearchParams();
     params.set("page", String(nextPage));
     params.set("limit", "15");
     if (status !== "all") params.set("status", status);
     if (q) params.set("search", q);
-    API.get(`/admin/investments?${params}`)
+    API.get(`/admin/${v === "fees" ? "entry-fees" : "investments"}?${params}`)
       .then((res) => {
         setItems(res.data.data || []);
         setPagination(res.data.pagination || {});
@@ -1355,6 +1458,14 @@ export function Payments() {
     fetchStats();
     fetchPayments(1, "all", "");
   }, []);
+
+  const switchView = (v) => {
+    setView(v);
+    setFilter("all");
+    setSearch("");
+    setPage(1);
+    fetchPayments(1, "all", "", v);
+  };
 
   const switchFilter = (f) => {
     setFilter(f);
@@ -1373,11 +1484,12 @@ export function Payments() {
     fetchPayments(p, filter);
   };
 
+  const totalRevenue = (stats?.feeRevenue || 0) + (stats?.entryFeeAmount || 0);
   const summary = [
-    { label: "Total volume", value: formatBdt(stats?.totalAmount) },
-    { label: "Platform revenue (10%)", value: formatBdt(stats?.feeRevenue) },
-    { label: "Completed", value: stats?.completed ?? 0 },
-    { label: "Pending", value: stats?.pending ?? 0 },
+    { label: "Investment volume", value: formatBdt(stats?.totalAmount) },
+    { label: "Commission (10%)", value: formatBdt(stats?.feeRevenue) },
+    { label: `Entry fees (${stats?.entryFeeCount || 0} paid)`, value: formatBdt(stats?.entryFeeAmount) },
+    { label: "Total platform revenue", value: formatBdt(totalRevenue) },
   ];
 
   const filters = [
@@ -1393,7 +1505,9 @@ export function Payments() {
       <div>
         <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Admin</p>
         <h1 className="mt-1 text-2xl font-bold text-slate-900 tracking-tight">Payments</h1>
-        <p className="mt-1 text-sm text-slate-500">All investment payments made through SSLCommerz.</p>
+        <p className="mt-1 text-sm text-slate-500">
+          All SSLCommerz payments — investments and registration entry fees.
+        </p>
       </div>
 
       <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -1405,7 +1519,28 @@ export function Payments() {
         ))}
       </div>
 
-      <div className="mt-5 flex flex-col lg:flex-row lg:items-center gap-3">
+      <div className="mt-5 flex p-1 bg-white border border-gray-200 rounded-lg w-fit">
+        <button
+          type="button"
+          onClick={() => switchView("investments")}
+          className={`h-9 px-4 rounded-md text-sm font-semibold ${
+            view === "investments" ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          Investments
+        </button>
+        <button
+          type="button"
+          onClick={() => switchView("fees")}
+          className={`h-9 px-4 rounded-md text-sm font-semibold ${
+            view === "fees" ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          Entry fees
+        </button>
+      </div>
+
+      <div className="mt-4 flex flex-col lg:flex-row lg:items-center gap-3">
         <div className="flex gap-1 p-1 bg-white border border-gray-200 rounded-lg w-fit overflow-x-auto">
           {filters.map((f) => (
             <button
@@ -1446,6 +1581,55 @@ export function Payments() {
       ) : (
         <div className="mt-4 bg-white border border-gray-200 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
+            {view === "fees" ? (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-gray-200 text-left">
+                    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">User</th>
+                    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Role</th>
+                    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Date</th>
+                    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Method</th>
+                    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Transaction ID</th>
+                    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {items.map((fee) => (
+                    <tr key={fee._id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="px-4 py-3.5">
+                        <div className="min-w-[160px]">
+                          <p className="font-medium text-slate-900 truncate">{fee.userId?.name || "Unknown"}</p>
+                          <p className="text-xs text-slate-500 truncate">{fee.userId?.email || ""}</p>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className={`text-[11px] font-medium capitalize px-2 py-0.5 rounded-md ${roleClass[fee.userId?.role] || "bg-slate-100 text-slate-600"}`}>
+                          {fee.userId?.role === "businessman" ? "Business" : fee.userId?.role || "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5 text-slate-500 whitespace-nowrap">
+                        {new Date(fee.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3.5 text-slate-500 whitespace-nowrap">{fee.paymentMethod || "—"}</td>
+                      <td className="px-4 py-3.5 text-xs text-slate-400 font-mono whitespace-nowrap">{fee.tranId}</td>
+                      <td className="px-4 py-3.5">
+                        <span
+                          className={`inline-block text-[11px] font-medium capitalize px-2 py-0.5 rounded-md ${
+                            statusClass[fee.status] || "bg-slate-100 text-slate-600"
+                          }`}
+                        >
+                          {fee.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-semibold text-slate-900 whitespace-nowrap">
+                        {formatBdt(fee.amount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-slate-50 border-b border-gray-200 text-left">
@@ -1523,6 +1707,7 @@ export function Payments() {
                 ))}
               </tbody>
             </table>
+            )}
           </div>
           {pagination.pages > 1 && (
             <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-slate-500">
@@ -1553,30 +1738,154 @@ export function Payments() {
   );
 }
 
+function KpiTile({ icon: Icon, label, value, sub, to }) {
+  const inner = (
+    <>
+      <div className="flex items-center justify-between">
+        <span className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+          <Icon size={19} />
+        </span>
+        {to && <ArrowRight size={16} className="text-slate-300" />}
+      </div>
+      <p className="mt-4 text-[26px] leading-tight font-bold text-slate-900 tabular-nums truncate">{value}</p>
+      <p className="mt-1 text-sm text-slate-500">{label}</p>
+      {sub && (
+        <p className="mt-2 inline-block text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+          {sub}
+        </p>
+      )}
+    </>
+  );
+  const cls =
+    "bg-white border border-gray-200 rounded-2xl p-5" +
+    (to ? " block hover:border-emerald-200 hover:shadow-sm transition-all" : "");
+  return to ? (
+    <Link to={to} className={cls}>
+      {inner}
+    </Link>
+  ) : (
+    <div className={cls}>{inner}</div>
+  );
+}
+
+function RateTile({ label, value, total, noun }) {
+  const pct = total ? Math.round((value / total) * 100) : 0;
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl p-5" title={`${value} of ${total} ${noun}`}>
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="text-sm font-medium text-slate-600 truncate">{label}</p>
+        <p className="text-xl font-bold text-slate-900 tabular-nums">{pct}%</p>
+      </div>
+      <div className="mt-3 h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-emerald-600 rounded-full transition-[width] duration-500"
+          style={{ width: value > 0 ? `${Math.max(pct, 2)}%` : 0 }}
+        />
+      </div>
+      <p className="mt-2 text-xs text-slate-400 tabular-nums">
+        {value} of {total} {noun}
+      </p>
+    </div>
+  );
+}
+
+function BreakdownCard({ title, icon: Icon, total, action, children }) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+            <Icon size={15} />
+          </span>
+          <h2 className="text-sm font-semibold text-slate-900 truncate">{title}</h2>
+        </div>
+        {action || <span className="text-xs font-medium text-slate-400 tabular-nums shrink-0">{total} total</span>}
+      </div>
+      <div className="mt-5 space-y-4">{children}</div>
+    </div>
+  );
+}
+
+function SectionLabel({ children }) {
+  return <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{children}</p>;
+}
+
 export function Analytics() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
+  const fetchData = (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
     API.get("/admin/analytics")
       .then((res) => setData(res.data.data))
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setRefreshing(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
-  const kpis = [
-    { label: "Total users", value: data?.users?.total ?? data?.totalUsers ?? 0, icon: UsersRound, to: "/dashboard/users" },
-    { label: "Listings", value: data?.posts?.total ?? data?.totalPosts ?? 0, icon: FileText, to: "/dashboard/listings" },
-    { label: "Matches", value: data?.matches?.total ?? data?.totalMatches ?? 0, icon: Handshake },
-    { label: "Pending reports", value: data?.reports?.pending ?? data?.pendingReports ?? 0, icon: AlertTriangle, to: "/dashboard/reports" },
+  const u = data?.users || {};
+  const po = data?.posts || {};
+  const m = data?.matches || {};
+  const re = data?.reports || {};
+  const pay = data?.payments || {};
+
+  const roleSegs = [
+    { label: "Investors", value: u.investor || 0, color: SEG_COLORS.good },
+    { label: "Businesses", value: u.businessman || 0, color: SEG_COLORS.info },
+    { label: "Admins", value: u.admin || 0, color: SEG_COLORS.warn },
+  ];
+  const userStatusSegs = [
+    { label: "Active", value: u.active || 0, color: SEG_COLORS.good },
+    { label: "Pending", value: u.pending || 0, color: SEG_COLORS.warn },
+    { label: "Suspended", value: u.suspended || 0, color: SEG_COLORS.neutral },
+    { label: "Blocked", value: u.blocked || 0, color: SEG_COLORS.bad },
+  ];
+  const listingSegs = [
+    { label: "Approved", value: po.active || 0, color: SEG_COLORS.good },
+    { label: "Fully funded", value: po.completed || 0, color: SEG_COLORS.info },
+    { label: "Pending approval", value: po.pending || 0, color: SEG_COLORS.warn },
+    { label: "Rejected", value: po.rejected || 0, color: SEG_COLORS.bad },
+  ];
+  const matchSegs = [
+    { label: "Accepted", value: m.accepted || 0, color: SEG_COLORS.good },
+    { label: "Pending", value: m.pending || 0, color: SEG_COLORS.warn },
+    { label: "Rejected", value: m.rejected || 0, color: SEG_COLORS.bad },
+  ];
+  const paymentSegs = [
+    { label: "Completed", value: pay.completed || 0, color: SEG_COLORS.good },
+    { label: "Pending", value: pay.pending || 0, color: SEG_COLORS.warn },
+    { label: "Failed", value: pay.failed || 0, color: SEG_COLORS.bad },
+    { label: "Cancelled", value: pay.cancelled || 0, color: SEG_COLORS.neutral },
+  ];
+  const reportSegs = [
+    { label: "Resolved", value: re.resolved || 0, color: SEG_COLORS.good },
+    { label: "Pending", value: re.pending || 0, color: SEG_COLORS.warn },
+    { label: "Dismissed", value: re.dismissed || 0, color: SEG_COLORS.neutral },
   ];
 
   return (
     <div>
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Admin</p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900 tracking-tight">Analytics</h1>
-        <p className="mt-1 text-sm text-slate-500">Platform totals and breakdowns.</p>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Admin</p>
+          <h1 className="mt-1 text-2xl font-bold text-slate-900 tracking-tight">Analytics</h1>
+          <p className="mt-1 text-sm text-slate-500">Live platform totals, conversion health, and revenue.</p>
+        </div>
+        <button
+          onClick={() => fetchData(true)}
+          disabled={loading || refreshing}
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-white border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50 disabled:opacity-50 shrink-0 w-fit"
+        >
+          <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
+          {refreshing ? "Refreshing..." : "Refresh"}
+        </button>
       </div>
 
       {loading ? (
@@ -1586,101 +1895,133 @@ export function Analytics() {
           <p className="text-sm text-slate-500">Failed to load analytics.</p>
         </div>
       ) : (
-        <div className="mt-5 space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {kpis.map((c) => {
-              const Icon = c.icon;
-              const inner = (
-                <>
-                  <div className="flex items-center justify-between">
-                    <span className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                      <Icon size={18} />
-                    </span>
-                    {c.to && <ArrowRight size={16} className="text-slate-300" />}
+        <div className="mt-6 space-y-7">
+          <section>
+            <SectionLabel>Overview</SectionLabel>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <KpiTile
+                icon={UsersRound}
+                label="Total users"
+                value={u.total ?? 0}
+                sub={`${u.active ?? 0} active`}
+                to="/dashboard/users"
+              />
+              <KpiTile
+                icon={FileText}
+                label="Listings"
+                value={po.total ?? 0}
+                sub={`${po.active ?? 0} live now`}
+                to="/dashboard/listings"
+              />
+              <KpiTile
+                icon={Banknote}
+                label="Payment volume"
+                value={formatBdt(pay.totalAmount)}
+                sub={`${pay.completed ?? 0} completed payments`}
+                to="/dashboard/payments"
+              />
+              <KpiTile
+                icon={Handshake}
+                label="Platform revenue"
+                value={formatBdt(pay.feeRevenue)}
+                sub="10% commission"
+                to="/dashboard/payments"
+              />
+            </div>
+          </section>
+
+          <section>
+            <SectionLabel>Platform health</SectionLabel>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <RateTile label="Account activation" value={u.active ?? 0} total={u.total ?? 0} noun="users active" />
+              <RateTile label="Listing approval" value={po.active ?? 0} total={po.total ?? 0} noun="listings approved" />
+              <RateTile label="Match acceptance" value={m.accepted ?? 0} total={m.total ?? 0} noun="requests accepted" />
+              <RateTile label="Payment success" value={pay.completed ?? 0} total={pay.total ?? 0} noun="payments completed" />
+            </div>
+          </section>
+
+          <section>
+            <SectionLabel>Breakdowns</SectionLabel>
+            <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <BreakdownCard title="Users by role" icon={UsersRound} total={u.total ?? 0}>
+                <PropBar segments={roleSegs} total={u.total || 0} />
+                <SegmentLegend segments={roleSegs} total={u.total || 0} />
+              </BreakdownCard>
+
+              <BreakdownCard title="Users by status" icon={Shield} total={u.total ?? 0}>
+                <PropBar segments={userStatusSegs} total={u.total || 0} />
+                <SegmentLegend segments={userStatusSegs} total={u.total || 0} />
+              </BreakdownCard>
+
+              <BreakdownCard title="Listings" icon={FileText} total={po.total ?? 0}>
+                <PropBar segments={listingSegs} total={po.total || 0} />
+                <SegmentLegend segments={listingSegs} total={po.total || 0} />
+                <div className="pt-3 border-t border-gray-100 flex flex-wrap gap-2 text-xs">
+                  <span className="px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 font-medium tabular-nums">
+                    Investor posts: {po.investor || 0}
+                  </span>
+                  <span className="px-2 py-1 rounded-md bg-blue-50 text-blue-700 font-medium tabular-nums">
+                    Business posts: {po.business || 0}
+                  </span>
+                </div>
+              </BreakdownCard>
+
+              <BreakdownCard title="Matches" icon={Handshake} total={m.total ?? 0}>
+                <PropBar segments={matchSegs} total={m.total || 0} />
+                <SegmentLegend segments={matchSegs} total={m.total || 0} />
+              </BreakdownCard>
+            </div>
+          </section>
+
+          <section>
+            <SectionLabel>Money & moderation</SectionLabel>
+            <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <BreakdownCard
+                title="Payments"
+                icon={Banknote}
+                total={pay.total ?? 0}
+                action={
+                  <Link to="/dashboard/payments" className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 shrink-0">
+                    View all
+                  </Link>
+                }
+              >
+                <div className="flex flex-wrap items-end justify-between gap-3 pb-1 border-b border-gray-100">
+                  <div>
+                    <p className="text-xl font-bold text-slate-900 tabular-nums">{formatBdt(pay.totalAmount)}</p>
+                    <p className="text-xs text-slate-400">total completed volume</p>
                   </div>
-                  <p className="mt-4 text-2xl font-bold text-slate-900">{c.value}</p>
-                  <p className="mt-0.5 text-sm text-slate-500">{c.label}</p>
-                </>
-              );
-              const className = "bg-white border border-gray-200 rounded-xl p-5" + (c.to ? " hover:border-emerald-200 hover:shadow-sm transition-all" : "");
-              return c.to ? (
-                <Link key={c.label} to={c.to} className={className}>{inner}</Link>
-              ) : (
-                <div key={c.label} className={className}>{inner}</div>
-              );
-            })}
-          </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-emerald-700 tabular-nums">{formatBdt(pay.feeRevenue)}</p>
+                    <p className="text-xs text-slate-400">platform revenue (10%)</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="px-2 py-1 rounded-md bg-slate-50 border border-gray-100 text-slate-600 tabular-nums">
+                    Entry fees: <span className="font-semibold text-slate-900">{formatBdt(pay.entryFeeAmount)}</span>
+                    {" · "}
+                    {pay.entryFeeCount || 0} paid
+                  </span>
+                </div>
+                <PropBar segments={paymentSegs} total={pay.total || 0} />
+                <SegmentLegend segments={paymentSegs} total={pay.total || 0} />
+              </BreakdownCard>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
-              <h2 className="text-sm font-semibold text-slate-900">Users by role</h2>
-              <div className="mt-4 space-y-4">
-                <BarRow label="Investors" value={data.users?.investor || 0} total={data.users?.total || 0} />
-                <BarRow label="Businesses" value={data.users?.businessman || 0} total={data.users?.total || 0} />
-                <BarRow label="Admins" value={data.users?.admin || 0} total={data.users?.total || 0} />
-              </div>
+              <BreakdownCard
+                title="Reports"
+                icon={AlertTriangle}
+                total={re.total ?? 0}
+                action={
+                  <Link to="/dashboard/reports" className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 shrink-0">
+                    Open reports
+                  </Link>
+                }
+              >
+                <PropBar segments={reportSegs} total={re.total || 0} />
+                <SegmentLegend segments={reportSegs} total={re.total || 0} />
+              </BreakdownCard>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
-              <h2 className="text-sm font-semibold text-slate-900">Users by status</h2>
-              <div className="mt-4 space-y-4">
-                <BarRow label="Active" value={data.users?.active || 0} total={data.users?.total || 0} />
-                <BarRow label="Pending" value={data.users?.pending || 0} total={data.users?.total || 0} />
-                <BarRow label="Suspended" value={data.users?.suspended || 0} total={data.users?.total || 0} />
-                <BarRow label="Blocked" value={data.users?.blocked || 0} total={data.users?.total || 0} />
-              </div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
-              <h2 className="text-sm font-semibold text-slate-900">Listings</h2>
-              <div className="mt-4 space-y-4">
-                <BarRow label="Investor posts" value={data.posts?.investor || 0} total={data.posts?.total || 0} />
-                <BarRow label="Business posts" value={data.posts?.business || 0} total={data.posts?.total || 0} />
-                <BarRow label="Pending approval" value={data.posts?.pending || 0} total={data.posts?.total || 0} />
-                <BarRow label="Approved" value={data.posts?.active || 0} total={data.posts?.total || 0} />
-                <BarRow label="Rejected" value={data.posts?.rejected || 0} total={data.posts?.total || 0} />
-              </div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
-              <h2 className="text-sm font-semibold text-slate-900">Matches</h2>
-              <div className="mt-4 space-y-4">
-                <BarRow label="Pending" value={data.matches?.pending || 0} total={data.matches?.total || 0} />
-                <BarRow label="Accepted" value={data.matches?.accepted || 0} total={data.matches?.total || 0} />
-                <BarRow label="Rejected" value={data.matches?.rejected || 0} total={data.matches?.total || 0} />
-              </div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold text-slate-900">Payments</h2>
-                <Link to="/dashboard/payments" className="text-xs font-semibold text-emerald-700 hover:text-emerald-800">
-                  View all
-                </Link>
-              </div>
-              <p className="mt-3 text-2xl font-bold text-slate-900">{formatBdt(data.payments?.totalAmount)}</p>
-              <p className="text-xs text-slate-500">
-                total volume via SSLCommerz · Platform revenue (10%):{" "}
-                <span className="font-semibold text-emerald-700">{formatBdt(data.payments?.feeRevenue)}</span>
-              </p>
-              <div className="mt-4 space-y-4">
-                <BarRow label="Completed" value={data.payments?.completed || 0} total={data.payments?.total || 0} />
-                <BarRow label="Pending" value={data.payments?.pending || 0} total={data.payments?.total || 0} />
-                <BarRow label="Failed" value={data.payments?.failed || 0} total={data.payments?.total || 0} />
-                <BarRow label="Cancelled" value={data.payments?.cancelled || 0} total={data.payments?.total || 0} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-xl p-5">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-slate-900">Reports</h2>
-              <Link to="/dashboard/reports" className="text-xs font-semibold text-emerald-700 hover:text-emerald-800">
-                Open reports
-              </Link>
-            </div>
-            <div className="mt-4 grid sm:grid-cols-3 gap-4">
-              <BarRow label="Pending" value={data.reports?.pending || 0} total={data.reports?.total || 0} />
-              <BarRow label="Resolved" value={data.reports?.resolved || 0} total={data.reports?.total || 0} />
-              <BarRow label="Dismissed" value={data.reports?.dismissed || 0} total={data.reports?.total || 0} />
-            </div>
-          </div>
+          </section>
         </div>
       )}
     </div>

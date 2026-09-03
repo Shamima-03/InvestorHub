@@ -3,7 +3,7 @@ const crypto = require("crypto");
 const PDFDocument = require("pdfkit");
 const { body } = require("express-validator");
 const { protect, requireActive, validate, checkRole } = require("./middleware");
-const { Investment, Post, Match } = require("./models");
+const { Investment, Post, Match, FeePayment, User } = require("./models");
 
 const router = express.Router();
 
@@ -16,6 +16,8 @@ const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 // Platform commission: deducted from what the business receives, not added on
 // top of the investor's payment.
 const PLATFORM_FEE_PERCENT = Number(process.env.PLATFORM_FEE_PERCENT || 10);
+// One-time registration entry fee every investor/businessman pays after signup
+const ENTRY_FEE_AMOUNT = Number(process.env.ENTRY_FEE_AMOUNT || 100);
 
 // SSLCommerz redirects the customer's browser back with a POST, so callbacks
 // answer with a 303 redirect to the frontend result page (/payment/success|fail|cancel).
@@ -349,6 +351,137 @@ router.get("/:id/invoice", protect, requireActive, async (req, res, next) => {
       });
 
     doc.end();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ===== Registration entry fee =====
+// No requireActive on these: the user is still pending admin approval.
+
+async function settleEntryFee(tranId, valId) {
+  const fee = await FeePayment.findOne({ tranId });
+  if (!fee) return { ok: false };
+  if (fee.status === "completed") return { ok: true };
+  if (!valId) return { ok: false };
+
+  const v = await validateWithGateway(valId);
+  const isValid =
+    v &&
+    ["VALID", "VALIDATED"].includes(v.status) &&
+    v.tran_id === tranId &&
+    Math.abs(Number(v.amount) - fee.amount) < 1;
+
+  if (!isValid) {
+    fee.status = "failed";
+    await fee.save();
+    return { ok: false };
+  }
+
+  fee.status = "completed";
+  fee.valId = valId;
+  fee.paymentMethod = v.card_type || v.card_issuer || "";
+  fee.bankTranId = v.bank_tran_id || "";
+  fee.paidAt = new Date();
+  await fee.save();
+  await User.findByIdAndUpdate(fee.userId, { entryFeePaid: true });
+  return { ok: true };
+}
+
+router.post("/entry-fee/init", protect, async (req, res, next) => {
+  try {
+    if (req.user.role === "admin") {
+      return res.status(400).json({ message: "Admins do not pay an entry fee" });
+    }
+    if (req.user.entryFeePaid) {
+      return res.status(400).json({ message: "Entry fee is already paid" });
+    }
+
+    const tranId = `EF${Date.now().toString(36)}${crypto.randomBytes(5).toString("hex")}`.toUpperCase();
+    const fee = await FeePayment.create({
+      userId: req.user._id,
+      amount: ENTRY_FEE_AMOUNT,
+      tranId,
+    });
+
+    const session = await createSession({
+      store_id: STORE_ID,
+      store_passwd: STORE_PASSWD,
+      total_amount: ENTRY_FEE_AMOUNT.toFixed(2),
+      currency: "BDT",
+      tran_id: tranId,
+      success_url: `${SERVER_URL}/api/payments/entry-fee/callback/success`,
+      fail_url: `${SERVER_URL}/api/payments/entry-fee/callback/fail`,
+      cancel_url: `${SERVER_URL}/api/payments/entry-fee/callback/cancel`,
+      ipn_url: `${SERVER_URL}/api/payments/entry-fee/ipn`,
+      shipping_method: "NO",
+      product_name: "InvestorHub registration entry fee",
+      product_category: "Registration",
+      product_profile: "non-physical-goods",
+      cus_name: req.user.name,
+      cus_email: req.user.email,
+      cus_add1: req.user.location || "Dhaka",
+      cus_city: req.user.location || "Dhaka",
+      cus_country: "Bangladesh",
+      cus_phone: req.user.phone || "01700000000",
+      value_a: fee._id.toString(),
+    });
+
+    if (session?.status !== "SUCCESS" || !session.GatewayPageURL) {
+      fee.status = "failed";
+      await fee.save();
+      return res.status(502).json({ message: session?.failedreason || "Could not start payment session" });
+    }
+
+    res.json({ success: true, data: { gatewayUrl: session.GatewayPageURL, tranId, amount: ENTRY_FEE_AMOUNT } });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/entry-fee/callback/success", async (req, res) => {
+  const { tran_id, val_id } = req.body || {};
+  try {
+    const { ok } = await settleEntryFee(tran_id, val_id);
+    res.redirect(303, ok ? `${CLIENT_URL}/onboarding?fee=success` : `${CLIENT_URL}/entry-fee?fee=failed`);
+  } catch (error) {
+    res.redirect(303, `${CLIENT_URL}/entry-fee?fee=failed`);
+  }
+});
+
+router.post("/entry-fee/callback/fail", async (req, res) => {
+  const { tran_id } = req.body || {};
+  try {
+    await FeePayment.findOneAndUpdate({ tranId: tran_id, status: "pending" }, { status: "failed" });
+  } catch (error) {
+    // fall through to redirect
+  }
+  res.redirect(303, `${CLIENT_URL}/entry-fee?fee=failed`);
+});
+
+router.post("/entry-fee/callback/cancel", async (req, res) => {
+  const { tran_id } = req.body || {};
+  try {
+    await FeePayment.findOneAndUpdate({ tranId: tran_id, status: "pending" }, { status: "cancelled" });
+  } catch (error) {
+    // fall through to redirect
+  }
+  res.redirect(303, `${CLIENT_URL}/entry-fee?fee=cancelled`);
+});
+
+router.post("/entry-fee/ipn", async (req, res, next) => {
+  try {
+    const { tran_id, val_id, status } = req.body || {};
+    if (!tran_id) return res.status(400).json({ message: "tran_id is required" });
+
+    if (status === "VALID" || status === "VALIDATED") {
+      await settleEntryFee(tran_id, val_id);
+    } else if (status === "FAILED") {
+      await FeePayment.findOneAndUpdate({ tranId: tran_id, status: "pending" }, { status: "failed" });
+    } else if (status === "CANCELLED") {
+      await FeePayment.findOneAndUpdate({ tranId: tran_id, status: "pending" }, { status: "cancelled" });
+    }
+    res.json({ success: true });
   } catch (error) {
     next(error);
   }

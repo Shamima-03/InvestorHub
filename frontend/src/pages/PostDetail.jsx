@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
-  ArrowLeft, Eye, Calendar, MapPin, MessageCircle, UserPlus, Pencil, Tag, Banknote, X,
+  ArrowLeft, Eye, Calendar, MapPin, MessageCircle, UserPlus, Pencil, Tag, Banknote, X, Flag, CheckCircle2,
 } from "lucide-react";
 import API from "../api";
 
@@ -22,6 +22,12 @@ export default function PostDetail() {
   const [withdrawing, setWithdrawing] = useState(false);
   const [contacting, setContacting] = useState(false);
   const [matching, setMatching] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState("post");
+  const [reportReason, setReportReason] = useState("");
+  const [reporting, setReporting] = useState(false);
+  const [reportDone, setReportDone] = useState(false);
+  const [reportError, setReportError] = useState("");
   const [error, setError] = useState("");
   const [investOpen, setInvestOpen] = useState(false);
   const [investAmount, setInvestAmount] = useState("");
@@ -100,6 +106,33 @@ export default function PostDetail() {
       setConfirmOpen(false);
     } finally {
       setMatching(false);
+    }
+  };
+
+  const closeReport = () => {
+    setReportOpen(false);
+    setReportDone(false);
+    setReportReason("");
+    setReportTarget("post");
+    setReportError("");
+  };
+
+  const submitReport = async (e) => {
+    e.preventDefault();
+    if (!reportReason.trim()) return;
+    setReporting(true);
+    setReportError("");
+    try {
+      await API.post("/reports", {
+        targetType: reportTarget,
+        targetId: reportTarget === "post" ? post._id : author._id,
+        reason: reportReason.trim(),
+      });
+      setReportDone(true);
+    } catch (err) {
+      setReportError(err.response?.data?.message || "Failed to submit the report");
+    } finally {
+      setReporting(false);
     }
   };
 
@@ -527,9 +560,119 @@ export default function PostDetail() {
                 </p>
               )}
             </div>
+
+            {isAuthenticated && !isAuthor && user?.status === "active" && (
+              <button
+                onClick={() => setReportOpen(true)}
+                className="w-full inline-flex items-center justify-center gap-1.5 py-1 text-xs font-medium text-slate-400 hover:text-red-600"
+              >
+                <Flag size={13} />
+                Report this listing or user
+              </button>
+            )}
           </aside>
         </div>
       </div>
+
+      {reportOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40" onClick={() => !reporting && closeReport()} />
+          <div className="relative w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-xl p-6">
+            {reportDone ? (
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                  <CheckCircle2 size={24} />
+                </div>
+                <h3 className="mt-4 text-lg font-bold text-slate-900">Report submitted</h3>
+                <p className="mt-1.5 text-sm text-slate-500">
+                  Thank you. An admin will review your report shortly.
+                </p>
+                <button
+                  onClick={closeReport}
+                  className="mt-5 h-10 px-5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold"
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={submitReport}>
+                <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
+                  <Flag size={20} />
+                </div>
+                <h3 className="mt-4 text-lg font-bold text-slate-900">Report</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Tell the admins what is wrong. Reports are confidential.
+                </p>
+
+                {reportError && (
+                  <div className="mt-3 bg-red-50 text-red-700 border border-red-100 px-3 py-2 rounded-lg text-sm">
+                    {reportError}
+                  </div>
+                )}
+
+                <p className="mt-4 text-xs font-medium text-slate-600">What do you want to report?</p>
+                <div className="mt-1.5 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setReportTarget("post")}
+                    className={`h-9 px-3.5 rounded-lg text-sm font-medium border ${
+                      reportTarget === "post"
+                        ? "bg-emerald-600 border-emerald-600 text-white"
+                        : "border-gray-200 text-slate-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    This listing
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReportTarget("user")}
+                    className={`h-9 px-3.5 rounded-lg text-sm font-medium border ${
+                      reportTarget === "user"
+                        ? "bg-emerald-600 border-emerald-600 text-white"
+                        : "border-gray-200 text-slate-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    The author ({author.name?.split(" ")[0] || "user"})
+                  </button>
+                </div>
+
+                <label htmlFor="report-reason" className="block mt-4 text-xs font-medium text-slate-600">
+                  Reason <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="report-reason"
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  rows={4}
+                  maxLength={1000}
+                  required
+                  placeholder="e.g. This listing looks like a scam, contains false information, or the user is behaving abusively..."
+                  className="mt-1.5 w-full px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 bg-white border border-gray-200 rounded-lg outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 resize-none"
+                />
+                <p className="mt-1 text-[11px] text-slate-400 text-right">{reportReason.length}/1000</p>
+
+                <div className="mt-3 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={closeReport}
+                    disabled={reporting}
+                    className="h-10 px-4 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={reporting || !reportReason.trim()}
+                    className="h-10 px-4 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-50"
+                  >
+                    {reporting ? "Submitting..." : "Submit report"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       {confirmOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

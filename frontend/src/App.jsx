@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Pending from "./pages/Pending";
 import Onboarding from "./pages/Onboarding";
+import EntryFee from "./pages/EntryFee";
 import Dashboard from "./pages/Dashboard";
 import Posts from "./pages/Posts";
 import PostForm from "./pages/PostForm";
@@ -40,6 +41,7 @@ function App() {
         <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
         <Route path="/pending" element={<PublicLayout><Pending /></PublicLayout>} />
         <Route path="/onboarding" element={<PublicLayout><Onboarding /></PublicLayout>} />
+        <Route path="/entry-fee" element={<PublicLayout><EntryFee /></PublicLayout>} />
         <Route path="/post/:id" element={<PublicLayout><PostDetail /></PublicLayout>} />
         <Route path="/payment/success" element={<PublicLayout><PaymentResult status="success" /></PublicLayout>} />
         <Route path="/payment/fail" element={<PublicLayout><PaymentResult status="fail" /></PublicLayout>} />

@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
     status: { type: String, enum: ["pending", "active", "suspended", "blocked", "rejected"], default: "pending" },
     rejectionReason: { type: String, default: "", maxlength: 1000 },
     isVerified: { type: Boolean, default: false },
+    entryFeePaid: { type: Boolean, default: false },
     nidImage: { type: String, default: "" },
     avatar: { type: String, default: "" },
     phone: { type: String, default: "" },
@@ -166,6 +167,22 @@ const reportSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const feePaymentSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    amount: { type: Number, required: true },
+    tranId: { type: String, required: true, unique: true },
+    valId: { type: String, default: "" },
+    status: { type: String, enum: ["pending", "completed", "failed", "cancelled"], default: "pending" },
+    paymentMethod: { type: String, default: "" },
+    bankTranId: { type: String, default: "" },
+    paidAt: { type: Date, default: null },
+  },
+  { timestamps: true }
+);
+
+feePaymentSchema.index({ userId: 1, createdAt: -1 });
+
 module.exports = {
   User: mongoose.model("User", userSchema),
   InvestorProfile: mongoose.model("InvestorProfile", investorProfileSchema),
@@ -176,4 +193,5 @@ module.exports = {
   Message: mongoose.model("Message", messageSchema),
   Report: mongoose.model("Report", reportSchema),
   Investment: mongoose.model("Investment", investmentSchema),
+  FeePayment: mongoose.model("FeePayment", feePaymentSchema),
 };
