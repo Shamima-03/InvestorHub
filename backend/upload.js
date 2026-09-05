@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { protect } = require("./middleware");
+const { protect } = require("./authMiddleware");
 
 const router = express.Router();
 

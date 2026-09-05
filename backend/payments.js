@@ -2,7 +2,7 @@ const express = require("express");
 const crypto = require("crypto");
 const PDFDocument = require("pdfkit");
 const { body } = require("express-validator");
-const { protect, requireActive, validate, checkRole } = require("./middleware");
+const { protect, requireActive, validate, checkRole } = require("./authMiddleware");
 const { Investment, Post, Match, FeePayment, User } = require("./models");
 
 const router = express.Router();

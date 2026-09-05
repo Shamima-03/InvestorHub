@@ -1,6 +1,6 @@
 const express = require("express");
 const { body } = require("express-validator");
-const { protect, validate } = require("./middleware");
+const { protect, validate } = require("./authMiddleware");
 const { User, InvestorProfile, BusinessmanProfile } = require("./models");
 
 const router = express.Router();
