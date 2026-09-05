@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Mail, MapPin, Clock } from "lucide-react";
+import API from "../api";
 
 const inputClass =
   "w-full h-11 px-3 text-sm text-slate-800 placeholder-slate-400 bg-white border border-gray-200 rounded-lg outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20";
@@ -7,11 +8,26 @@ const inputClass =
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setForm({ name: "", email: "", subject: "", message: "" });
+    setSending(true);
+    setError("");
+    try {
+      await API.post("/contact", form);
+      setSubmitted(true);
+      setForm({ name: "", email: "", subject: "", message: "" });
+    } catch (err) {
+      setError(
+        err.response?.data?.errors?.[0]?.message ||
+          err.response?.data?.message ||
+          "Failed to send the message. Please try again."
+      );
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -79,6 +95,11 @@ export default function ContactPage() {
                 onSubmit={handleSubmit}
                 className="border border-gray-200 rounded-xl p-6 sm:p-8 space-y-5 bg-white"
               >
+                {error && (
+                  <div className="bg-red-50 text-red-700 border border-red-100 px-4 py-3 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1.5">Name</label>
@@ -127,9 +148,10 @@ export default function ContactPage() {
                 </div>
                 <button
                   type="submit"
-                  className="h-11 px-5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold"
+                  disabled={sending}
+                  className="h-11 px-5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
                 >
-                  Send message
+                  {sending ? "Sending..." : "Send message"}
                 </button>
               </form>
             )}

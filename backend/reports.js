@@ -59,4 +59,33 @@ router.post(
   }
 );
 
+// The reporter's own reports, with the current status so they can track the outcome
+router.get("/my", protect, requireActive, async (req, res, next) => {
+  try {
+    const reports = await Report.find({ reporterId: req.user._id }).sort({ createdAt: -1 });
+
+    const postIds = reports.filter((r) => r.targetType === "post").map((r) => r.targetId);
+    const userIds = reports.filter((r) => r.targetType === "user").map((r) => r.targetId);
+    const [posts, users] = await Promise.all([
+      Post.find({ _id: { $in: postIds } }).select("title status"),
+      // Only name/role — a reporter should not receive the target's email
+      User.find({ _id: { $in: userIds } }).select("name role"),
+    ]);
+    const postMap = new Map(posts.map((p) => [p._id.toString(), p]));
+    const userMap = new Map(users.map((u) => [u._id.toString(), u]));
+
+    const data = reports.map((r) => ({
+      ...r.toObject(),
+      target:
+        r.targetType === "post"
+          ? postMap.get(r.targetId.toString()) || null
+          : userMap.get(r.targetId.toString()) || null,
+    }));
+
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

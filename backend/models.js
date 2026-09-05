@@ -163,9 +163,23 @@ const reportSchema = new mongoose.Schema(
     targetId: { type: mongoose.Schema.Types.ObjectId, required: true },
     reason: { type: String, required: [true, "Reason is required"], maxlength: 1000 },
     status: { type: String, enum: ["pending", "reviewed", "resolved", "dismissed"], default: "pending" },
+    adminNote: { type: String, default: "", maxlength: 1000 },
   },
   { timestamps: true }
 );
+
+const contactMessageSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 100 },
+    email: { type: String, required: true, trim: true, lowercase: true },
+    subject: { type: String, required: true, trim: true, maxlength: 200 },
+    message: { type: String, required: true, trim: true, maxlength: 3000 },
+    status: { type: String, enum: ["new", "read"], default: "new" },
+  },
+  { timestamps: true }
+);
+
+contactMessageSchema.index({ status: 1, createdAt: -1 });
 
 const feePaymentSchema = new mongoose.Schema(
   {
@@ -194,4 +208,5 @@ module.exports = {
   Report: mongoose.model("Report", reportSchema),
   Investment: mongoose.model("Investment", investmentSchema),
   FeePayment: mongoose.model("FeePayment", feePaymentSchema),
+  ContactMessage: mongoose.model("ContactMessage", contactMessageSchema),
 };

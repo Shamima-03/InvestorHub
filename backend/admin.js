@@ -1,6 +1,6 @@
 const express = require("express");
 const { protect, checkRole } = require("./middleware");
-const { User, Post, Match, Report, Investment, FeePayment } = require("./models");
+const { User, Post, Match, Report, Investment, FeePayment, ContactMessage } = require("./models");
 
 const router = express.Router();
 
@@ -171,11 +171,15 @@ router.get("/reports", async (req, res, next) => {
 
 router.put("/reports/:id", async (req, res, next) => {
   try {
-    const { status } = req.body;
+    const { status, note } = req.body;
     if (!["pending", "reviewed", "resolved", "dismissed"].includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
-    const report = await Report.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    // The note is shown to the reporter on a final decision; a reopened
+    // report clears the stale note.
+    const isFinal = status === "resolved" || status === "dismissed";
+    const update = { status, adminNote: isFinal ? (note || "").trim().slice(0, 1000) : "" };
+    const report = await Report.findByIdAndUpdate(req.params.id, update, { new: true });
     if (!report) return res.status(404).json({ message: "Report not found" });
     res.json({ success: true, data: report });
   } catch (error) {
@@ -206,6 +210,59 @@ router.get("/investments", async (req, res, next) => {
       data: investments,
       pagination: { page: Number(page), limit: Number(limit), total, pages: Math.ceil(total / Number(limit)) },
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/contacts", async (req, res, next) => {
+  try {
+    const { page = 1, limit = 20, status, search } = req.query;
+    const query = {};
+    if (status) query.status = status;
+    if (search) {
+      const rx = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
+      query.$or = [{ name: rx }, { email: rx }, { subject: rx }];
+    }
+
+    const messages = await ContactMessage.find(query)
+      .sort({ createdAt: -1 })
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit));
+    const total = await ContactMessage.countDocuments(query);
+    const newCount = await ContactMessage.countDocuments({ status: "new" });
+
+    res.json({
+      success: true,
+      data: messages,
+      newCount,
+      pagination: { page: Number(page), limit: Number(limit), total, pages: Math.ceil(total / Number(limit)) },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put("/contacts/:id/status", async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    if (!["new", "read"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+    const message = await ContactMessage.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (!message) return res.status(404).json({ message: "Message not found" });
+    res.json({ success: true, data: message });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/contacts/:id", async (req, res, next) => {
+  try {
+    const message = await ContactMessage.findById(req.params.id);
+    if (!message) return res.status(404).json({ message: "Message not found" });
+    await message.deleteOne();
+    res.json({ success: true, message: "Message deleted" });
   } catch (error) {
     next(error);
   }

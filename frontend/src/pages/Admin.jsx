@@ -84,6 +84,21 @@ function ReportTarget({ r }) {
 }
 
 function ReportActions({ r, busy, onSet }) {
+  // A decision is never final: resolved/dismissed reports can be reopened
+  // so the admin can change the outcome later.
+  if (r.status === "resolved" || r.status === "dismissed") {
+    return (
+      <button
+        onClick={() => onSet(r._id, "pending")}
+        disabled={busy}
+        title="Move back to pending to change the decision"
+        className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50 disabled:opacity-50"
+      >
+        <RefreshCw size={14} />
+        Reopen
+      </button>
+    );
+  }
   return (
     <>
       {r.status === "pending" && (
@@ -962,14 +977,35 @@ export function Reports() {
     localStorage.setItem("adminReportsView", mode);
   };
 
-  const resolve = async (id, status) => {
+  const [decision, setDecision] = useState(null);
+  const [decisionNote, setDecisionNote] = useState("");
+
+  const resolve = async (id, status, note) => {
     setActing(id);
     try {
-      await API.put(`/admin/reports/${id}`, { status });
+      await API.put(`/admin/reports/${id}`, note !== undefined ? { status, note } : { status });
       fetchReports();
     } finally {
       setActing("");
     }
+  };
+
+  // Final decisions (resolve/dismiss) go through a modal so the admin can
+  // leave a note that the reporter will see on their My Reports page.
+  const requestStatus = (id, status) => {
+    if (status === "resolved" || status === "dismissed") {
+      setDecision({ id, status, report: reports.find((x) => x._id === id) });
+      setDecisionNote("");
+    } else {
+      resolve(id, status);
+    }
+  };
+
+  const confirmDecision = async () => {
+    if (!decision) return;
+    await resolve(decision.id, decision.status, decisionNote.trim());
+    setDecision(null);
+    setDecisionNote("");
   };
 
   const visible = filter === "all" ? reports : reports.filter((r) => r.status === filter);
@@ -1077,11 +1113,14 @@ export function Reports() {
                 Reported by {r.reporterId?.name || "Unknown"}
                 {r.createdAt ? ` · ${new Date(r.createdAt).toLocaleDateString()}` : ""}
               </p>
-              {(r.status === "pending" || r.status === "reviewed") && (
-                <div className="mt-4 pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2">
-                  <ReportActions r={r} busy={acting === r._id} onSet={resolve} />
-                </div>
+              {r.adminNote && (r.status === "resolved" || r.status === "dismissed") && (
+                <p className="mt-2 text-xs bg-slate-50 border border-gray-100 rounded-lg px-3 py-2 text-slate-600">
+                  <span className="font-semibold">Note to reporter:</span> {r.adminNote}
+                </p>
               )}
+              <div className="mt-4 pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2">
+                <ReportActions r={r} busy={acting === r._id} onSet={requestStatus} />
+              </div>
             </div>
           ))}
         </div>
@@ -1101,20 +1140,84 @@ export function Reports() {
                   </div>
                   <ReportTarget r={r} />
                   <p className="mt-2 text-sm text-slate-800">{r.reason}</p>
+                  {r.adminNote && (r.status === "resolved" || r.status === "dismissed") && (
+                    <p className="mt-2 text-xs bg-slate-50 border border-gray-100 rounded-lg px-3 py-2 text-slate-600">
+                      <span className="font-semibold">Note to reporter:</span> {r.adminNote}
+                    </p>
+                  )}
                   <p className="mt-2 text-xs text-slate-400">
                     Reported by {r.reporterId?.name || "Unknown"}
                     {r.reporterId?.email ? ` · ${r.reporterId.email}` : ""}
                     {r.createdAt ? ` · ${new Date(r.createdAt).toLocaleDateString()}` : ""}
                   </p>
                 </div>
-                {(r.status === "pending" || r.status === "reviewed") && (
-                  <div className="flex flex-wrap items-center gap-2 shrink-0">
-                    <ReportActions r={r} busy={acting === r._id} onSet={resolve} />
-                  </div>
-                )}
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <ReportActions r={r} busy={acting === r._id} onSet={requestStatus} />
+                </div>
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {decision && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40" onClick={() => setDecision(null)} />
+          <div className="relative w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-xl p-6">
+            <h3 className="text-lg font-bold text-slate-900">
+              {decision.status === "resolved" ? "Resolve report" : "Dismiss report"}
+            </h3>
+            <p className="mt-1 text-sm text-slate-500">
+              {decision.status === "resolved"
+                ? "Mark this report as resolved — action was taken."
+                : "Dismiss this report — no action was needed."}
+            </p>
+            {decision.report && (
+              <p className="mt-2 text-sm text-slate-600 bg-slate-50 border border-gray-100 rounded-lg px-3 py-2 line-clamp-2">
+                "{decision.report.reason}"
+              </p>
+            )}
+            <label htmlFor="decision-note" className="block mt-4 text-xs font-medium text-slate-600">
+              Note to the reporter (optional — shown on their My Reports page)
+            </label>
+            <textarea
+              id="decision-note"
+              value={decisionNote}
+              onChange={(e) => setDecisionNote(e.target.value)}
+              rows={3}
+              maxLength={1000}
+              autoFocus
+              placeholder={
+                decision.status === "resolved"
+                  ? "e.g. The listing was removed. Thanks for reporting."
+                  : "e.g. We reviewed the listing and found no violation."
+              }
+              className="mt-1.5 w-full px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 bg-white border border-gray-200 rounded-lg outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 resize-none"
+            />
+            <p className="mt-1 text-[11px] text-slate-400 text-right">{decisionNote.length}/1000</p>
+            <div className="mt-3 flex justify-end gap-2">
+              <button
+                onClick={() => setDecision(null)}
+                className="h-10 px-4 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDecision}
+                disabled={acting === decision.id}
+                className={`h-10 px-4 rounded-lg text-white text-sm font-semibold disabled:opacity-50 ${
+                  decision.status === "resolved"
+                    ? "bg-emerald-600 hover:bg-emerald-700"
+                    : "bg-slate-700 hover:bg-slate-800"
+                }`}
+              >
+                {acting === decision.id
+                  ? "Saving..."
+                  : decision.status === "resolved"
+                  ? "Resolve report"
+                  : "Dismiss report"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -1808,6 +1911,330 @@ function BreakdownCard({ title, icon: Icon, total, action, children }) {
 
 function SectionLabel({ children }) {
   return <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{children}</p>;
+}
+
+export function ContactMessages() {
+  const [items, setItems] = useState([]);
+  const [newCount, setNewCount] = useState(0);
+  const [pagination, setPagination] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [acting, setActing] = useState("");
+  const [viewMsg, setViewMsg] = useState(null);
+
+  const fetchMessages = (nextPage = 1, status = filter, q = search) => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    params.set("page", String(nextPage));
+    params.set("limit", "10");
+    if (status !== "all") params.set("status", status);
+    if (q) params.set("search", q);
+    API.get(`/admin/contacts?${params}`)
+      .then((res) => {
+        setItems(res.data.data || []);
+        setNewCount(res.data.newCount || 0);
+        setPagination(res.data.pagination || {});
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchMessages(1, "all", "");
+  }, []);
+
+  const switchFilter = (f) => {
+    setFilter(f);
+    setPage(1);
+    fetchMessages(1, f);
+  };
+
+  const applySearch = (e) => {
+    e?.preventDefault();
+    setPage(1);
+    fetchMessages(1, filter, search);
+  };
+
+  const goPage = (p) => {
+    setPage(p);
+    fetchMessages(p, filter);
+  };
+
+  const setStatus = async (id, status) => {
+    setActing(id);
+    try {
+      await API.put(`/admin/contacts/${id}/status`, { status });
+      fetchMessages(page);
+    } finally {
+      setActing("");
+    }
+  };
+
+  const remove = async (id) => {
+    if (!confirm("Delete this message? This cannot be undone.")) return;
+    setActing(id);
+    try {
+      await API.delete(`/admin/contacts/${id}`);
+      setViewMsg(null);
+      fetchMessages(page);
+    } finally {
+      setActing("");
+    }
+  };
+
+  // Opening a message marks it read automatically, like a real inbox
+  const openView = (msg) => {
+    if (msg.status === "new") {
+      setViewMsg({ ...msg, status: "read" });
+      API.put(`/admin/contacts/${msg._id}/status`, { status: "read" })
+        .then(() => fetchMessages(page))
+        .catch(() => {});
+    } else {
+      setViewMsg(msg);
+    }
+  };
+
+  const toggleRead = async (msg) => {
+    const next = msg.status === "new" ? "read" : "new";
+    await setStatus(msg._id, next);
+    setViewMsg({ ...msg, status: next });
+  };
+
+  const filters = [
+    { id: "all", label: "All" },
+    { id: "new", label: "New" },
+    { id: "read", label: "Read" },
+  ];
+
+  return (
+    <div>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Admin</p>
+        <h1 className="mt-1 text-2xl font-bold text-slate-900 tracking-tight">Contact inbox</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Messages from the contact page{newCount > 0 ? ` · ${newCount} new` : ""}.
+        </p>
+      </div>
+
+      <div className="mt-5 flex flex-col lg:flex-row lg:items-center gap-3">
+        <div className="flex gap-1 p-1 bg-white border border-gray-200 rounded-lg w-fit">
+          {filters.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => switchFilter(f.id)}
+              className={`h-8 px-3 rounded-md text-sm font-medium ${
+                filter === f.id ? "bg-emerald-600 text-white" : "text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {f.label}
+              {f.id === "new" && newCount > 0 && (
+                <span className={`ml-1.5 text-xs ${filter === f.id ? "text-white/80" : "text-slate-400"}`}>
+                  {newCount}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+        <form onSubmit={applySearch} className="flex gap-2 lg:ml-auto">
+          <div className="relative flex-1 lg:w-64">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name, email, or subject"
+              className={`${inputClass} w-full pl-9`}
+            />
+          </div>
+          <button type="submit" className="h-10 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shrink-0">
+            Search
+          </button>
+        </form>
+      </div>
+
+      {loading ? (
+        <Spinner label="Loading messages..." />
+      ) : items.length === 0 ? (
+        <div className="mt-4 bg-white border border-gray-200 rounded-xl py-16 text-center">
+          <Mail size={28} className="mx-auto text-slate-300" />
+          <p className="mt-3 text-sm font-medium text-slate-800">No {filter === "all" ? "" : filter} messages</p>
+          <p className="mt-1 text-sm text-slate-500">Messages sent from the contact page will show up here.</p>
+        </div>
+      ) : (
+        <div className="mt-4 bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-50 border-b border-gray-200 text-left">
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Sender</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Subject</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Message</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Date</th>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {items.map((msg) => (
+                  <tr
+                    key={msg._id}
+                    className={`hover:bg-slate-50/70 transition-colors ${msg.status === "new" ? "bg-emerald-50/40" : ""}`}
+                  >
+                    <td className="px-4 py-3.5">
+                      {msg.status === "new" ? (
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-600 text-white">New</span>
+                      ) : (
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-500">Read</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="min-w-[150px]">
+                        <p className={`truncate ${msg.status === "new" ? "font-semibold text-slate-900" : "font-medium text-slate-800"}`}>
+                          {msg.name}
+                        </p>
+                        <p className="text-xs text-slate-500 truncate">{msg.email}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 max-w-[220px]">
+                      <button
+                        onClick={() => openView(msg)}
+                        className={`block max-w-full truncate text-left hover:text-emerald-700 ${
+                          msg.status === "new" ? "font-semibold text-slate-900" : "text-slate-700"
+                        }`}
+                      >
+                        {msg.subject}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3.5 max-w-[240px]">
+                      <p className="text-slate-500 truncate">{msg.message}</p>
+                    </td>
+                    <td className="px-4 py-3.5 text-slate-500 whitespace-nowrap">
+                      {msg.createdAt ? new Date(msg.createdAt).toLocaleDateString() : "—"}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => openView(msg)}
+                          className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50"
+                        >
+                          <Eye size={14} />
+                          View
+                        </button>
+                        <button
+                          onClick={() => remove(msg._id)}
+                          disabled={acting === msg._id}
+                          className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-50"
+                          title="Delete message"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {pagination.pages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-slate-500">
+              <span>
+                Page {pagination.page} of {pagination.pages} · {pagination.total} messages
+              </span>
+              <div className="flex gap-2">
+                <button
+                  disabled={page <= 1}
+                  onClick={() => goPage(page - 1)}
+                  className="h-8 px-3 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
+                >
+                  Previous
+                </button>
+                <button
+                  disabled={page >= pagination.pages}
+                  onClick={() => goPage(page + 1)}
+                  className="h-8 px-3 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {viewMsg && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/50" onClick={() => setViewMsg(null)} />
+          <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto bg-white rounded-2xl border border-gray-200 shadow-xl p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-11 h-11 rounded-full bg-emerald-50 text-emerald-700 text-base font-semibold flex items-center justify-center shrink-0">
+                  {viewMsg.name?.charAt(0)?.toUpperCase() || "?"}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-900 truncate">{viewMsg.name}</p>
+                  <p className="text-sm text-slate-500 truncate">{viewMsg.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewMsg(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-gray-100 shrink-0"
+                title="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-lg font-bold text-slate-900 break-words">{viewMsg.subject}</h3>
+                {viewMsg.status === "new" ? (
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-600 text-white shrink-0">New</span>
+                ) : (
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 shrink-0">Read</span>
+                )}
+              </div>
+              <p className="mt-1 text-xs text-slate-400">
+                Received {viewMsg.createdAt ? new Date(viewMsg.createdAt).toLocaleString() : "—"}
+              </p>
+            </div>
+
+            <div className="mt-4 bg-slate-50 border border-gray-100 rounded-xl p-4">
+              <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap break-words">{viewMsg.message}</p>
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
+              <button
+                onClick={() => remove(viewMsg._id)}
+                disabled={acting === viewMsg._id}
+                className="h-10 px-3.5 inline-flex items-center gap-1.5 rounded-lg border border-red-100 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+              >
+                <Trash2 size={14} />
+                Delete
+              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => toggleRead(viewMsg)}
+                  disabled={acting === viewMsg._id}
+                  className="h-10 px-3.5 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-700 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  <Check size={14} />
+                  {viewMsg.status === "new" ? "Mark read" : "Mark unread"}
+                </button>
+                <a
+                  href={`mailto:${viewMsg.email}?subject=${encodeURIComponent(`Re: ${viewMsg.subject}`)}`}
+                  className="h-10 px-4 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold"
+                >
+                  <Mail size={14} />
+                  Reply
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function Analytics() {

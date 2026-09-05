@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
 import API from "../api";
 import PostCard from "../components/PostCard";
 
@@ -113,23 +113,6 @@ export default function FindingGoalPage() {
 
   const filterUI = (
     <div className="space-y-5">
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">Search</label>
-        <div className="relative">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleFilter();
-            }}
-            placeholder="Search posts..."
-            className={`${inputClass} pl-9`}
-          />
-        </div>
-      </div>
-
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-1.5">Post type</label>
         <select value={type} onChange={(e) => setType(e.target.value)} className={inputClass}>

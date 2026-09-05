@@ -21,8 +21,22 @@ router.get("/", optionalAuth, async (req, res, next) => {
       if (maxBudget) query.budget.$lte = Number(maxBudget);
     }
     if (search) {
-      const rx = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
-      query.$or = [{ title: rx }, { description: rx }, { category: rx }];
+      // Word-by-word matching: every word must appear somewhere in the title,
+      // description, or category — and words like "investor"/"business" also
+      // match the post type, so type searches return proper results.
+      const words = search.trim().split(/\s+/).slice(0, 6);
+      query.$and = words.map((word) => {
+        const rx = { $regex: word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
+        const or = [{ title: rx }, { description: rx }, { category: rx }];
+        const t = word.toLowerCase();
+        if (t.length >= 3) {
+          if ("investor".startsWith(t) || t === "investor_post") or.push({ type: "investor_post" });
+          if ("business".startsWith(t) || "businessman".startsWith(t) || t === "business_post") {
+            or.push({ type: "business_post" });
+          }
+        }
+        return { $or: or };
+      });
     }
 
     const sortMap = {

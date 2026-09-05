@@ -7,7 +7,7 @@ import Footer from "./Footer";
 import {
   LayoutDashboard, FileText, PlusCircle, UsersRound, MessageCircle,
   UserCircle, Shield, AlertTriangle, BarChart3, LogOut, ChevronLeft,
-  ChevronRight, Search, Bell, Menu, Banknote,
+  ChevronRight, Search, Bell, Menu, Banknote, Flag, Inbox,
 } from "lucide-react";
 
 export function canAccessDashboard(user) {
@@ -48,6 +48,7 @@ const userLinks = [
   { to: "/dashboard/create-post", label: "Create Post", icon: PlusCircle },
   { to: "/dashboard/matches", label: "Matches", icon: UsersRound },
   { to: "/dashboard/investments", label: "Investments", icon: Banknote },
+  { to: "/dashboard/my-reports", label: "My Reports", icon: Flag },
   { to: "/dashboard/chat", label: "Messages", icon: MessageCircle },
   { to: "/dashboard/profile", label: "Profile", icon: UserCircle },
 ];
@@ -58,6 +59,7 @@ const adminLinks = [
   { to: "/dashboard/users", label: "Manage Users", icon: Shield },
   { to: "/dashboard/reports", label: "Reports", icon: AlertTriangle },
   { to: "/dashboard/payments", label: "Payments", icon: Banknote },
+  { to: "/dashboard/contacts", label: "Contact Inbox", icon: Inbox },
   { to: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
 ];
 

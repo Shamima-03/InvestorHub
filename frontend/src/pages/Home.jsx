@@ -36,21 +36,25 @@ const features = [
     icon: Users,
     title: 'Smart Matching',
     desc: 'AI-powered matching connects the right investors with the right businesses.',
+    tile: 'from-emerald-500 to-emerald-600',
   },
   {
     icon: Handshake,
     title: 'Direct Connection',
     desc: 'Communicate directly with potential partners through real-time chat.',
+    tile: 'from-teal-500 to-teal-600',
   },
   {
     icon: TrendingUp,
     title: 'Grow Together',
     desc: 'Build meaningful partnerships that drive growth and success.',
+    tile: 'from-cyan-500 to-teal-500',
   },
   {
     icon: Shield,
     title: 'Verified Profiles',
     desc: 'All users go through verification for a safe and trusted environment.',
+    tile: 'from-emerald-600 to-teal-600',
   },
 ];
 
@@ -68,16 +72,20 @@ export default function LandingPage() {
     <div className="bg-white">
       <Hero />
 
-      <section className="bg-slate-50 border-y border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-          <div className="max-w-2xl mb-12">
-            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+      <section className="relative overflow-hidden bg-slate-50 border-y border-gray-200">
+        <div className="pointer-events-none absolute -top-24 right-1/4 w-[360px] h-[360px] rounded-full bg-emerald-100/40 blur-3xl" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+          <div className="max-w-2xl mx-auto text-center mb-14">
+            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-100 px-3.5 py-1.5 rounded-full">
               Why InvestorHub
             </p>
-            <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
-              Everything you need to succeed
+            <h2 className="mt-4 text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+              Everything you need to{" "}
+              <span className="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
+                succeed
+              </span>
             </h2>
-            <p className="mt-3 text-slate-600 leading-relaxed">
+            <p className="mt-4 text-slate-600 leading-relaxed">
               Tools to find the right partner, start a conversation, and grow
               with confidence.
             </p>
@@ -87,12 +95,14 @@ export default function LandingPage() {
             {features.map((f) => (
               <div
                 key={f.title}
-                className="bg-white border border-gray-200 rounded-xl p-6 hover:border-emerald-200 hover:shadow-sm transition-all"
+                className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-900/5 hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                  <f.icon size={20} />
+                <div
+                  className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.tile} text-white flex items-center justify-center shadow-sm group-hover:scale-110 group-hover:shadow-md transition-transform duration-300`}
+                >
+                  <f.icon size={21} />
                 </div>
-                <h3 className="mt-4 text-base font-semibold text-slate-900">
+                <h3 className="mt-5 text-base font-bold text-slate-900">
                   {f.title}
                 </h3>
                 <p className="mt-2 text-sm text-slate-600 leading-relaxed">
@@ -104,40 +114,49 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+      <section className="relative overflow-hidden bg-white">
+        <div className="pointer-events-none absolute -bottom-32 -left-24 w-[380px] h-[380px] rounded-full bg-teal-50 blur-3xl" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5 mb-12">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+              <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-100 px-3.5 py-1.5 rounded-full">
                 Latest opportunities
               </p>
-              <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
-                Featured posts
+              <h2 className="mt-4 text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+                Featured{" "}
+                <span className="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
+                  posts
+                </span>
               </h2>
-              <p className="mt-2 text-slate-600">
+              <p className="mt-3 text-slate-600">
                 Recent investor and business listings on the platform.
               </p>
             </div>
             <Link
               to="/finding-goal"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+              className="group inline-flex items-center gap-2 h-11 px-6 rounded-full border border-gray-200 bg-white text-sm font-semibold text-slate-700 hover:border-emerald-200 hover:text-emerald-700 hover:bg-emerald-50/50 transition-colors shrink-0"
             >
-              Browse all posts <ArrowRight size={16} />
+              Browse all posts
+              <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
 
           {featuredPosts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredPosts.map((post) => (
                 <PostCard key={post._id} post={post} />
               ))}
             </div>
           ) : (
-            <div className="border border-dashed border-gray-200 rounded-xl py-16 text-center">
-              <p className="text-slate-500">No featured posts yet. Check back soon.</p>
+            <div className="border border-dashed border-gray-200 rounded-2xl py-16 text-center bg-slate-50/50">
+              <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center mx-auto shadow-sm">
+                <TrendingUp size={22} />
+              </span>
+              <p className="mt-4 font-semibold text-slate-800">No featured posts yet</p>
+              <p className="mt-1 text-sm text-slate-500">New opportunities will show up here soon.</p>
               <Link
                 to="/finding-goal"
-                className="inline-flex items-center gap-1.5 mt-3 text-sm font-semibold text-emerald-700"
+                className="inline-flex items-center gap-1.5 mt-4 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
               >
                 Browse posts <ArrowRight size={14} />
               </Link>

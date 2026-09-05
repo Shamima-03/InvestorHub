@@ -19,8 +19,9 @@ import Matches from "./pages/Matches";
 import Investments from "./pages/Investments";
 import PaymentResult from "./pages/PaymentResult";
 import Invoice from "./pages/Invoice";
+import MyReports from "./pages/MyReports";
 import Chat from "./pages/Chat";
-import { Users, Reports, Analytics, Listings, Payments, UserProfile } from "./pages/Admin";
+import { Users, Reports, Analytics, Listings, Payments, UserProfile, ContactMessages } from "./pages/Admin";
 import PostDetail from "./pages/PostDetail";
 
 function App() {
@@ -56,12 +57,14 @@ function App() {
           <Route path="matches" element={<Matches />} />
           <Route path="investments" element={<Investments />} />
           <Route path="invoice/:id" element={<Invoice />} />
+          <Route path="my-reports" element={<MyReports />} />
           <Route path="chat" element={<Chat />} />
           <Route path="users" element={<ProtectedRoute roles={["admin"]}><Users /></ProtectedRoute>} />
           <Route path="users/:id" element={<ProtectedRoute roles={["admin"]}><UserProfile /></ProtectedRoute>} />
           <Route path="listings" element={<ProtectedRoute roles={["admin"]}><Listings /></ProtectedRoute>} />
           <Route path="reports" element={<ProtectedRoute roles={["admin"]}><Reports /></ProtectedRoute>} />
           <Route path="payments" element={<ProtectedRoute roles={["admin"]}><Payments /></ProtectedRoute>} />
+          <Route path="contacts" element={<ProtectedRoute roles={["admin"]}><ContactMessages /></ProtectedRoute>} />
           <Route path="analytics" element={<ProtectedRoute roles={["admin"]}><Analytics /></ProtectedRoute>} />
         </Route>
 
