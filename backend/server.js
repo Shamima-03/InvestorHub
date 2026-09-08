@@ -8,7 +8,7 @@ const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const connectDB = require("./db");
-const { errorHandler } = require("./middleware");
+const { errorHandler } = require("./authMiddleware");
 const { socketHandler } = require("./chat");
 
 connectDB();

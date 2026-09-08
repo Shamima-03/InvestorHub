@@ -1,5 +1,5 @@
 const express = require("express");
-const { protect, checkRole } = require("./middleware");
+const { protect, checkRole } = require("./authMiddleware");
 const { User, Post, Match, Report, Investment, FeePayment, ContactMessage } = require("./models");
 
 const router = express.Router();

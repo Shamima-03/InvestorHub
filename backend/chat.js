@@ -1,6 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const { protect, requireActive } = require("./middleware");
+const { protect, requireActive } = require("./authMiddleware");
 const { Conversation, Message, User } = require("./models");
 
 const router = express.Router();

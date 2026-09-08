@@ -2221,13 +2221,7 @@ export function ContactMessages() {
                   <Check size={14} />
                   {viewMsg.status === "new" ? "Mark read" : "Mark unread"}
                 </button>
-                <a
-                  href={`mailto:${viewMsg.email}?subject=${encodeURIComponent(`Re: ${viewMsg.subject}`)}`}
-                  className="h-10 px-4 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold"
-                >
-                  <Mail size={14} />
-                  Reply
-                </a>
+
               </div>
             </div>
           </div>
