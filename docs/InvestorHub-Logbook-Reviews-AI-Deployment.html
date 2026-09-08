@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>InvestorHub — Project Work Logbook (Documentation, Reviews, AI Assistant &amp; Deployment)</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin:0; background:#f1f5f9; color:#111827; font-family:"Segoe UI",Arial,sans-serif; }
+    .page { max-width:1000px; margin:0 auto; padding:24px 20px 48px; }
+    .toolbar { display:flex; justify-content:center; margin:0 0 16px; }
+    button { border:1px solid #cbd5e1; background:#fff; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:13px; }
+    button:hover { background:#f1f5f9; }
+    .sheet { background:#fff; padding:34px 38px 40px; box-shadow:0 1px 10px rgba(15,23,42,0.08); }
+
+    h1 { margin:0; text-align:center; font-size:20px; letter-spacing:0.01em; }
+    h2 { margin:4px 0 0; text-align:center; font-size:16px; letter-spacing:0.16em; font-weight:700; }
+    .module { margin:6px 0 0; text-align:center; font-size:12.5px; font-weight:600; color:#334155; }
+
+    .meta { width:100%; margin:26px 0 18px; border-collapse:collapse; font-size:11.5px; }
+    .meta td { padding:7px 22px 7px 0; vertical-align:top; }
+    .meta td:last-child { padding-right:0; }
+    .meta .label { font-weight:600; white-space:nowrap; }
+    .fill { display:inline-block; min-width:150px; border-bottom:1px solid #94a3b8; }
+
+    table.log { width:100%; border-collapse:collapse; font-size:11px; }
+    table.log th, table.log td { border:1px solid #94a3b8; padding:8px 10px; vertical-align:top; }
+    table.log th { background:#f1f5f9; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; text-align:center; }
+    table.log th:nth-child(1), table.log td:nth-child(1) { width:15%; text-align:center; }
+    table.log th:nth-child(2) { width:57%; }
+    table.log th:nth-child(3) { width:28%; }
+    .day { font-weight:700; display:block; }
+    .dow { display:block; }
+    .date { display:block; white-space:nowrap; }
+    ol { margin:0; padding-left:16px; }
+    ol li { margin-bottom:3px; line-height:1.45; }
+    ol li:last-child { margin-bottom:0; }
+    td.learn { line-height:1.45; }
+    tr.deploy td:first-child { background:#fff7ed; }
+
+    .sign { margin-top:34px; display:flex; justify-content:space-between; font-size:11.5px; }
+    .sign div { text-align:center; }
+    .sign .line { display:block; width:190px; border-top:1px solid #475569; margin-bottom:5px; }
+
+    @media print {
+      body { background:#fff; }
+      .toolbar { display:none; }
+      .page { max-width:none; padding:0; }
+      .sheet { box-shadow:none; padding:0; }
+      table.log { font-size:9.6px; }
+      table.log th, table.log td { padding:5px 7px; }
+      tr { break-inside:avoid; }
+      thead { display:table-header-group; }
+      @page { size:A4 portrait; margin:14mm 12mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
+
+    <div class="sheet">
+      <h1>InvestorHub</h1>
+      <h2>PROJECT WORK LOGBOOK</h2>
+      <p class="module">Module: System Documentation (UML), Platform Reviews, AI Assistant &amp; Deployment</p>
+
+      <table class="meta">
+        <tr>
+          <td class="label">Student Name:</td>
+          <td style="width:36%"><span class="fill">&nbsp;</span></td>
+          <td class="label">Student ID:</td>
+          <td><span class="fill">&nbsp;</span></td>
+        </tr>
+        <tr>
+          <td class="label">Project:</td>
+          <td>InvestorHub — Investor &amp; Business Matching Platform</td>
+          <td class="label">Technology:</td>
+          <td>MERN Stack (MongoDB, Express, React, Node.js), Socket.IO, SSLCommerz, Google Gemini API</td>
+        </tr>
+        <tr>
+          <td class="label">Duration:</td>
+          <td>19 September 2026 – 3 October 2026 (15 Days)</td>
+          <td class="label">Supervisor:</td>
+          <td><span class="fill">&nbsp;</span></td>
+        </tr>
+      </table>
+
+      <table class="log">
+        <thead>
+          <tr>
+            <th>Day / Date</th>
+            <th>Activities</th>
+            <th>Learning (What I Learned)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="day">Day 1</span><span class="dow">Saturday</span><span class="date">19 Sep 2026</span></td>
+            <td><ol>
+              <li>Mapped every Mongoose schema (User, Post, Match, Conversation, Message, Investment, Report) into an Entity Relationship Diagram.</li>
+              <li>Drew the ERD in Chen notation with entities, relationship diamonds, and an ISA triangle for the investor / businessman / admin roles.</li>
+              <li>Marked primary keys, foreign keys, and unique constraints such as the (investorId, businessmanId) match pair.</li>
+            </ol></td>
+            <td class="learn">Learned how to translate a document (NoSQL) schema into classical ER notation, and how embedded arrays become junction entities.</td>
+          </tr>
+
+          <tr>
+            <td><span class="day">Day 2</span><span class="dow">Sunday</span><span class="date">20 Sep 2026</span></td>
+            <td><ol>
+              <li>Listed every Express route and React page to identify the real actors: guest, registered user, investor, businessman, admin.</li>
+              <li>Built the use case diagram with a system boundary, association, generalization, and &laquo;include&raquo; / &laquo;extend&raquo; relationships.</li>
+              <li>Added SSLCommerz as an external (secondary) actor on the entry-fee and investment use cases.</li>
+            </ol></td>
+            <td class="learn">Learned that a use case diagram must be derived from the actual API and access rules, not from assumptions about the system.</td>
+          </tr>
+
+          <tr>
+            <td><span class="day">Day 3</span><span class="dow">Monday</span><span class="date">21 Sep 2026</span></td>
+            <td><ol>
+              <li>Drew the member activity diagram: login, registration loop, pending-approval branch, then a fork into the parallel dashboard activities.</li>
+              <li>Drew the administrator activity diagram with parallel moderation branches joining before logout.</li>
+              <li>Added decision guards (valid / invalid, accepted / rejected) and final nodes to every path.</li>
+            </ol></td>
+            <td class="learn">Learned fork / join semantics for concurrent activities and why every activity needs both an incoming and an outgoing flow.</td>
+          </tr>
+
+          <tr>
+            <td><span class="day">Day 4</span><span class="dow">Tuesday</span><span class="date">22 Sep 2026</span></td>
+            <td><ol>
+              <li>Built the swimlane diagram for the Member / System / Admin workflow from registration to payment.</li>
+              <li>Prepared the data flow diagram and the sequence diagram for the registration and payment flows.</li>
+              <li>Created an index page that links all six diagrams, each printable to A3 PDF.</li>
+            </ol></td>
+            <td class="learn">Learned how swimlanes show responsibility hand-offs that a plain flowchart hides.</td>
+          </tr>
+
+          <tr>
+            <td><span class="day">Day 5</span><span class="dow">Wednesday</span><span class="date">23 Sep 2026</span></td>
+            <td><ol>
+              <li>Reviewed all diagrams and found overlapping connectors: lines crossing through boxes and arrows ending in empty space.</li>
+              <li>Rerouted every connector orthogonally through free corridors and attached each arrowhead to a shape boundary.</li>
+              <li>Wrote a verification script that flags any line passing through a node, any dangling endpoint, and any crossing.</li>
+            </ol></td>
+            <td class="learn">Learned that diagram quality can be checked automatically with geometry rules instead of only by eye.</td>
+          </tr>
+
+          <tr>
+            <td><span class="day">Day 6</span><span class="dow">Thursday</span><span class="date">24 Sep 2026</span></td>
+            <td><ol>
+              <li>Designed the Review schema with a unique userId so each account keeps exactly one platform review.</li>
+              <li>Built the review API: list with rating summary, upsert on post, and delete restricted to the owner or an admin.</li>
+              <li>Protected the whole route with the auth middleware so reviews are readable only by signed-in accounts.</li>
+            </ol></td>
+            <td class="learn">Learned to use a unique index with an upsert so re-submitting edits the record instead of creating duplicates.</td>
+          </tr>
+
+          <tr>
+            <td><span class="day">Day 7</span><span class="dow">Friday</span><span class="date">25 Sep 2026</span></td>
+            <td><ol>
+              <li>Built the /review page with a star picker, review form, average rating, and a per-star breakdown bar chart.</li>
+              <li>Guarded the route so only logged-in users reach it, and hid the Review link in the navbar for visitors.</li>
+              <li>Tested rating validation, the edit and delete flow, and the ownership rule with a second account.</li>
+            </ol></td>
+            <td class="learn">Learned to enforce access on both sides: hiding a link is presentation, the API guard is the real protection.</td>
+          </tr>
+
+          <tr>
+            <td><span class="day">Day 8</span><span class="dow">Saturday</span><span class="date">26 Sep 2026</span></td>
+            <td><ol>
+              <li>Linked the listing title on every match card to its post detail page in both the grid and the list view.</li>
+              <li>Handled matches with no listing attached, and listings deleted after the match, so no broken link is rendered.</li>
+              <li>Highlighted the link with colour and an underline so it is visibly clickable.</li>
+            </ol></td>
+            <td class="learn">Learned to check the null case of a populated reference before rendering a link built from its id.</td>
+          </tr>
+
+          <tr>
+            <td><span class="day">Day 9</span><span class="dow">Sunday</span><span class="date">27 Sep 2026</span></td>
+            <td><ol>
+              <li>Studied the Google Gemini generateContent API and its request format (system instruction, contents, roles).</li>
+              <li>Built a backend proxy route so the API key stays on the server and never reaches the React bundle.</li>
+              <li>Wrote a system prompt describing InvestorHub rules so the assistant answers about this platform only.</li>
+            </ol></td>
+            <td class="learn">Learned that any third-party key used from the browser is public, so it must be proxied through the backend.</td>
+          </tr>
+
+          <tr>
+            <td><span class="day">Day 10</span><span class="dow">Monday</span><span class="date">28 Sep 2026</span></td>
+            <td><ol>
+              <li>Found the first model was retired and the replacement "thinking" model took about 35 seconds per answer.</li>
+              <li>Benchmarked the available models and selected a flash-lite model that replies in about one second.</li>
+              <li>Added a request timeout, a dedicated rate limit, and safe error messages that never expose the key or the upstream error.</li>
+            </ol></td>
+            <td class="learn">Learned to measure model latency before choosing one, and to keep the provider's raw errors in the server log only.</td>
+          </tr>
+
+          <tr>
+            <td><span class="day">Day 11</span><span class="dow">Tuesday</span><span class="date">29 Sep 2026</span></td>
+            <td><ol>
+              <li>Built the floating chat widget on the home page with suggested questions and a typing indicator.</li>
+              <li>Passed the recent turns as conversation history so follow-up questions keep their context.</li>
+              <li>Tested the widget on desktop and mobile widths, including the off-topic and "cannot see your account" guardrails.</li>
+            </ol></td>
+            <td class="learn">Learned to bound an AI conversation: limited history, capped output, and a disclaimer that answers can be wrong.</td>
+          </tr>
+
+          <tr class="deploy">
+            <td><span class="day">Day 12</span><span class="dow">Wednesday</span><span class="date">30 Sep 2026</span></td>
+            <td><ol>
+              <li>Prepared the project for deployment: audited every environment variable and confirmed .env is git-ignored.</li>
+              <li>Separated development and production values for CLIENT_URL, SERVER_URL, the CORS origin, and the database URI.</li>
+              <li>Created the production build, checked the bundle output, and fixed the remaining build warnings.</li>
+            </ol></td>
+            <td class="learn">Learned that deployment starts with configuration: hard-coded localhost URLs and committed secrets break a live build.</td>
+          </tr>
+
+          <tr class="deploy">
+            <td><span class="day">Day 13</span><span class="dow">Thursday</span><span class="date">1 Oct 2026</span></td>
+            <td><ol>
+              <li>Deployed the Express API to the cloud host and connected it to the MongoDB Atlas cluster with a restricted database user.</li>
+              <li>Whitelisted the deployment IP in Atlas and verified the health route and the server logs.</li>
+              <li>Configured Socket.IO for production (websocket transport and the allowed origin) and tested real-time chat on the live server.</li>
+            </ol></td>
+            <td class="learn">Learned how to move from a local database and localhost sockets to a managed cluster with strict origin rules.</td>
+          </tr>
+
+          <tr class="deploy">
+            <td><span class="day">Day 14</span><span class="dow">Friday</span><span class="date">2 Oct 2026</span></td>
+            <td><ol>
+              <li>Deployed the React frontend, pointed it at the live API base URL, and added SPA rewrites so deep links do not 404.</li>
+              <li>Updated the SSLCommerz success, fail, cancel, and IPN callback URLs to the production domain and re-tested a sandbox payment.</li>
+              <li>Verified HTTPS, the security headers, and the rate limiters on the live site.</li>
+            </ol></td>
+            <td class="learn">Learned that a payment gateway must be reconfigured for every environment, because its callbacks point back to a fixed URL.</td>
+          </tr>
+
+          <tr class="deploy">
+            <td><span class="day">Day 15</span><span class="dow">Saturday</span><span class="date">3 Oct 2026</span></td>
+            <td><ol>
+              <li>Ran a full smoke test on the live site: register, entry fee, NID upload, admin approval, listing, match, chat, investment, invoice, review, and the AI assistant.</li>
+              <li>Created the admin account on production and confirmed the moderation and analytics pages against live data.</li>
+              <li>Finalised the documentation: diagrams, deployment steps, environment variable list, and this logbook.</li>
+            </ol></td>
+            <td class="learn">Learned that a deployment is only finished after every user journey is re-tested on the live environment, not just the build.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="sign">
+        <div><span class="line"></span>Student's Signature</div>
+        <div><span class="line"></span>Supervisor's Signature</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

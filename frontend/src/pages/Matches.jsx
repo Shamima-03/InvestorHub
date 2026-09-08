@@ -73,6 +73,26 @@ function Actions({ match, isSender, busy, onAccept, onReject, onChat, onWithdraw
   return null;
 }
 
+// The listing title opens the post details. A match with no post attached (or
+// whose post was deleted, so populate returns null) keeps the plain label.
+function PostTitle({ match, className }) {
+  const post = match.postId;
+  if (!post?._id || !post?.title) {
+    return <p className={className}>{post?.title || "General match"}</p>;
+  }
+  return (
+    <p className={className}>
+      <Link
+        to={`/post/${post._id}`}
+        title={`Open "${post.title}"`}
+        className="font-medium text-emerald-700 underline underline-offset-2 decoration-emerald-300 hover:text-emerald-800 hover:decoration-emerald-500"
+      >
+        {post.title}
+      </Link>
+    </p>
+  );
+}
+
 function GridCard({ match, other, otherRole, isSender, busy, onAccept, onReject, onChat, onWithdraw }) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-5 hover:border-emerald-200 hover:shadow-sm transition-all flex flex-col">
@@ -86,7 +106,7 @@ function GridCard({ match, other, otherRole, isSender, busy, onAccept, onReject,
       </div>
       <h3 className="mt-3 font-semibold text-slate-900 truncate">{other?.name || "Unknown"}</h3>
       {otherRole && <p className="text-xs text-slate-500 capitalize mt-0.5">{otherRole}</p>}
-      <p className="mt-2 text-sm text-slate-600 line-clamp-2 flex-1">{match.postId?.title || "General match"}</p>
+      <PostTitle match={match} className="mt-2 text-sm text-slate-600 line-clamp-2 flex-1" />
       <p className="mt-2 text-xs text-slate-400">{new Date(match.createdAt).toLocaleDateString()}</p>
       <div className="mt-4 pt-3 border-t border-gray-100">
         <Actions match={match} isSender={isSender} busy={busy} onAccept={onAccept} onReject={onReject} onChat={onChat} onWithdraw={onWithdraw} />
@@ -110,7 +130,7 @@ function ListRow({ match, other, otherRole, isSender, busy, onAccept, onReject, 
                 <span className="text-[11px] font-medium text-slate-500 capitalize">{otherRole}</span>
               )}
             </div>
-            <p className="text-sm text-slate-500 truncate">{match.postId?.title || "General match"}</p>
+            <PostTitle match={match} className="text-sm text-slate-500 truncate" />
             <div className="flex items-center gap-2 mt-1.5">
               <span className={`text-[11px] font-medium capitalize px-2 py-0.5 rounded-md ${statusClass[match.status] || "bg-slate-100 text-slate-600"}`}>
                 {match.status}

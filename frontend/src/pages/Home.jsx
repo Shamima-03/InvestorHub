@@ -11,6 +11,7 @@ import {
 import API from '../api';
 import Hero from '../components/Hero';
 import PostCard from '../components/PostCard';
+import ChatWidget from '../components/ChatWidget';
 
 const faqs = [
   {
@@ -239,6 +240,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      <ChatWidget />
     </div>
   );
 }

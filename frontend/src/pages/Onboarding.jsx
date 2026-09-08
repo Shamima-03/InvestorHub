@@ -76,11 +76,11 @@ export default function Onboarding() {
               Step 3 of 3 · Identity verification
             </p>
             <h1 className="mt-1 text-xl font-semibold text-slate-900">
-              Upload your National ID{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
+              Upload your NID or  DOB{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
             </h1>
             <p className="mt-2 text-sm text-slate-500 leading-relaxed">
               To keep InvestorHub safe, every {user?.role === "businessman" ? "business" : "investor"} account
-              is verified. Upload a clear photo of your NID card — an admin reviews it before activating your account.
+              is verified. Upload a clear photo of your NID card or DOB — an admin reviews it before activating your account.
             </p>
           </div>
 
@@ -117,7 +117,7 @@ export default function Onboarding() {
             ) : (
               <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 hover:border-emerald-300 rounded-xl py-10 cursor-pointer text-center transition-colors">
                 <UploadCloud size={28} className="text-slate-400" />
-                <span className="text-sm font-medium text-slate-700">Click to choose your NID photo</span>
+                <span className="text-sm font-medium text-slate-700">Click to choose your NID/DOB photo</span>
                 <span className="text-xs text-slate-400">JPG or PNG, max 5MB</span>
                 <input type="file" accept="image/*" onChange={pickFile} className="hidden" />
               </label>
@@ -128,7 +128,7 @@ export default function Onboarding() {
               disabled={submitting || !file}
               className="mt-5 w-full h-11 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
             >
-              {submitting ? "Submitting..." : "Submit NID for verification"}
+              {submitting ? "Submitting..." : "Submit NID/DOB for verification"}
             </button>
           </form>
 

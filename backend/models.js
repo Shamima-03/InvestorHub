@@ -197,6 +197,18 @@ const feePaymentSchema = new mongoose.Schema(
 
 feePaymentSchema.index({ userId: 1, createdAt: -1 });
 
+// One platform review per account: posting again edits the existing one.
+const reviewSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    comment: { type: String, required: true, trim: true, maxlength: 1000 },
+  },
+  { timestamps: true }
+);
+
+reviewSchema.index({ createdAt: -1 });
+
 module.exports = {
   User: mongoose.model("User", userSchema),
   InvestorProfile: mongoose.model("InvestorProfile", investorProfileSchema),
@@ -209,4 +221,5 @@ module.exports = {
   Investment: mongoose.model("Investment", investmentSchema),
   FeePayment: mongoose.model("FeePayment", feePaymentSchema),
   ContactMessage: mongoose.model("ContactMessage", contactMessageSchema),
+  Review: mongoose.model("Review", reviewSchema),
 };

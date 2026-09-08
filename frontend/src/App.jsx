@@ -23,6 +23,7 @@ import MyReports from "./pages/MyReports";
 import Chat from "./pages/Chat";
 import { Users, Reports, Analytics, Listings, Payments, UserProfile, ContactMessages } from "./pages/Admin";
 import PostDetail from "./pages/PostDetail";
+import Review from "./pages/Review";
 
 function App() {
   const dispatch = useDispatch();
@@ -44,6 +45,14 @@ function App() {
         <Route path="/onboarding" element={<PublicLayout><Onboarding /></PublicLayout>} />
         <Route path="/entry-fee" element={<PublicLayout><EntryFee /></PublicLayout>} />
         <Route path="/post/:id" element={<PublicLayout><PostDetail /></PublicLayout>} />
+        <Route
+          path="/review"
+          element={
+            <ProtectedRoute loginOnly>
+              <PublicLayout><Review /></PublicLayout>
+            </ProtectedRoute>
+          }
+        />
         <Route path="/payment/success" element={<PublicLayout><PaymentResult status="success" /></PublicLayout>} />
         <Route path="/payment/fail" element={<PublicLayout><PaymentResult status="fail" /></PublicLayout>} />
         <Route path="/payment/cancel" element={<PublicLayout><PaymentResult status="cancel" /></PublicLayout>} />

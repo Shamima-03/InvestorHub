@@ -16,7 +16,9 @@ export function canAccessDashboard(user) {
   return user.status === "active";
 }
 
-export function ProtectedRoute({ children, roles }) {
+// loginOnly: the page just needs a signed-in account (no admin approval),
+// used by pages that live outside the dashboard such as /review.
+export function ProtectedRoute({ children, roles, loginOnly = false }) {
   const { user, isAuthenticated, authChecked } = useSelector((state) => state.auth);
   if (!authChecked) {
     return (
@@ -28,7 +30,7 @@ export function ProtectedRoute({ children, roles }) {
   }
   if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
   if (roles && !roles.includes(user.role)) return <Navigate to="/" replace />;
-  if (!canAccessDashboard(user)) return <Navigate to="/pending" replace />;
+  if (!loginOnly && !canAccessDashboard(user)) return <Navigate to="/pending" replace />;
   return children;
 }
 

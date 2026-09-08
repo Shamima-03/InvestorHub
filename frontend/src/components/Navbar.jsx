@@ -58,13 +58,15 @@ export default function Navbar() {
     setSearchOpen(false);
   };
 
+  // /review is behind a login, so the link is hidden from logged-out visitors.
   const navLinks = [
     { label: "Home", to: "/" },
     { label: "Finding Goal", to: "/finding-goal" },
     { label: "Contact", to: "/contact" },
+    ...(isAuthenticated ? [{ label: "Review", to: "/review" }] : []),
   ];
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => location.pathname.toLowerCase() === path.toLowerCase();
   const roleInfo = ROLE_BADGE[user?.role] || ROLE_BADGE.investor;
 
   return (

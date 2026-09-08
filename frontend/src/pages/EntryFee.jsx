@@ -107,7 +107,7 @@ export default function EntryFee() {
             className="mt-6 w-full h-11 inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
           >
             <ShieldCheck size={16} />
-            {paying ? "Redirecting to SSLCommerz..." : `Pay BDT ${ENTRY_FEE} with SSLCommerz`}
+            {paying ? "Redirecting to SSLCommerz..." : `Pay Registration Fee `}
           </button>
 
           <div className="mt-4 flex items-center justify-center">

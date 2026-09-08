@@ -483,7 +483,7 @@ export default function PostDetail() {
                             className="h-11 flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50"
                           >
                             <Banknote size={16} />
-                            {investing ? "Redirecting..." : "Pay with SSLCommerz"}
+                            {investing ? "Redirecting..." : "Make Payment"}
                           </button>
                           <button
                             type="button"

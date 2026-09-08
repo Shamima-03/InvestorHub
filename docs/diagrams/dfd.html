@@ -5,269 +5,784 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>InvestorHub — Data Flow Diagram (DFD)</title>
   <style>
-    :root { --ink:#0f172a; --muted:#475569; --proc:#0f766e; }
+    :root { --ink:#111827; --muted:#4b5563; }
     * { box-sizing: border-box; }
-    body { margin:0; background:#f1f5f9; color:var(--ink); font-family:"Segoe UI",Arial,sans-serif; }
+    body { margin:0; background:#f8fafc; color:var(--ink); font-family:"Segoe UI",Arial,sans-serif; }
     .page { max-width:1500px; margin:0 auto; padding:28px 20px 48px; }
     header { text-align:center; margin-bottom:8px; }
     h1 { margin:0; font-size:26px; }
     .subtitle { margin:6px 0 0; color:var(--muted); font-size:14px; }
     .toolbar { display:flex; justify-content:center; margin:16px 0 20px; }
     button { border:1px solid #cbd5e1; background:#fff; padding:8px 14px; border-radius:8px; cursor:pointer; }
-    .board { background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:auto; padding:12px; margin-bottom:24px; }
-    .board h2 { margin:0 0 4px 16px; font-size:16px; color:#0f766e; }
-    .board p { margin:0 0 8px 16px; color:var(--muted); font-size:12px; }
+    button:hover { background:#f1f5f9; }
+    .board { background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:auto; padding:16px 12px 20px; margin-bottom:28px; }
+    .board h2 { margin:0 0 2px 12px; font-size:16px; }
+    .board p { margin:0 0 10px 12px; color:var(--muted); font-size:12px; }
     svg { display:block; width:100%; height:auto; }
     .notes { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
     .card { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; }
     .card h2 { margin:0 0 8px; font-size:14px; }
     .card ul { margin:0; padding-left:18px; color:var(--muted); font-size:13px; line-height:1.55; }
-    @media print { body{background:#fff} .toolbar{display:none} .page{max-width:none;padding:0} .board{border:none;page-break-inside:avoid} @page{size:A3 landscape;margin:10mm} }
+    .legend { display:flex; flex-wrap:wrap; gap:18px; justify-content:center; margin:0 0 18px; font-size:13px; color:var(--muted); }
+    .legend span { display:flex; align-items:center; gap:8px; }
+    @media print {
+      body { background:#fff; }
+      .toolbar { display:none; }
+      .page { max-width:none; padding:0; }
+      .board { border:none; page-break-inside:avoid; margin-bottom:18px; }
+      @page { size:A3 landscape; margin:10mm; }
+    }
   </style>
 </head>
 <body>
   <div class="page">
     <header>
       <h1>InvestorHub — Data Flow Diagram (DFD)</h1>
-      <p class="subtitle">Level 0 (Context), Level 1 (System Decomposition), Level 2 (Match Management Detail)</p>
+      <p class="subtitle">Level 0 (Context) · Level 1 (Decomposition) · Level 2 (Process Detail)</p>
     </header>
     <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
+
+    <div class="legend">
+      <span>
+        <svg width="46" height="22"><rect x="1" y="3" width="44" height="16" fill="#fff" stroke="#111827"/></svg>
+        External entity
+      </span>
+      <span>
+        <svg width="56" height="22"><rect x="1" y="2" width="54" height="18" rx="8" fill="#fff" stroke="#111827"/></svg>
+        Process
+      </span>
+      <span>
+        <svg width="44" height="28">
+          <ellipse cx="22" cy="7" rx="16" ry="5" fill="#fff" stroke="#111827"/>
+          <path d="M6 7 V20" fill="none" stroke="#111827"/>
+          <path d="M38 7 V20" fill="none" stroke="#111827"/>
+          <ellipse cx="22" cy="20" rx="16" ry="5" fill="#fff" stroke="#111827"/>
+        </svg>
+        Data store
+      </span>
+      <span>
+        <svg width="50" height="16">
+          <defs><marker id="lg" markerWidth="7" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0 0 L7 3 L0 6 Z" fill="#111827"/></marker></defs>
+          <line x1="2" y1="8" x2="46" y2="8" stroke="#111827" marker-end="url(#lg)"/>
+        </svg>
+        Data flow
+      </span>
+    </div>
 
     <!-- LEVEL 0 -->
     <div class="board">
       <h2>Level 0 — Context Diagram</h2>
-      <p>Single central process with external entities</p>
-      <svg viewBox="0 0 1200 620" xmlns="http://www.w3.org/2000/svg">
-        <defs><marker id="d0" markerWidth="8" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L8 3.5 L0 7 Z" fill="#334155"/></marker></defs>
+      <p>One central process. Each external entity uses two parallel arrows (in and out). Lines are orthogonal and do not cross.</p>
+      <svg viewBox="0 0 1400 780" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Level 0 Context DFD">
+        <defs>
+          <marker id="a0" markerWidth="9" markerHeight="8" refX="9" refY="4" orient="auto">
+            <path d="M0 0 L9 4 L0 8 Z" fill="#111827"/>
+          </marker>
+        </defs>
 
-        <!-- Central process -->
-        <circle cx="600" cy="310" r="90" fill="#ecfdf5" stroke="#0f766e" stroke-width="2"/>
-        <text x="600" y="300" text-anchor="middle" font-size="14" font-weight="700" fill="#0f766e">0</text>
-        <text x="600" y="320" text-anchor="middle" font-size="13" font-weight="600">InvestorHub</text>
-        <text x="600" y="338" text-anchor="middle" font-size="13" font-weight="600">System</text>
+        <rect x="530" y="300" width="340" height="170" rx="22" fill="#fff" stroke="#111827" stroke-width="2"/>
+        <text x="700" y="362" text-anchor="middle" font-size="18" font-weight="700">0</text>
+        <text x="700" y="390" text-anchor="middle" font-size="16" font-weight="700">InvestorHub System</text>
+        <text x="700" y="414" text-anchor="middle" font-size="12" fill="#4b5563">Investment Matching Platform</text>
 
-        <!-- External entities -->
-        <rect x="60" y="80" width="130" height="44" fill="#fff" stroke="#334155" stroke-width="1.4"/>
-        <text x="125" y="107" text-anchor="middle" font-size="13" font-weight="600">Guest</text>
+        <rect x="615" y="40" width="170" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="700" y="71" text-anchor="middle" font-size="14" font-weight="600">Guest</text>
 
-        <rect x="60" y="240" width="130" height="44" fill="#fff" stroke="#334155" stroke-width="1.4"/>
-        <text x="125" y="267" text-anchor="middle" font-size="13" font-weight="600">Investor</text>
+        <rect x="60" y="335" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="150" y="366" text-anchor="middle" font-size="14" font-weight="600">Investor</text>
 
-        <rect x="60" y="400" width="130" height="44" fill="#fff" stroke="#334155" stroke-width="1.4"/>
-        <text x="125" y="427" text-anchor="middle" font-size="13" font-weight="600">Businessman</text>
+        <rect x="615" y="680" width="170" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="700" y="711" text-anchor="middle" font-size="14" font-weight="600">Businessman</text>
 
-        <rect x="1010" y="160" width="130" height="44" fill="#fff" stroke="#b45309" stroke-width="1.4"/>
-        <text x="1075" y="187" text-anchor="middle" font-size="13" font-weight="600">Administrator</text>
+        <rect x="1160" y="335" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="1250" y="366" text-anchor="middle" font-size="14" font-weight="600">Administrator</text>
 
-        <rect x="1010" y="420" width="130" height="44" fill="#fff" stroke="#334155" stroke-width="1.4"/>
-        <text x="1075" y="440" text-anchor="middle" font-size="12" font-weight="600">Image Upload</text>
-        <text x="1075" y="456" text-anchor="middle" font-size="11" fill="#64748b">(imgbb)</text>
+        <rect x="1160" y="680" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="1250" y="702" text-anchor="middle" font-size="13" font-weight="600">Image Upload</text>
+        <text x="1250" y="718" text-anchor="middle" font-size="11" fill="#4b5563">(imgbb)</text>
 
-        <!-- Flows (orthogonal routing, labels offset) -->
-        <path d="M190 102 L350 102 L350 240 L520 240" stroke="#334155" fill="none" marker-end="url(#d0)"/>
-        <text x="350" y="95" font-size="10">browse posts</text>
-        <path d="M520 260 L350 260 L350 120 L190 120" stroke="#334155" fill="none" marker-end="url(#d0)"/>
-        <text x="350" y="275" font-size="10">post list</text>
+        <path d="M655 90 L655 300" fill="none" stroke="#111827" stroke-width="1.4" marker-end="url(#a0)"/>
+        <text x="500" y="130" font-size="11">
+          <tspan x="500" dy="0">Browse request</tspan>
+          <tspan x="500" dy="14">Registration details</tspan>
+          <tspan x="500" dy="14">Login credentials</tspan>
+        </text>
 
-        <path d="M190 262 L300 262 L300 300 L510 300" stroke="#334155" fill="none" marker-end="url(#d0)"/>
-        <text x="300" y="255" font-size="10">register / login</text>
-        <path d="M510 320 L300 320 L300 280 L190 280" stroke="#334155" fill="none" marker-end="url(#d0)"/>
-        <text x="300" y="335" font-size="10">auth token</text>
+        <path d="M745 300 L745 90" fill="none" stroke="#111827" stroke-width="1.4" marker-end="url(#a0)"/>
+        <text x="760" y="130" font-size="11">
+          <tspan x="760" dy="0">Post list</tspan>
+          <tspan x="760" dy="14">Registration status</tspan>
+          <tspan x="760" dy="14">Login result</tspan>
+        </text>
 
-        <path d="M190 270 L280 270 L280 330 L510 330" stroke="#334155" fill="none" marker-end="url(#d0)"/>
-        <text x="280" y="325" font-size="10">create post</text>
-        <path d="M190 278 L260 278 L260 350 L510 350" stroke="#334155" fill="none" marker-end="url(#d0)"/>
-        <text x="260" y="365" font-size="10">match request</text>
-        <path d="M510 360 L260 360 L260 290 L190 290" stroke="#334155" fill="none" marker-end="url(#d0)"/>
-        <text x="260" y="378" font-size="10">match status</text>
+        <path d="M240 348 L530 348" fill="none" stroke="#111827" stroke-width="1.4" marker-end="url(#a0)"/>
+        <text x="250" y="248" font-size="11">
+          <tspan x="250" dy="0">Profile data</tspan>
+          <tspan x="250" dy="14">Investment post</tspan>
+          <tspan x="250" dy="14">Match request</tspan>
+          <tspan x="250" dy="14">Chat message</tspan>
+          <tspan x="250" dy="14">Report</tspan>
+        </text>
 
-        <path d="M190 422 L280 422 L280 370 L510 370" stroke="#334155" fill="none" marker-end="url(#d0)"/>
-        <text x="280" y="415" font-size="10">business post</text>
-        <path d="M510 380 L280 380 L280 430 L190 430" stroke="#334155" fill="none" marker-end="url(#d0)"/>
-        <text x="280" y="445" font-size="10">chat messages</text>
+        <path d="M530 378 L240 378" fill="none" stroke="#111827" stroke-width="1.4" marker-end="url(#a0)"/>
+        <text x="250" y="400" font-size="11">
+          <tspan x="250" dy="0">Auth token</tspan>
+          <tspan x="250" dy="14">Post list</tspan>
+          <tspan x="250" dy="14">Match status</tspan>
+          <tspan x="250" dy="14">Chat messages</tspan>
+          <tspan x="250" dy="14">Notifications</tspan>
+        </text>
 
-        <path d="M1010 182 L860 182 L860 280 L690 280" stroke="#b45309" fill="none" marker-end="url(#d0)"/>
-        <text x="860" y="175" font-size="10">approve user</text>
-        <path d="M690 300 L860 300 L860 200 L1010 200" stroke="#b45309" fill="none" marker-end="url(#d0)"/>
-        <text x="860" y="315" font-size="10">user reports</text>
-        <path d="M690 320 L880 320 L880 210 L1010 210" stroke="#b45309" fill="none" marker-end="url(#d0)"/>
-        <text x="880" y="335" font-size="10">analytics data</text>
+        <path d="M1160 348 L870 348" fill="none" stroke="#111827" stroke-width="1.4" marker-end="url(#a0)"/>
+        <text x="890" y="248" font-size="11">
+          <tspan x="890" dy="0">User approval</tspan>
+          <tspan x="890" dy="14">Status update</tspan>
+          <tspan x="890" dy="14">Moderation action</tspan>
+          <tspan x="890" dy="14">System settings</tspan>
+        </text>
 
-        <path d="M1010 442 L880 442 L880 340 L690 340" stroke="#334155" fill="none" marker-end="url(#d0)"/>
-        <text x="880" y="435" font-size="10">image file</text>
-        <path d="M690 360 L880 360 L880 450 L1010 450" stroke="#334155" fill="none" marker-end="url(#d0)"/>
-        <text x="880" y="375" font-size="10">image URL</text>
+        <path d="M870 378 L1160 378" fill="none" stroke="#111827" stroke-width="1.4" marker-end="url(#a0)"/>
+        <text x="890" y="400" font-size="11">
+          <tspan x="890" dy="0">User list</tspan>
+          <tspan x="890" dy="14">Reports</tspan>
+          <tspan x="890" dy="14">Dashboard data</tspan>
+          <tspan x="890" dy="14">Analytics</tspan>
+        </text>
+
+        <path d="M640 680 L640 470" fill="none" stroke="#111827" stroke-width="1.4" marker-end="url(#a0)"/>
+        <text x="430" y="500" font-size="11">
+          <tspan x="430" dy="0">Company profile</tspan>
+          <tspan x="430" dy="14">Business post</tspan>
+          <tspan x="430" dy="14">Match response</tspan>
+          <tspan x="430" dy="14">Chat message</tspan>
+          <tspan x="430" dy="14">Report</tspan>
+        </text>
+
+        <path d="M760 470 L760 680" fill="none" stroke="#111827" stroke-width="1.4" marker-end="url(#a0)"/>
+        <text x="775" y="500" font-size="11">
+          <tspan x="775" dy="0">Auth token</tspan>
+          <tspan x="775" dy="14">Post list</tspan>
+          <tspan x="775" dy="14">Match request</tspan>
+          <tspan x="775" dy="14">Chat messages</tspan>
+          <tspan x="775" dy="14">Notifications</tspan>
+        </text>
+
+        <path d="M820 470 L820 555 L1160 555" fill="none" stroke="#111827" stroke-width="1.4" marker-end="url(#a0)"/>
+        <text x="960" y="546" font-size="11">Image file</text>
+
+        <path d="M1160 590 L850 590 L850 470" fill="none" stroke="#111827" stroke-width="1.4" marker-end="url(#a0)"/>
+        <text x="960" y="608" font-size="11">Image URL</text>
       </svg>
     </div>
 
     <!-- LEVEL 1 -->
     <div class="board">
       <h2>Level 1 — System Decomposition</h2>
-      <p>Main processes: 1.0 Auth, 2.0 Posts, 3.0 Match, 4.0 Chat, 5.0 Admin</p>
-      <svg viewBox="0 0 1300 720" xmlns="http://www.w3.org/2000/svg">
-        <defs><marker id="d1" markerWidth="8" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L8 3.5 L0 7 Z" fill="#334155"/></marker></defs>
+      <p>Processes are stacked in one column. Each process has its own data store on the same row. Entities are duplicated where needed so every connector stays on its row.</p>
+      <svg viewBox="0 0 1580 1080" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Level 1 DFD">
+        <defs>
+          <marker id="a1" markerWidth="9" markerHeight="8" refX="9" refY="4" orient="auto">
+            <path d="M0 0 L9 4 L0 8 Z" fill="#111827"/>
+          </marker>
+        </defs>
 
         <!-- Processes -->
-        <circle cx="400" cy="180" r="52" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.6"/>
-        <text x="400" y="175" text-anchor="middle" font-size="12" font-weight="700">1.0</text>
-        <text x="400" y="192" text-anchor="middle" font-size="11">Authentication</text>
+        <rect x="500" y="50" width="250" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.8"/>
+        <line x1="500" y1="82" x2="750" y2="82" stroke="#111827"/>
+        <text x="625" y="72" text-anchor="middle" font-size="13" font-weight="700">1.0</text>
+        <text x="625" y="108" text-anchor="middle" font-size="13" font-weight="600">Authentication</text>
 
-        <circle cx="650" cy="180" r="52" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.6"/>
-        <text x="650" y="175" text-anchor="middle" font-size="12" font-weight="700">2.0</text>
-        <text x="650" y="192" text-anchor="middle" font-size="11">Post Management</text>
+        <rect x="500" y="250" width="250" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.8"/>
+        <line x1="500" y1="282" x2="750" y2="282" stroke="#111827"/>
+        <text x="625" y="272" text-anchor="middle" font-size="13" font-weight="700">2.0</text>
+        <text x="625" y="308" text-anchor="middle" font-size="13" font-weight="600">Post Management</text>
 
-        <circle cx="900" cy="180" r="52" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.6"/>
-        <text x="900" y="175" text-anchor="middle" font-size="12" font-weight="700">3.0</text>
-        <text x="900" y="192" text-anchor="middle" font-size="11">Match Management</text>
+        <rect x="500" y="450" width="250" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.8"/>
+        <line x1="500" y1="482" x2="750" y2="482" stroke="#111827"/>
+        <text x="625" y="472" text-anchor="middle" font-size="13" font-weight="700">3.0</text>
+        <text x="625" y="508" text-anchor="middle" font-size="13" font-weight="600">Match Management</text>
 
-        <circle cx="650" cy="380" r="52" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.6"/>
-        <text x="650" y="375" text-anchor="middle" font-size="12" font-weight="700">4.0</text>
-        <text x="650" y="392" text-anchor="middle" font-size="11">Chat Service</text>
+        <rect x="500" y="650" width="250" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.8"/>
+        <line x1="500" y1="682" x2="750" y2="682" stroke="#111827"/>
+        <text x="625" y="672" text-anchor="middle" font-size="13" font-weight="700">4.0</text>
+        <text x="625" y="708" text-anchor="middle" font-size="13" font-weight="600">Chat Service</text>
 
-        <circle cx="900" cy="380" r="52" fill="#fff7ed" stroke="#b45309" stroke-width="1.6"/>
-        <text x="900" y="375" text-anchor="middle" font-size="12" font-weight="700">5.0</text>
-        <text x="900" y="392" text-anchor="middle" font-size="11">Admin Module</text>
+        <rect x="500" y="850" width="250" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.8"/>
+        <line x1="500" y1="882" x2="750" y2="882" stroke="#111827"/>
+        <text x="625" y="872" text-anchor="middle" font-size="13" font-weight="700">5.0</text>
+        <text x="625" y="908" text-anchor="middle" font-size="13" font-weight="600">Admin Module</text>
+
+        <path d="M625 128 L625 250" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a1)"/>
+        <path d="M625 328 L625 450" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a1)"/>
+        <path d="M625 528 L625 650" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a1)"/>
+        <path d="M625 728 L625 850" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a1)"/>
 
         <!-- Data stores -->
-        <path d="M80 300 L200 300 L200 340 L80 340 Z" fill="#fff" stroke="#334155"/>
-        <line x1="80" y1="315" x2="200" y2="315" stroke="#334155"/>
-        <text x="140" y="332" text-anchor="middle" font-size="11">D1 Users</text>
+        <path d="M980 62 V118" fill="none" stroke="#111827"/>
+        <path d="M1140 62 V118" fill="none" stroke="#111827"/>
+        <ellipse cx="1060" cy="118" rx="80" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1060" cy="62" rx="80" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="1060" y="96" text-anchor="middle" font-size="12" font-weight="600">D1 Users</text>
 
-        <path d="M80 420 L200 420 L200 460 L80 460 Z" fill="#fff" stroke="#334155"/>
-        <line x1="80" y1="435" x2="200" y2="435" stroke="#334155"/>
-        <text x="140" y="452" text-anchor="middle" font-size="11">D2 Profiles</text>
+        <path d="M980 155 V205" fill="none" stroke="#111827"/>
+        <path d="M1140 155 V205" fill="none" stroke="#111827"/>
+        <ellipse cx="1060" cy="205" rx="80" ry="14" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1060" cy="155" rx="80" ry="14" fill="#fff" stroke="#111827"/>
+        <text x="1060" y="186" text-anchor="middle" font-size="12" font-weight="600">D2 Profiles</text>
 
-        <path d="M1050 300 L1170 300 L1170 340 L1050 340 Z" fill="#fff" stroke="#334155"/>
-        <line x1="1050" y1="315" x2="1170" y2="315" stroke="#334155"/>
-        <text x="1110" y="332" text-anchor="middle" font-size="11">D3 Posts</text>
+        <path d="M980 262 V318" fill="none" stroke="#111827"/>
+        <path d="M1140 262 V318" fill="none" stroke="#111827"/>
+        <ellipse cx="1060" cy="318" rx="80" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1060" cy="262" rx="80" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="1060" y="296" text-anchor="middle" font-size="12" font-weight="600">D3 Posts</text>
 
-        <path d="M1050 420 L1170 420 L1170 460 L1050 460 Z" fill="#fff" stroke="#334155"/>
-        <line x1="1050" y1="435" x2="1170" y2="435" stroke="#334155"/>
-        <text x="1110" y="452" text-anchor="middle" font-size="11">D4 Matches</text>
+        <path d="M980 462 V518" fill="none" stroke="#111827"/>
+        <path d="M1140 462 V518" fill="none" stroke="#111827"/>
+        <ellipse cx="1060" cy="518" rx="80" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1060" cy="462" rx="80" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="1060" y="496" text-anchor="middle" font-size="12" font-weight="600">D4 Matches</text>
 
-        <path d="M1050 540 L1170 540 L1170 580 L1050 580 Z" fill="#fff" stroke="#334155"/>
-        <line x1="1050" y1="555" x2="1170" y2="555" stroke="#334155"/>
-        <text x="1110" y="572" text-anchor="middle" font-size="11">D5 Messages</text>
+        <path d="M980 662 V718" fill="none" stroke="#111827"/>
+        <path d="M1140 662 V718" fill="none" stroke="#111827"/>
+        <ellipse cx="1060" cy="718" rx="80" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1060" cy="662" rx="80" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="1060" y="696" text-anchor="middle" font-size="12" font-weight="600">D5 Messages</text>
 
-        <path d="M80 540 L200 540 L200 580 L80 580 Z" fill="#fff" stroke="#334155"/>
-        <line x1="80" y1="555" x2="200" y2="555" stroke="#334155"/>
-        <text x="140" y="572" text-anchor="middle" font-size="11">D6 Reports</text>
+        <path d="M980 862 V918" fill="none" stroke="#111827"/>
+        <path d="M1140 862 V918" fill="none" stroke="#111827"/>
+        <ellipse cx="1060" cy="918" rx="80" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1060" cy="862" rx="80" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="1060" y="896" text-anchor="middle" font-size="12" font-weight="600">D6 Reports</text>
 
-        <!-- External entities -->
-        <rect x="350" y="40" width="120" height="40" fill="#fff" stroke="#334155"/>
-        <text x="410" y="66" text-anchor="middle" font-size="12" font-weight="600">Member</text>
-        <rect x="850" y="40" width="120" height="40" fill="#fff" stroke="#b45309"/>
-        <text x="910" y="66" text-anchor="middle" font-size="12" font-weight="600">Admin</text>
+        <path d="M980 970 V1024" fill="none" stroke="#111827"/>
+        <path d="M1140 970 V1024" fill="none" stroke="#111827"/>
+        <ellipse cx="1060" cy="1024" rx="80" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1060" cy="970" rx="80" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="1060" y="1003" text-anchor="middle" font-size="12" font-weight="600">D1 Users</text>
+        <text x="1060" y="1048" text-anchor="middle" font-size="10" fill="#4b5563">(repeated)</text>
 
-        <!-- Flows Level 1 -->
-        <line x1="410" y1="80" x2="400" y2="128" stroke="#334155" marker-end="url(#d1)"/>
-        <text x="360" y="110" font-size="10">login data</text>
-        <line x1="400" y1="232" x2="140" y2="300" stroke="#334155" marker-end="url(#d1)"/>
-        <text x="240" y="260" font-size="10">user record</text>
-        <line x1="400" y1="232" x2="140" y2="420" stroke="#334155" marker-end="url(#d1)"/>
-        <text x="240" y="340" font-size="10">profile data</text>
+        <!-- Entities: one per row (duplicated) -->
+        <rect x="40" y="64" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="95" text-anchor="middle" font-size="13" font-weight="600">Guest</text>
 
-        <line x1="410" y1="80" x2="650" y2="128" stroke="#334155" marker-end="url(#d1)"/>
-        <text x="530" y="100" font-size="10">post CRUD</text>
-        <line x1="650" y1="232" x2="1050" y2="320" stroke="#334155" marker-end="url(#d1)"/>
-        <text x="850" y="260" font-size="10">post data</text>
-        <line x1="1050" y1="320" x2="650" y2="232" stroke="#334155" marker-end="url(#d1)"/>
-        <text x="850" y="290" font-size="10">post list</text>
+        <rect x="40" y="264" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="286" text-anchor="middle" font-size="12" font-weight="600">Investor /</text>
+        <text x="130" y="302" text-anchor="middle" font-size="12" font-weight="600">Businessman</text>
 
-        <line x1="410" y1="80" x2="900" y2="128" stroke="#334155" marker-end="url(#d1)"/>
-        <text x="680" y="100" font-size="10">match req</text>
-        <line x1="900" y1="232" x2="1050" y2="440" stroke="#334155" marker-end="url(#d1)"/>
-        <text x="990" y="340" font-size="10">match record</text>
+        <rect x="40" y="464" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="486" text-anchor="middle" font-size="12" font-weight="600">Investor /</text>
+        <text x="130" y="502" text-anchor="middle" font-size="12" font-weight="600">Businessman</text>
 
-        <line x1="410" y1="80" x2="650" y2="328" stroke="#334155" marker-end="url(#d1)"/>
-        <text x="500" y="200" font-size="10">chat msg</text>
-        <line x1="650" y1="432" x2="1050" y2="560" stroke="#334155" marker-end="url(#d1)"/>
-        <text x="850" y="500" font-size="10">messages</text>
+        <rect x="40" y="664" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="686" text-anchor="middle" font-size="12" font-weight="600">Investor /</text>
+        <text x="130" y="702" text-anchor="middle" font-size="12" font-weight="600">Businessman</text>
 
-        <path d="M910 80 L910 140 L900 140" stroke="#b45309" fill="none" marker-end="url(#d1)"/>
-        <text x="930" y="110" font-size="10">admin cmd</text>
-        <path d="M900 432 L900 580 L140 580 L140 540" stroke="#b45309" fill="none" marker-end="url(#d1)"/>
-        <text x="520" y="572" font-size="10">report data</text>
-        <path d="M900 432 L900 620 L140 620 L140 300" stroke="#b45309" fill="none" marker-end="url(#d1)"/>
-        <text x="520" y="612" font-size="10">status update</text>
+        <rect x="40" y="864" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="895" text-anchor="middle" font-size="13" font-weight="600">Administrator</text>
 
-        <!-- Process interconnections -->
-        <line x1="452" y1="180" x2="598" y2="180" stroke="#64748b" stroke-dasharray="4 3" marker-end="url(#d1)"/>
-        <text x="525" y="172" font-size="9" fill="#64748b">token</text>
-        <line x1="702" y1="180" x2="848" y2="180" stroke="#64748b" stroke-dasharray="4 3" marker-end="url(#d1)"/>
-        <text x="775" y="172" font-size="9" fill="#64748b">post ref</text>
-        <line x1="900" y1="232" x2="650" y2="328" stroke="#64748b" stroke-dasharray="4 3" marker-end="url(#d1)"/>
-        <text x="780" y="290" font-size="9" fill="#64748b">accepted match</text>
+        <rect x="1340" y="64" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="1430" y="95" text-anchor="middle" font-size="13" font-weight="600">Administrator</text>
+
+        <rect x="1340" y="264" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="1430" y="286" text-anchor="middle" font-size="12" font-weight="600">Image Upload</text>
+        <text x="1430" y="302" text-anchor="middle" font-size="11" fill="#4b5563">(imgbb)</text>
+
+        <!-- Row 1.0 : Guest -->
+        <path d="M220 80 L500 80" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="230" y="72" font-size="11">Registration details, Login credentials</text>
+        <path d="M500 106 L220 106" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="230" y="122" font-size="11">Account status, Login result</text>
+
+        <path d="M750 72 L980 72" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="770" y="64" font-size="11">New / updated user record</text>
+        <path d="M980 96 L750 96" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="770" y="112" font-size="11">Authentication details</text>
+
+        <path d="M750 118 L900 118 L900 168 L980 168" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="770" y="140" font-size="11">Profile data</text>
+        <path d="M980 188 L880 188 L880 126 L750 126" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="760" y="152" font-size="11">Stored profile</text>
+
+        <path d="M1140 80 L1340 80" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="1185" y="72" font-size="11">User list</text>
+        <path d="M1140 100 L1340 100" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="1185" y="116" font-size="11">Member list</text>
+
+        <!-- Row 2.0 : Member + imgbb -->
+        <path d="M220 276 L500 276" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="230" y="268" font-size="11">Post details, Browse request</text>
+        <path d="M500 302 L220 302" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="230" y="318" font-size="11">Post list, Save status</text>
+
+        <path d="M750 272 L980 272" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="770" y="264" font-size="11">Post record</text>
+        <path d="M980 296 L750 296" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="770" y="312" font-size="11">Post list / post data</text>
+
+        <path d="M1140 276 L1340 276" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="1188" y="268" font-size="11">Image file</text>
+        <path d="M1340 302 L1140 302" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="1188" y="318" font-size="11">Image URL</text>
+
+        <!-- Row 3.0 -->
+        <path d="M220 476 L500 476" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="230" y="468" font-size="11">Match request, Accept / reject</text>
+        <path d="M500 502 L220 502" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="230" y="518" font-size="11">Match status, Notifications</text>
+
+        <path d="M750 472 L980 472" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="770" y="464" font-size="11">Match record</text>
+        <path d="M980 496 L750 496" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="770" y="512" font-size="11">Match data / status</text>
+
+        <!-- Row 4.0 -->
+        <path d="M220 676 L500 676" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="230" y="668" font-size="11">Chat message, Open conversation</text>
+        <path d="M500 702 L220 702" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="230" y="718" font-size="11">Delivered messages, Notifications</text>
+
+        <path d="M750 672 L980 672" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="770" y="664" font-size="11">Message record</text>
+        <path d="M980 696 L750 696" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="770" y="712" font-size="11">Conversation / messages</text>
+
+        <!-- Row 5.0 -->
+        <path d="M220 876 L500 876" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="230" y="868" font-size="11">Approval, Moderation, Settings</text>
+        <path d="M500 902 L220 902" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="230" y="918" font-size="11">Reports, Dashboard data</text>
+
+        <path d="M750 872 L980 872" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="770" y="864" font-size="11">Report record</text>
+        <path d="M980 896 L750 896" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="770" y="912" font-size="11">Stored reports</text>
+
+        <path d="M625 928 L625 992 L980 992" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a1)"/>
+        <text x="640" y="984" font-size="11">Status update (approve / block)</text>
       </svg>
     </div>
 
-    <!-- LEVEL 2 -->
+    <!-- LEVEL 2 : 1.0 -->
     <div class="board">
-      <h2>Level 2 — Match Management (Process 3.0 exploded)</h2>
-      <p>Sub-processes: 3.1 Validate, 3.2 Create Request, 3.3 Accept/Reject, 3.4 Notify</p>
-      <svg viewBox="0 0 1200 580" xmlns="http://www.w3.org/2000/svg">
-        <defs><marker id="d2" markerWidth="8" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L8 3.5 L0 7 Z" fill="#334155"/></marker></defs>
+      <h2>Level 2 — Process 1.0 Authentication</h2>
+      <p>Three-column grid. Guest aligns with 1.1; the member entity is repeated on the 1.2 and 1.3 rows.</p>
+      <svg viewBox="0 0 1280 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Level 2 Authentication DFD">
+        <defs>
+          <marker id="a2a" markerWidth="9" markerHeight="8" refX="9" refY="4" orient="auto">
+            <path d="M0 0 L9 4 L0 8 Z" fill="#111827"/>
+          </marker>
+        </defs>
 
-        <rect x="60" y="200" width="120" height="44" fill="#fff" stroke="#334155"/>
-        <text x="120" y="227" text-anchor="middle" font-size="12" font-weight="600">Investor</text>
-        <rect x="60" y="340" width="120" height="44" fill="#fff" stroke="#334155"/>
-        <text x="120" y="367" text-anchor="middle" font-size="12" font-weight="600">Businessman</text>
+        <rect x="40" y="64" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="95" text-anchor="middle" font-size="13" font-weight="600">Guest</text>
 
-        <circle cx="350" cy="260" r="46" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.5"/>
-        <text x="350" y="255" text-anchor="middle" font-size="11" font-weight="700">3.1</text>
-        <text x="350" y="272" text-anchor="middle" font-size="10">Validate Roles</text>
+        <rect x="40" y="244" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="266" text-anchor="middle" font-size="12" font-weight="600">Investor /</text>
+        <text x="130" y="282" text-anchor="middle" font-size="12" font-weight="600">Businessman</text>
 
-        <circle cx="550" cy="260" r="46" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.5"/>
-        <text x="550" y="255" text-anchor="middle" font-size="11" font-weight="700">3.2</text>
-        <text x="550" y="272" text-anchor="middle" font-size="10">Create Request</text>
+        <rect x="40" y="424" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="446" text-anchor="middle" font-size="12" font-weight="600">Investor /</text>
+        <text x="130" y="462" text-anchor="middle" font-size="12" font-weight="600">Businessman</text>
 
-        <circle cx="750" cy="260" r="46" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.5"/>
-        <text x="750" y="255" text-anchor="middle" font-size="11" font-weight="700">3.3</text>
-        <text x="750" y="272" text-anchor="middle" font-size="10">Accept / Reject</text>
+        <rect x="460" y="50" width="230" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="460" y1="82" x2="690" y2="82" stroke="#111827"/>
+        <text x="575" y="72" text-anchor="middle" font-size="13" font-weight="700">1.1</text>
+        <text x="575" y="108" text-anchor="middle" font-size="13" font-weight="600">User Registration</text>
 
-        <circle cx="950" cy="260" r="46" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.5"/>
-        <text x="950" y="255" text-anchor="middle" font-size="11" font-weight="700">3.4</text>
-        <text x="950" y="272" text-anchor="middle" font-size="10">Notify Users</text>
+        <rect x="460" y="230" width="230" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="460" y1="262" x2="690" y2="262" stroke="#111827"/>
+        <text x="575" y="252" text-anchor="middle" font-size="13" font-weight="700">1.2</text>
+        <text x="575" y="288" text-anchor="middle" font-size="12" font-weight="600">Login &amp; Authentication</text>
 
-        <path d="M350 420 L470 420 L470 460 L350 460 Z" fill="#fff" stroke="#334155"/>
-        <line x1="350" y1="435" x2="470" y2="435" stroke="#334155"/>
-        <text x="410" y="452" text-anchor="middle" font-size="11">D1 Users</text>
+        <rect x="460" y="410" width="230" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="460" y1="442" x2="690" y2="442" stroke="#111827"/>
+        <text x="575" y="432" text-anchor="middle" font-size="13" font-weight="700">1.3</text>
+        <text x="575" y="468" text-anchor="middle" font-size="13" font-weight="600">Manage Profile</text>
 
-        <path d="M650 420 L770 420 L770 460 L650 460 Z" fill="#fff" stroke="#334155"/>
-        <line x1="650" y1="435" x2="770" y2="435" stroke="#334155"/>
-        <text x="710" y="452" text-anchor="middle" font-size="11">D4 Matches</text>
+        <path d="M575 128 L575 230" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a2a)"/>
+        <path d="M575 308 L575 410" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a2a)"/>
 
-        <path d="M850 420 L970 420 L970 460 L850 460 Z" fill="#fff" stroke="#334155"/>
-        <line x1="850" y1="435" x2="970" y2="435" stroke="#334155"/>
-        <text x="910" y="452" text-anchor="middle" font-size="11">D3 Posts</text>
+        <path d="M900 70 V130" fill="none" stroke="#111827"/>
+        <path d="M1100 70 V130" fill="none" stroke="#111827"/>
+        <ellipse cx="1000" cy="130" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1000" cy="70" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="1000" y="106" text-anchor="middle" font-size="13" font-weight="600">D1 Users</text>
 
-        <!-- Flows -->
-        <line x1="180" y1="222" x2="304" y2="250" stroke="#334155" marker-end="url(#d2)"/>
-        <text x="230" y="230" font-size="10">match request</text>
-        <line x1="350" y1="306" x2="410" y2="420" stroke="#334155" marker-end="url(#d2)"/>
-        <text x="360" y="370" font-size="10">read roles</text>
-        <line x1="396" y1="260" x2="504" y2="260" stroke="#334155" marker-end="url(#d2)"/>
-        <text x="450" y="252" font-size="10">valid pair</text>
-        <line x1="550" y1="306" x2="710" y2="420" stroke="#334155" marker-end="url(#d2)"/>
-        <text x="620" y="370" font-size="10">save pending</text>
-        <line x1="910" y1="420" x2="580" y2="306" stroke="#334155" marker-end="url(#d2)"/>
-        <text x="760" y="360" font-size="10">postId ref</text>
+        <path d="M900 250 V310" fill="none" stroke="#111827"/>
+        <path d="M1100 250 V310" fill="none" stroke="#111827"/>
+        <ellipse cx="1000" cy="310" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1000" cy="250" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="1000" y="286" text-anchor="middle" font-size="13" font-weight="600">D1 Users</text>
 
-        <path d="M180 362 L280 362 L280 280 L704 280" stroke="#334155" fill="none" marker-end="url(#d2)"/>
-        <text x="420" y="272" font-size="10">accept / reject</text>
-        <line x1="750" y1="306" x2="710" y2="420" stroke="#334155" marker-end="url(#d2)"/>
-        <text x="720" y="370" font-size="10">update status</text>
-        <line x1="796" y1="260" x2="904" y2="260" stroke="#334155" marker-end="url(#d2)"/>
-        <text x="850" y="252" font-size="10">result</text>
+        <path d="M900 430 V490" fill="none" stroke="#111827"/>
+        <path d="M1100 430 V490" fill="none" stroke="#111827"/>
+        <ellipse cx="1000" cy="490" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1000" cy="430" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="1000" y="466" text-anchor="middle" font-size="13" font-weight="600">D2 Profiles</text>
 
-        <path d="M950 306 L950 520 L180 520 L180 222" stroke="#334155" fill="none" stroke-dasharray="4 3" marker-end="url(#d2)"/>
-        <text x="560" y="512" font-size="10">notification to investor</text>
-        <path d="M950 306 L950 540 L180 540 L180 362" stroke="#334155" fill="none" stroke-dasharray="4 3" marker-end="url(#d2)"/>
-        <text x="560" y="532" font-size="10">notification to businessman</text>
+        <path d="M220 80 L460 80" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2a)"/>
+        <text x="240" y="72" font-size="11">Register / login details</text>
+        <path d="M460 106 L220 106" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2a)"/>
+        <text x="240" y="122" font-size="11">Registration status</text>
+        <path d="M690 80 L900 80" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2a)"/>
+        <text x="710" y="72" font-size="11">New user record</text>
+        <path d="M900 100 L690 100" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2a)"/>
+        <text x="710" y="116" font-size="11">Registration status</text>
 
-        <!-- Parent process boundary -->
-        <rect x="280" y="120" width="760" height="200" fill="none" stroke="#0f766e" stroke-width="1.2" stroke-dasharray="6 4"/>
-        <text x="660" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#0f766e">Process 3.0 Match Management</text>
+        <path d="M220 260 L460 260" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2a)"/>
+        <text x="240" y="252" font-size="11">Login credentials</text>
+        <path d="M460 286 L220 286" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2a)"/>
+        <text x="240" y="302" font-size="11">Login result, Notifications</text>
+        <path d="M690 260 L900 260" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2a)"/>
+        <text x="710" y="252" font-size="11">Authenticate user</text>
+        <path d="M900 286 L690 286" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2a)"/>
+        <text x="710" y="302" font-size="11">Authentication result</text>
+
+        <path d="M220 440 L460 440" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2a)"/>
+        <text x="240" y="432" font-size="11">Profile update</text>
+        <path d="M460 466 L220 466" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2a)"/>
+        <text x="240" y="482" font-size="11">Profile information, Update result</text>
+        <path d="M690 440 L900 440" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2a)"/>
+        <text x="710" y="432" font-size="11">Update profile</text>
+        <path d="M900 466 L690 466" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2a)"/>
+        <text x="710" y="482" font-size="11">Update status</text>
+      </svg>
+    </div>
+
+    <!-- LEVEL 2 : 2.0 -->
+    <div class="board">
+      <h2>Level 2 — Process 2.0 Post Management</h2>
+      <p>Member, Guest, and Member (repeated) each sit on their own row. Image upload stays on the 2.1 row, to the right of D3.</p>
+      <svg viewBox="0 0 1480 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Level 2 Post Management DFD">
+        <defs>
+          <marker id="a2b" markerWidth="9" markerHeight="8" refX="9" refY="4" orient="auto">
+            <path d="M0 0 L9 4 L0 8 Z" fill="#111827"/>
+          </marker>
+        </defs>
+
+        <rect x="40" y="64" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="86" text-anchor="middle" font-size="12" font-weight="600">Investor /</text>
+        <text x="130" y="102" text-anchor="middle" font-size="12" font-weight="600">Businessman</text>
+
+        <rect x="40" y="244" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="275" text-anchor="middle" font-size="13" font-weight="600">Guest</text>
+
+        <rect x="40" y="424" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="446" text-anchor="middle" font-size="12" font-weight="600">Investor /</text>
+        <text x="130" y="462" text-anchor="middle" font-size="12" font-weight="600">Businessman</text>
+
+        <rect x="1260" y="64" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="1350" y="86" text-anchor="middle" font-size="12" font-weight="600">Image Upload</text>
+        <text x="1350" y="102" text-anchor="middle" font-size="11" fill="#4b5563">(imgbb)</text>
+
+        <rect x="460" y="50" width="230" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="460" y1="82" x2="690" y2="82" stroke="#111827"/>
+        <text x="575" y="72" text-anchor="middle" font-size="13" font-weight="700">2.1</text>
+        <text x="575" y="108" text-anchor="middle" font-size="13" font-weight="600">Create Post</text>
+
+        <rect x="460" y="230" width="230" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="460" y1="262" x2="690" y2="262" stroke="#111827"/>
+        <text x="575" y="252" text-anchor="middle" font-size="13" font-weight="700">2.2</text>
+        <text x="575" y="288" text-anchor="middle" font-size="13" font-weight="600">Browse / View Posts</text>
+
+        <rect x="460" y="410" width="230" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="460" y1="442" x2="690" y2="442" stroke="#111827"/>
+        <text x="575" y="432" text-anchor="middle" font-size="13" font-weight="700">2.3</text>
+        <text x="575" y="468" text-anchor="middle" font-size="13" font-weight="600">Update / Delete Post</text>
+
+        <path d="M575 128 L575 230" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a2b)"/>
+        <path d="M575 308 L575 410" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a2b)"/>
+
+        <path d="M880 70 V130" fill="none" stroke="#111827"/>
+        <path d="M1080 70 V130" fill="none" stroke="#111827"/>
+        <ellipse cx="980" cy="130" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="980" cy="70" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="980" y="106" text-anchor="middle" font-size="13" font-weight="600">D3 Posts</text>
+
+        <path d="M880 250 V310" fill="none" stroke="#111827"/>
+        <path d="M1080 250 V310" fill="none" stroke="#111827"/>
+        <ellipse cx="980" cy="310" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="980" cy="250" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="980" y="286" text-anchor="middle" font-size="13" font-weight="600">D3 Posts</text>
+
+        <path d="M880 430 V490" fill="none" stroke="#111827"/>
+        <path d="M1080 430 V490" fill="none" stroke="#111827"/>
+        <ellipse cx="980" cy="490" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="980" cy="430" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="980" y="466" text-anchor="middle" font-size="13" font-weight="600">D3 Posts</text>
+
+        <path d="M220 80 L460 80" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="240" y="72" font-size="11">Post details</text>
+        <path d="M460 106 L220 106" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="240" y="122" font-size="11">Save status</text>
+        <path d="M690 80 L880 80" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="710" y="72" font-size="11">New post record</text>
+        <path d="M880 100 L690 100" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="710" y="116" font-size="11">Save status</text>
+        <path d="M1080 80 L1260 80" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="1105" y="72" font-size="11">Image file</text>
+        <path d="M1260 100 L1080 100" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="1105" y="116" font-size="11">Image URL</text>
+
+        <path d="M220 260 L460 260" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="240" y="252" font-size="11">Browse request</text>
+        <path d="M460 286 L220 286" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="240" y="302" font-size="11">Public post list</text>
+        <path d="M690 260 L880 260" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="710" y="252" font-size="11">Fetch posts</text>
+        <path d="M880 286 L690 286" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="710" y="302" font-size="11">Post list / post data</text>
+
+        <path d="M220 440 L460 440" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="240" y="432" font-size="11">Edit / delete command</text>
+        <path d="M460 466 L220 466" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="240" y="482" font-size="11">Update / delete result</text>
+        <path d="M690 440 L880 440" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="710" y="432" font-size="11">Updated post record</text>
+        <path d="M880 466 L690 466" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2b)"/>
+        <text x="710" y="482" font-size="11">Update status</text>
+      </svg>
+    </div>
+
+    <!-- LEVEL 2 : 3.0 -->
+    <div class="board">
+      <h2>Level 2 — Process 3.0 Match Management</h2>
+      <p>Investor is repeated on the 3.1 and 3.2 rows. Businessman sits only on the 3.3 row. Notification back to the investor uses a second Investor box on the right of 3.3.</p>
+      <svg viewBox="0 0 1480 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Level 2 Match Management DFD">
+        <defs>
+          <marker id="a2c" markerWidth="9" markerHeight="8" refX="9" refY="4" orient="auto">
+            <path d="M0 0 L9 4 L0 8 Z" fill="#111827"/>
+          </marker>
+        </defs>
+
+        <rect x="40" y="64" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="95" text-anchor="middle" font-size="13" font-weight="600">Investor</text>
+
+        <rect x="40" y="244" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="275" text-anchor="middle" font-size="13" font-weight="600">Investor</text>
+
+        <rect x="40" y="424" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="455" text-anchor="middle" font-size="13" font-weight="600">Businessman</text>
+
+        <rect x="1260" y="424" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="1350" y="455" text-anchor="middle" font-size="13" font-weight="600">Investor</text>
+
+        <rect x="460" y="50" width="230" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="460" y1="82" x2="690" y2="82" stroke="#111827"/>
+        <text x="575" y="72" text-anchor="middle" font-size="13" font-weight="700">3.1</text>
+        <text x="575" y="108" text-anchor="middle" font-size="13" font-weight="600">Validate Roles</text>
+
+        <rect x="460" y="230" width="230" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="460" y1="262" x2="690" y2="262" stroke="#111827"/>
+        <text x="575" y="252" text-anchor="middle" font-size="13" font-weight="700">3.2</text>
+        <text x="575" y="288" text-anchor="middle" font-size="13" font-weight="600">Create Match Request</text>
+
+        <rect x="460" y="410" width="230" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="460" y1="442" x2="690" y2="442" stroke="#111827"/>
+        <text x="575" y="432" text-anchor="middle" font-size="13" font-weight="700">3.3</text>
+        <text x="575" y="468" text-anchor="middle" font-size="13" font-weight="600">Accept / Reject</text>
+
+        <path d="M575 128 L575 230" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a2c)"/>
+        <path d="M575 308 L575 410" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a2c)"/>
+
+        <path d="M880 70 V130" fill="none" stroke="#111827"/>
+        <path d="M1080 70 V130" fill="none" stroke="#111827"/>
+        <ellipse cx="980" cy="130" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="980" cy="70" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="980" y="106" text-anchor="middle" font-size="13" font-weight="600">D1 Users</text>
+
+        <path d="M880 250 V310" fill="none" stroke="#111827"/>
+        <path d="M1080 250 V310" fill="none" stroke="#111827"/>
+        <ellipse cx="980" cy="310" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="980" cy="250" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="980" y="286" text-anchor="middle" font-size="13" font-weight="600">D4 Matches</text>
+
+        <path d="M880 430 V490" fill="none" stroke="#111827"/>
+        <path d="M1080 430 V490" fill="none" stroke="#111827"/>
+        <ellipse cx="980" cy="490" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="980" cy="430" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="980" y="466" text-anchor="middle" font-size="13" font-weight="600">D4 Matches</text>
+
+        <path d="M220 80 L460 80" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="240" y="72" font-size="11">Match request</text>
+        <path d="M690 80 L880 80" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="710" y="72" font-size="11">Read roles</text>
+        <path d="M880 100 L690 100" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="710" y="116" font-size="11">Role / status data</text>
+
+        <path d="M220 260 L460 260" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="240" y="252" font-size="11">Valid pair / post id</text>
+        <path d="M460 286 L220 286" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="240" y="302" font-size="11">Request confirmation</text>
+        <path d="M690 260 L880 260" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="710" y="252" font-size="11">Save pending match</text>
+        <path d="M880 286 L690 286" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="710" y="302" font-size="11">Request status</text>
+
+        <path d="M220 440 L460 440" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="240" y="432" font-size="11">Accept / reject</text>
+        <path d="M460 466 L220 466" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="240" y="482" font-size="11">Result, Notifications</text>
+        <path d="M690 440 L880 440" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="710" y="432" font-size="11">Update match status</text>
+        <path d="M880 466 L690 466" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="710" y="482" font-size="11">Saved status</text>
+        <path d="M1080 440 L1260 440" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="1105" y="432" font-size="11">Match status</text>
+        <path d="M1080 466 L1260 466" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2c)"/>
+        <text x="1105" y="482" font-size="11">Notifications</text>
+      </svg>
+    </div>
+
+    <!-- LEVEL 2 : 4.0 -->
+    <div class="board">
+      <h2>Level 2 — Process 4.0 Chat Service</h2>
+      <p>Investor and Businessman are each repeated: one copy on the 4.1 row, one copy on the 4.2 row. All flows stay horizontal inside their row.</p>
+      <svg viewBox="0 0 1280 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Level 2 Chat Service DFD">
+        <defs>
+          <marker id="a2d" markerWidth="9" markerHeight="8" refX="9" refY="4" orient="auto">
+            <path d="M0 0 L9 4 L0 8 Z" fill="#111827"/>
+          </marker>
+        </defs>
+
+        <rect x="40" y="40" width="160" height="44" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="120" y="67" text-anchor="middle" font-size="13" font-weight="600">Investor</text>
+        <rect x="40" y="100" width="160" height="44" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="120" y="127" text-anchor="middle" font-size="13" font-weight="600">Businessman</text>
+
+        <rect x="40" y="250" width="160" height="44" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="120" y="277" text-anchor="middle" font-size="13" font-weight="600">Investor</text>
+        <rect x="40" y="310" width="160" height="44" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="120" y="337" text-anchor="middle" font-size="13" font-weight="600">Businessman</text>
+
+        <rect x="420" y="60" width="230" height="100" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="420" y1="92" x2="650" y2="92" stroke="#111827"/>
+        <text x="535" y="82" text-anchor="middle" font-size="13" font-weight="700">4.1</text>
+        <text x="535" y="122" text-anchor="middle" font-size="13" font-weight="600">Open Conversation</text>
+
+        <rect x="420" y="270" width="230" height="100" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="420" y1="302" x2="650" y2="302" stroke="#111827"/>
+        <text x="535" y="292" text-anchor="middle" font-size="13" font-weight="700">4.2</text>
+        <text x="535" y="332" text-anchor="middle" font-size="13" font-weight="600">Send Message</text>
+
+        <path d="M535 160 L535 270" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a2d)"/>
+
+        <path d="M850 80 V140" fill="none" stroke="#111827"/>
+        <path d="M1050 80 V140" fill="none" stroke="#111827"/>
+        <ellipse cx="950" cy="140" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="950" cy="80" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="950" y="116" text-anchor="middle" font-size="13" font-weight="600">D5 Messages</text>
+
+        <path d="M850 290 V350" fill="none" stroke="#111827"/>
+        <path d="M1050 290 V350" fill="none" stroke="#111827"/>
+        <ellipse cx="950" cy="350" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="950" cy="290" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="950" y="326" text-anchor="middle" font-size="13" font-weight="600">D5 Messages</text>
+
+        <path d="M200 62 L420 62" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2d)"/>
+        <text x="220" y="54" font-size="11">Open chat / match id</text>
+        <path d="M200 122 L420 122" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2d)"/>
+        <text x="220" y="148" font-size="11">Open chat / match id</text>
+        <path d="M650 90 L850 90" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2d)"/>
+        <text x="670" y="82" font-size="11">Conversation record</text>
+        <path d="M850 118 L650 118" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2d)"/>
+        <text x="670" y="138" font-size="11">Conversation data</text>
+
+        <path d="M200 272 L420 272" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2d)"/>
+        <text x="220" y="264" font-size="11">Chat message</text>
+        <path d="M420 288 L200 288" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2d)"/>
+        <text x="220" y="304" font-size="11">Delivered messages</text>
+        <path d="M200 332 L420 332" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2d)"/>
+        <text x="220" y="324" font-size="11">Chat message</text>
+        <path d="M420 348 L200 348" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2d)"/>
+        <text x="220" y="364" font-size="11">Delivered messages</text>
+        <path d="M650 300 L850 300" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2d)"/>
+        <text x="670" y="292" font-size="11">Store message</text>
+        <path d="M850 328 L650 328" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2d)"/>
+        <text x="670" y="348" font-size="11">Message / seen status</text>
+      </svg>
+    </div>
+
+    <!-- LEVEL 2 : 5.0 -->
+    <div class="board">
+      <h2>Level 2 — Process 5.0 Admin Module</h2>
+      <p>Administrator is repeated on each row so approve, moderate, and report-review flows never leave their lane.</p>
+      <svg viewBox="0 0 1280 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Level 2 Admin Module DFD">
+        <defs>
+          <marker id="a2e" markerWidth="9" markerHeight="8" refX="9" refY="4" orient="auto">
+            <path d="M0 0 L9 4 L0 8 Z" fill="#111827"/>
+          </marker>
+        </defs>
+
+        <rect x="40" y="64" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="95" text-anchor="middle" font-size="13" font-weight="600">Administrator</text>
+        <rect x="40" y="244" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="275" text-anchor="middle" font-size="13" font-weight="600">Administrator</text>
+        <rect x="40" y="424" width="180" height="50" fill="#fff" stroke="#111827" stroke-width="1.6"/>
+        <text x="130" y="455" text-anchor="middle" font-size="13" font-weight="600">Administrator</text>
+
+        <rect x="460" y="50" width="230" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="460" y1="82" x2="690" y2="82" stroke="#111827"/>
+        <text x="575" y="72" text-anchor="middle" font-size="13" font-weight="700">5.1</text>
+        <text x="575" y="108" text-anchor="middle" font-size="13" font-weight="600">Approve / Block Users</text>
+
+        <rect x="460" y="230" width="230" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="460" y1="262" x2="690" y2="262" stroke="#111827"/>
+        <text x="575" y="252" text-anchor="middle" font-size="13" font-weight="700">5.2</text>
+        <text x="575" y="288" text-anchor="middle" font-size="13" font-weight="600">Moderate Posts</text>
+
+        <rect x="460" y="410" width="230" height="78" rx="16" fill="#fff" stroke="#111827" stroke-width="1.7"/>
+        <line x1="460" y1="442" x2="690" y2="442" stroke="#111827"/>
+        <text x="575" y="432" text-anchor="middle" font-size="13" font-weight="700">5.3</text>
+        <text x="575" y="468" text-anchor="middle" font-size="13" font-weight="600">Review Reports</text>
+
+        <path d="M575 128 L575 230" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a2e)"/>
+        <path d="M575 308 L575 410" fill="none" stroke="#111827" stroke-width="1.3" marker-end="url(#a2e)"/>
+
+        <path d="M900 70 V130" fill="none" stroke="#111827"/>
+        <path d="M1100 70 V130" fill="none" stroke="#111827"/>
+        <ellipse cx="1000" cy="130" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1000" cy="70" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="1000" y="106" text-anchor="middle" font-size="13" font-weight="600">D1 Users</text>
+
+        <path d="M900 250 V310" fill="none" stroke="#111827"/>
+        <path d="M1100 250 V310" fill="none" stroke="#111827"/>
+        <ellipse cx="1000" cy="310" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1000" cy="250" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="1000" y="286" text-anchor="middle" font-size="13" font-weight="600">D3 Posts</text>
+
+        <path d="M900 430 V490" fill="none" stroke="#111827"/>
+        <path d="M1100 430 V490" fill="none" stroke="#111827"/>
+        <ellipse cx="1000" cy="490" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <ellipse cx="1000" cy="430" rx="100" ry="16" fill="#fff" stroke="#111827"/>
+        <text x="1000" y="466" text-anchor="middle" font-size="13" font-weight="600">D6 Reports</text>
+
+        <path d="M220 80 L460 80" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2e)"/>
+        <text x="240" y="72" font-size="11">Approve / block command</text>
+        <path d="M460 106 L220 106" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2e)"/>
+        <text x="240" y="122" font-size="11">User list, Update result</text>
+        <path d="M690 80 L900 80" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2e)"/>
+        <text x="710" y="72" font-size="11">Status update</text>
+        <path d="M900 100 L690 100" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2e)"/>
+        <text x="710" y="116" font-size="11">User list / result</text>
+
+        <path d="M220 260 L460 260" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2e)"/>
+        <text x="240" y="252" font-size="11">Moderation action</text>
+        <path d="M460 286 L220 286" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2e)"/>
+        <text x="240" y="302" font-size="11">Moderation result</text>
+        <path d="M690 260 L900 260" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2e)"/>
+        <text x="710" y="252" font-size="11">Hide / update post</text>
+        <path d="M900 286 L690 286" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2e)"/>
+        <text x="710" y="302" font-size="11">Post list / status</text>
+
+        <path d="M220 440 L460 440" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2e)"/>
+        <text x="240" y="432" font-size="11">Report review</text>
+        <path d="M460 466 L220 466" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2e)"/>
+        <text x="240" y="482" font-size="11">Reports, Dashboard data</text>
+        <path d="M690 440 L900 440" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2e)"/>
+        <text x="710" y="432" font-size="11">Report data / decision</text>
+        <path d="M900 466 L690 466" fill="none" stroke="#111827" stroke-width="1.35" marker-end="url(#a2e)"/>
+        <text x="710" y="482" font-size="11">Stored reports</text>
       </svg>
     </div>
 
@@ -275,25 +790,27 @@
       <div class="card">
         <h2>Level 0</h2>
         <ul>
-          <li>One system bubble.</li>
-          <li>External entities: Guest, Investor, Businessman, Admin, imgbb.</li>
-          <li>Shows overall input/output at system boundary.</li>
+          <li>One system process: <b>0 InvestorHub System</b>.</li>
+          <li>External entities: Guest, Investor, Businessman, Administrator, Image Upload (imgbb).</li>
+          <li>Each entity uses two parallel arrows (in and out). Labels sit beside the arrow, not on top of it.</li>
         </ul>
       </div>
       <div class="card">
         <h2>Level 1</h2>
         <ul>
-          <li>5 main processes aligned with backend modules.</li>
-          <li>6 data stores: Users, Profiles, Posts, Matches, Messages, Reports.</li>
-          <li>Processes read/write to appropriate stores.</li>
+          <li>Five processes aligned with backend modules: Auth, Posts, Match, Chat, Admin.</li>
+          <li>Six data stores: Users, Profiles, Posts, Matches, Messages, Reports.</li>
+          <li>Entities and D1 are repeated on separate rows so connectors never cross (standard DFD practice).</li>
         </ul>
       </div>
       <div class="card">
         <h2>Level 2</h2>
         <ul>
-          <li>Process 3.0 exploded into 4 sub-processes.</li>
-          <li>Validates investor-businessman pair before saving.</li>
-          <li>Accept/reject updates D4 and notifies both users.</li>
+          <li>1.0 Register → Login → Manage Profile.</li>
+          <li>2.0 Create → Browse → Update/Delete post (with imgbb).</li>
+          <li>3.0 Validate roles → Create request → Accept/Reject.</li>
+          <li>4.0 Open conversation → Send message (Socket.IO).</li>
+          <li>5.0 Approve users → Moderate posts → Review reports.</li>
         </ul>
       </div>
     </div>
