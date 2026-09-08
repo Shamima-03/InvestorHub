@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>InvestorHub — Project Work Logbook (Documentation, Reviews, AI Assistant &amp; Deployment)</title>
+  <title>InvestorHub — Project Work Logbook (Interface, Search, Reviews, AI Assistant &amp; Deployment)</title>
   <style>
     * { box-sizing: border-box; }
     body { margin:0; background:#f1f5f9; color:#111827; font-family:"Segoe UI",Arial,sans-serif; }
@@ -62,7 +62,7 @@
     <div class="sheet">
       <h1>InvestorHub</h1>
       <h2>PROJECT WORK LOGBOOK</h2>
-      <p class="module">Module: System Documentation (UML), Platform Reviews, AI Assistant &amp; Deployment</p>
+      <p class="module">Module: Public Interface, Listing Search, Member Modules, Platform Reviews, AI Assistant &amp; Deployment</p>
 
       <table class="meta">
         <tr>
@@ -97,151 +97,151 @@
           <tr>
             <td><span class="day">Day 1</span><span class="dow">Saturday</span><span class="date">19 Sep 2026</span></td>
             <td><ol>
-              <li>Mapped every Mongoose schema (User, Post, Match, Conversation, Message, Investment, Report) into an Entity Relationship Diagram.</li>
-              <li>Drew the ERD in Chen notation with entities, relationship diamonds, and an ISA triangle for the investor / businessman / admin roles.</li>
-              <li>Marked primary keys, foreign keys, and unique constraints such as the (investorId, businessmanId) match pair.</li>
+              <li>Rebuilt the public landing page: headline section, live platform snapshot and the primary calls to action.</li>
+              <li>Added a headline search box that queries the live listings instead of showing a static banner.</li>
+              <li>Made the whole page responsive from a 390 px phone up to a desktop width.</li>
             </ol></td>
-            <td class="learn">Learned how to translate a document (NoSQL) schema into classical ER notation, and how embedded arrays become junction entities.</td>
+            <td class="learn">Learned to design a landing page around one clear action instead of decoration.</td>
           </tr>
 
           <tr>
             <td><span class="day">Day 2</span><span class="dow">Sunday</span><span class="date">20 Sep 2026</span></td>
             <td><ol>
-              <li>Listed every Express route and React page to identify the real actors: guest, registered user, investor, businessman, admin.</li>
-              <li>Built the use case diagram with a system boundary, association, generalization, and &laquo;include&raquo; / &laquo;extend&raquo; relationships.</li>
-              <li>Added SSLCommerz as an external (secondary) actor on the entry-fee and investment use cases.</li>
+              <li>Rebuilt the navigation bar: sticky header, global listing search and a role aware account menu.</li>
+              <li>Added the mobile menu and the shared public layout with the footer.</li>
+              <li>Showed the account status in the menu so a pending user is not sent to a page they cannot open.</li>
             </ol></td>
-            <td class="learn">Learned that a use case diagram must be derived from the actual API and access rules, not from assumptions about the system.</td>
+            <td class="learn">Learned to keep one navigation component correct for guest, member and admin at the same time.</td>
           </tr>
 
           <tr>
             <td><span class="day">Day 3</span><span class="dow">Monday</span><span class="date">21 Sep 2026</span></td>
             <td><ol>
-              <li>Drew the member activity diagram: login, registration loop, pending-approval branch, then a fork into the parallel dashboard activities.</li>
-              <li>Drew the administrator activity diagram with parallel moderation branches joining before logout.</li>
-              <li>Added decision guards (valid / invalid, accepted / rejected) and final nodes to every path.</li>
+              <li>Built the public listing browse page with the card grid and the loading, empty and error states.</li>
+              <li>Redesigned the listing card to show the type, category, budget and author role at a glance.</li>
+              <li>Added the pagination controls and kept the chosen filters in the page URL.</li>
             </ol></td>
-            <td class="learn">Learned fork / join semantics for concurrent activities and why every activity needs both an incoming and an outgoing flow.</td>
+            <td class="learn">Learned that a list screen needs its empty and loading states designed, not added later.</td>
           </tr>
 
           <tr>
             <td><span class="day">Day 4</span><span class="dow">Tuesday</span><span class="date">22 Sep 2026</span></td>
             <td><ol>
-              <li>Built the swimlane diagram for the Member / System / Admin workflow from registration to payment.</li>
-              <li>Prepared the data flow diagram and the sequence diagram for the registration and payment flows.</li>
-              <li>Created an index page that links all six diagrams, each printable to A3 PDF.</li>
+              <li>Implemented the listing search API: every search word must appear in the title, description or category.</li>
+              <li>Added filters for listing type, category and budget range, and five sort modes including budget and popularity.</li>
+              <li>Added pagination and created MongoDB indexes on status, type, category and creation date.</li>
             </ol></td>
-            <td class="learn">Learned how swimlanes show responsibility hand-offs that a plain flowchart hides.</td>
+            <td class="learn">Learned how a query is composed on the server and why an index must exist before a collection grows.</td>
           </tr>
 
           <tr>
             <td><span class="day">Day 5</span><span class="dow">Wednesday</span><span class="date">23 Sep 2026</span></td>
             <td><ol>
-              <li>Reviewed all diagrams and found overlapping connectors: lines crossing through boxes and arrows ending in empty space.</li>
-              <li>Rerouted every connector orthogonally through free corridors and attached each arrowhead to a shape boundary.</li>
-              <li>Wrote a verification script that flags any line passing through a node, any dangling endpoint, and any crossing.</li>
+              <li>Built the listing detail page with the author panel, budget, category and view counter.</li>
+              <li>Added the owner actions: edit and delete a listing, with the rejection reason shown to the author.</li>
+              <li>Wired the image upload flow so a cover image can be attached to a listing.</li>
             </ol></td>
-            <td class="learn">Learned that diagram quality can be checked automatically with geometry rules instead of only by eye.</td>
+            <td class="learn">Learned to show the same page differently to the owner, to a visitor and to an administrator.</td>
           </tr>
 
           <tr>
             <td><span class="day">Day 6</span><span class="dow">Thursday</span><span class="date">24 Sep 2026</span></td>
             <td><ol>
-              <li>Designed the Review schema with a unique userId so each account keeps exactly one platform review.</li>
-              <li>Built the review API: list with rating summary, upsert on post, and delete restricted to the owner or an admin.</li>
-              <li>Protected the whole route with the auth middleware so reviews are readable only by signed-in accounts.</li>
+              <li>Built the member profile module with the common account fields and the avatar.</li>
+              <li>Added the role specific profile forms: investment range, preferred industries and investment type for an investor; company name, industry, business stage and funding needed for a business owner.</li>
+              <li>Validated every field on the server and returned a readable message for each failure.</li>
             </ol></td>
-            <td class="learn">Learned to use a unique index with an upsert so re-submitting edits the record instead of creating duplicates.</td>
+            <td class="learn">Learned to keep role specific data in its own collection instead of widening the user record.</td>
           </tr>
 
           <tr>
             <td><span class="day">Day 7</span><span class="dow">Friday</span><span class="date">25 Sep 2026</span></td>
             <td><ol>
-              <li>Built the /review page with a star picker, review form, average rating, and a per-star breakdown bar chart.</li>
-              <li>Guarded the route so only logged-in users reach it, and hid the Review link in the navbar for visitors.</li>
-              <li>Tested rating validation, the edit and delete flow, and the ownership rule with a second account.</li>
+              <li>Improved the real-time chat: typing indication, seen receipts and conversation search in the sidebar.</li>
+              <li>Kept the newest message in view and refreshed the conversation list when a message arrives.</li>
+              <li>Built the administrative contact inbox with read and unread states and message deletion.</li>
             </ol></td>
-            <td class="learn">Learned to enforce access on both sides: hiding a link is presentation, the API guard is the real protection.</td>
+            <td class="learn">Learned how a socket event pair such as typing and stop-typing keeps two clients in step.</td>
           </tr>
 
           <tr>
             <td><span class="day">Day 8</span><span class="dow">Saturday</span><span class="date">26 Sep 2026</span></td>
             <td><ol>
-              <li>Linked the listing title on every match card to its post detail page in both the grid and the list view.</li>
-              <li>Handled matches with no listing attached, and listings deleted after the match, so no broken link is rendered.</li>
-              <li>Highlighted the link with colour and an underline so it is visibly clickable.</li>
+              <li>Designed the Review model with a unique user reference so each account keeps exactly one platform review.</li>
+              <li>Built the review API: list with the rating summary, create or edit through an upsert, and delete restricted to the owner or an administrator.</li>
+              <li>Protected the whole route with the authentication middleware so only signed-in accounts can read or write.</li>
             </ol></td>
-            <td class="learn">Learned to check the null case of a populated reference before rendering a link built from its id.</td>
+            <td class="learn">Learned to use a unique index with an upsert so a second submission edits instead of duplicating.</td>
           </tr>
 
           <tr>
             <td><span class="day">Day 9</span><span class="dow">Sunday</span><span class="date">27 Sep 2026</span></td>
             <td><ol>
-              <li>Studied the Google Gemini generateContent API and its request format (system instruction, contents, roles).</li>
-              <li>Built a backend proxy route so the API key stays on the server and never reaches the React bundle.</li>
-              <li>Wrote a system prompt describing InvestorHub rules so the assistant answers about this platform only.</li>
+              <li>Built the review page with a star picker, the review form, the average rating and a per-star breakdown.</li>
+              <li>Hid the Review link in the navigation for a logged-out visitor and guarded the route itself.</li>
+              <li>Tested the rating validation, the edit and delete flow and the ownership rule with a second account.</li>
             </ol></td>
-            <td class="learn">Learned that any third-party key used from the browser is public, so it must be proxied through the backend.</td>
+            <td class="learn">Learned that hiding a link is presentation only; the real protection is the guard on the API.</td>
           </tr>
 
           <tr>
             <td><span class="day">Day 10</span><span class="dow">Monday</span><span class="date">28 Sep 2026</span></td>
             <td><ol>
-              <li>Found the first model was retired and the replacement "thinking" model took about 35 seconds per answer.</li>
-              <li>Benchmarked the available models and selected a flash-lite model that replies in about one second.</li>
-              <li>Added a request timeout, a dedicated rate limit, and safe error messages that never expose the key or the upstream error.</li>
+              <li>Linked the listing title on every match card to its detail page, in both the grid and the list view.</li>
+              <li>Handled a match with no listing attached and a listing deleted after the match, so no broken link is rendered.</li>
+              <li>Highlighted the link with colour and an underline so it reads as clickable.</li>
             </ol></td>
-            <td class="learn">Learned to measure model latency before choosing one, and to keep the provider's raw errors in the server log only.</td>
+            <td class="learn">Learned to check the null case of a populated reference before building a link from its id.</td>
           </tr>
 
           <tr>
             <td><span class="day">Day 11</span><span class="dow">Tuesday</span><span class="date">29 Sep 2026</span></td>
             <td><ol>
-              <li>Built the floating chat widget on the home page with suggested questions and a typing indicator.</li>
-              <li>Passed the recent turns as conversation history so follow-up questions keep their context.</li>
-              <li>Tested the widget on desktop and mobile widths, including the off-topic and "cannot see your account" guardrails.</li>
+              <li>Studied the assistant API and built a backend proxy so the API key stays on the server and never reaches the browser bundle.</li>
+              <li>Wrote a system prompt describing the platform rules so the assistant answers only about InvestorHub.</li>
+              <li>Added a dedicated rate limit and a request timeout to the assistant endpoint.</li>
             </ol></td>
-            <td class="learn">Learned to bound an AI conversation: limited history, capped output, and a disclaimer that answers can be wrong.</td>
+            <td class="learn">Learned that any third-party key used from the browser is public, so it must be proxied.</td>
           </tr>
 
-          <tr class="deploy">
+          <tr>
             <td><span class="day">Day 12</span><span class="dow">Wednesday</span><span class="date">30 Sep 2026</span></td>
             <td><ol>
-              <li>Prepared the project for deployment: audited every environment variable and confirmed .env is git-ignored.</li>
-              <li>Separated development and production values for CLIENT_URL, SERVER_URL, the CORS origin, and the database URI.</li>
-              <li>Created the production build, checked the bundle output, and fixed the remaining build warnings.</li>
+              <li>Measured the response time of the available assistant models and replaced a slow one that needed about thirty-five seconds with a lite model that replies in about one second.</li>
+              <li>Built the floating chat widget on the home page with suggested questions and a typing indicator.</li>
+              <li>Tested the widget on desktop and mobile widths and confirmed the off-topic and no-account-data guardrails.</li>
             </ol></td>
-            <td class="learn">Learned that deployment starts with configuration: hard-coded localhost URLs and committed secrets break a live build.</td>
+            <td class="learn">Learned to measure latency before choosing a model and to bound an AI conversation.</td>
           </tr>
 
           <tr class="deploy">
             <td><span class="day">Day 13</span><span class="dow">Thursday</span><span class="date">1 Oct 2026</span></td>
             <td><ol>
-              <li>Deployed the Express API to the cloud host and connected it to the MongoDB Atlas cluster with a restricted database user.</li>
-              <li>Whitelisted the deployment IP in Atlas and verified the health route and the server logs.</li>
-              <li>Configured Socket.IO for production (websocket transport and the allowed origin) and tested real-time chat on the live server.</li>
+              <li>Prepared the project for deployment: audited every environment variable and confirmed the secrets file is git-ignored.</li>
+              <li>Separated development and production values for the client URL, the server URL, the allowed origin and the database connection.</li>
+              <li>Created the production build, checked the bundle output and cleared the remaining build warnings.</li>
             </ol></td>
-            <td class="learn">Learned how to move from a local database and localhost sockets to a managed cluster with strict origin rules.</td>
+            <td class="learn">Learned that deployment starts with configuration: a hard-coded localhost URL breaks a live build.</td>
           </tr>
 
           <tr class="deploy">
             <td><span class="day">Day 14</span><span class="dow">Friday</span><span class="date">2 Oct 2026</span></td>
             <td><ol>
-              <li>Deployed the React frontend, pointed it at the live API base URL, and added SPA rewrites so deep links do not 404.</li>
-              <li>Updated the SSLCommerz success, fail, cancel, and IPN callback URLs to the production domain and re-tested a sandbox payment.</li>
-              <li>Verified HTTPS, the security headers, and the rate limiters on the live site.</li>
+              <li>Deployed the Express API to the cloud host and connected it to the MongoDB Atlas cluster with a restricted database user.</li>
+              <li>Whitelisted the deployment address in Atlas and verified the health route and the server logs.</li>
+              <li>Configured the real-time channel for production and tested chat on the live server.</li>
             </ol></td>
-            <td class="learn">Learned that a payment gateway must be reconfigured for every environment, because its callbacks point back to a fixed URL.</td>
+            <td class="learn">Learned how to move from a local database and localhost sockets to a managed cluster with strict origins.</td>
           </tr>
 
           <tr class="deploy">
             <td><span class="day">Day 15</span><span class="dow">Saturday</span><span class="date">3 Oct 2026</span></td>
             <td><ol>
-              <li>Ran a full smoke test on the live site: register, entry fee, NID upload, admin approval, listing, match, chat, investment, invoice, review, and the AI assistant.</li>
-              <li>Created the admin account on production and confirmed the moderation and analytics pages against live data.</li>
-              <li>Finalised the documentation: diagrams, deployment steps, environment variable list, and this logbook.</li>
+              <li>Deployed the React client, pointed it at the live API and added the rewrites that keep deep links working.</li>
+              <li>Updated the payment gateway success, fail, cancel and IPN URLs to the production domain and re-tested a sandbox payment.</li>
+              <li>Ran a full smoke test on the live site: register, entry fee, identity upload, approval, listing, match, chat, investment, invoice, review and the assistant.</li>
             </ol></td>
-            <td class="learn">Learned that a deployment is only finished after every user journey is re-tested on the live environment, not just the build.</td>
+            <td class="learn">Learned that a deployment is finished only after every user journey is re-tested on the live environment.</td>
           </tr>
         </tbody>
       </table>
