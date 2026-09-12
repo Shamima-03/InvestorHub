@@ -46,6 +46,14 @@ router.post(
   ],
   validate,
   async (req, res, next) => {
+    // The platform review is member feedback about the service. An administrator
+    // runs the platform, so letting them rate it would be self-promotion.
+    if (req.user.role === "admin") {
+      return res.status(403).json({
+        message: "Administrators cannot review the platform. Reviews come from investors and businesses only.",
+      });
+    }
+
     try {
       const { rating, comment } = req.body;
       // Upsert on the unique userId: the second submit updates instead of duplicating.

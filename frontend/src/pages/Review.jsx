@@ -33,6 +33,9 @@ function Stars({ value, size = 16 }) {
 
 export default function Review() {
   const { user } = useSelector((state) => state.auth);
+  // The platform review is member feedback about the service, so the account that
+  // runs the platform does not write one. The server enforces this as well.
+  const isAdmin = user?.role === "admin";
   const [reviews, setReviews] = useState([]);
   const [summary, setSummary] = useState({ total: 0, average: 0, breakdown: [] });
   const [mine, setMine] = useState(null);
@@ -125,8 +128,8 @@ export default function Review() {
           </h1>
           <p className="mt-3 text-slate-600 leading-relaxed">
             Tell other members what the platform is like to use — matching, listings, chat, payments.
-            Only signed-in accounts can read and write reviews, and everyone gets one review they can
-            edit at any time.
+            Reviews are written by investors and business owners: every member gets one review they can
+            edit at any time, while an administrator can only read them.
           </p>
         </div>
 
@@ -162,6 +165,41 @@ export default function Review() {
               </div>
             </div>
 
+            {isAdmin ? (
+              <div className="bg-white border border-gray-200 rounded-xl p-5">
+                <h2 className="text-sm font-semibold text-slate-900">Administrator view</h2>
+                <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                  Reviews are written by investors and business owners about the platform.
+                  As an administrator you can read every review here, but you cannot post one.
+                </p>
+                {mine && (
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <p className="text-sm text-slate-600">
+                      This account still has an old review on the platform. You can remove it.
+                    </p>
+                    {error && (
+                      <p className="mt-2 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                        {error}
+                      </p>
+                    )}
+                    {notice && (
+                      <p className="mt-2 text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
+                        {notice}
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={remove}
+                      disabled={saving}
+                      className="mt-3 h-10 px-4 inline-flex items-center gap-1.5 rounded-lg text-sm font-medium text-red-600 border border-red-100 hover:bg-red-50 disabled:opacity-60"
+                    >
+                      <Trash2 size={15} />
+                      Remove my old review
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
             <form onSubmit={submit} className="bg-white border border-gray-200 rounded-xl p-5">
               <h2 className="text-sm font-semibold text-slate-900">
                 {mine ? "Edit your review" : "Write a review"}
@@ -233,6 +271,7 @@ export default function Review() {
                 )}
               </div>
             </form>
+            )}
           </div>
 
           {/* All reviews */}
