@@ -151,9 +151,13 @@ export default function PostDetail() {
   };
 
   const canInvest = canContact && user?.role === "investor" && !isInvestorPost && post.status === "active";
+  const raisedAmount = Number(post.raisedAmount) || 0;
+  const remainingGoal =
+    !isInvestorPost && post.budget > 0 ? Math.max(0, Math.round((post.budget - raisedAmount) * 100) / 100) : null;
+  const goalReached = remainingGoal !== null && remainingGoal < 10;
 
   const openInvest = () => {
-    if (!investAmount && post.budget > 0) setInvestAmount(String(post.budget));
+    if (!investAmount && remainingGoal > 0) setInvestAmount(String(remainingGoal));
     setInvestOpen(true);
   };
 
@@ -162,6 +166,10 @@ export default function PostDetail() {
     const amount = Number(investAmount);
     if (!amount || amount < 10) {
       setError("Enter an amount of at least BDT 10");
+      return;
+    }
+    if (remainingGoal !== null && amount > remainingGoal) {
+      setError(`You can invest at most ${formatBdt(remainingGoal)} — that is all that remains of this listing's ${formatBdt(post.budget)} goal`);
       return;
     }
     setInvesting(true);
@@ -371,21 +379,25 @@ export default function PostDetail() {
               <p className="mt-1 text-2xl font-bold text-slate-900">
                 {post.budget > 0 ? formatBdt(post.budget) : "Not specified"}
               </p>
-              {!isInvestorPost && post.budget > 0 && post.raisedAmount > 0 && (
+              {!isInvestorPost && post.budget > 0 && (
                 <div className="mt-3">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-slate-500">Raised</span>
-                    <span className="font-semibold text-emerald-700">{formatBdt(post.raisedAmount)}</span>
+                    <span className="font-semibold text-emerald-700">{formatBdt(raisedAmount)}</span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-between text-xs">
+                    <span className="text-slate-500">Remaining</span>
+                    <span className="font-semibold text-slate-800">{formatBdt(remainingGoal)}</span>
                   </div>
                   <div className="mt-1.5 h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-emerald-600 rounded-full"
-                      style={{ width: `${Math.min(100, Math.round((post.raisedAmount / post.budget) * 100))}%` }}
+                      style={{ width: `${Math.min(100, Math.round((raisedAmount / post.budget) * 100))}%` }}
                     />
                   </div>
                   <p className="mt-1 text-[11px] text-slate-400">
-                    {Math.min(100, Math.round((post.raisedAmount / post.budget) * 100))}% of goal
-                    {post.status === "completed" ? " · Fully funded" : ""}
+                    {Math.min(100, Math.round((raisedAmount / post.budget) * 100))}% of goal
+                    {goalReached || post.status === "completed" ? " · Fully funded" : ""}
                   </p>
                 </div>
               )}
@@ -448,7 +460,12 @@ export default function PostDetail() {
                 </div>
               ) : canContact ? (
                 <div className="space-y-2">
-                  {canInvest &&
+                  {canInvest && goalReached && (
+                    <p className="text-sm text-emerald-800 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-lg">
+                      This listing has reached its {formatBdt(post.budget)} goal, so it is not accepting more investment.
+                    </p>
+                  )}
+                  {canInvest && !goalReached &&
                     (investOpen ? (
                       <form onSubmit={startInvest} className="border border-emerald-100 bg-emerald-50/60 rounded-lg p-3 space-y-2">
                         <label htmlFor="invest-amount" className="block text-xs font-medium text-slate-600">
@@ -458,12 +475,26 @@ export default function PostDetail() {
                           id="invest-amount"
                           type="number"
                           min="10"
+                          max={remainingGoal ?? undefined}
+                          step="1"
                           required
                           value={investAmount}
-                          onChange={(e) => setInvestAmount(e.target.value)}
-                          placeholder="e.g. 50000"
+                          onChange={(e) => {
+                            const next = e.target.value;
+                            if (remainingGoal !== null && Number(next) > remainingGoal) {
+                              setInvestAmount(String(remainingGoal));
+                              return;
+                            }
+                            setInvestAmount(next);
+                          }}
+                          placeholder={remainingGoal != null ? `Max ${remainingGoal}` : "e.g. 50000"}
                           className="w-full h-11 px-3.5 text-sm bg-white border border-gray-200 rounded-lg outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20"
                         />
+                        {remainingGoal != null && (
+                          <p className="text-[11px] text-slate-500">
+                            Goal {formatBdt(post.budget)} · remaining {formatBdt(remainingGoal)}. You cannot pay more than the remaining amount.
+                          </p>
+                        )}
                         {Number(investAmount) >= 10 && (
                           <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs space-y-1">
                             <div className="flex justify-between text-slate-500">

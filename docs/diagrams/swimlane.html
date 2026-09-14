@@ -39,6 +39,17 @@
 
     <div class="board">
       <svg viewBox="0 0 1140 920" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="InvestorHub Swimlane">
+    <style>
+      text {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-weight: 700;
+        stroke: #ffffff;
+        stroke-width: 3.2px;
+        paint-order: stroke fill;
+        stroke-linejoin: round;
+      }
+    </style>
+
         <defs>
           <marker id="arr" markerWidth="8" markerHeight="7" refX="8" refY="3.5" orient="auto">
             <path d="M0 0 L8 3.5 L0 7 Z" fill="#111827"/>
@@ -53,69 +64,69 @@
         <line x1="700" y1="40" x2="700" y2="880" stroke="#111827"/>
 
         <line x1="20" y1="90" x2="1120" y2="90" stroke="#111827"/>
-        <text x="190" y="66" text-anchor="middle" font-size="14" font-weight="700">MEMBER</text>
-        <text x="190" y="82" text-anchor="middle" font-size="10" fill="#4b5563">(Investor / Businessman)</text>
-        <text x="530" y="66" text-anchor="middle" font-size="14" font-weight="700">SYSTEM</text>
-        <text x="910" y="66" text-anchor="middle" font-size="14" font-weight="700">ADMIN</text>
+        <text x="190" y="66" text-anchor="middle" font-size="22" font-weight="700">MEMBER</text>
+        <text x="190" y="82" text-anchor="middle" font-size="16" fill="#1e293b">(Investor / Businessman)</text>
+        <text x="530" y="66" text-anchor="middle" font-size="22" font-weight="700">SYSTEM</text>
+        <text x="910" y="66" text-anchor="middle" font-size="22" font-weight="700">ADMIN</text>
 
         <!-- Row helpers: y = 110, 190, 270, 350, 430, 510, 590, 670, 750, 830 -->
         <!-- Each row: boxes at y, arrows at y+17 (center of 34px box) -->
 
         <!-- START -->
         <ellipse cx="190" cy="110" rx="40" ry="18" fill="#fff" stroke="#111827" stroke-width="1.4"/>
-        <text x="190" y="115" text-anchor="middle" font-size="11" font-weight="700">START</text>
+        <text x="190" y="115" text-anchor="middle" font-size="17" font-weight="700">START</text>
 
         <!-- Row 190: Register -->
         <rect x="70" y="190" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="190" y="211" text-anchor="middle" font-size="11">1. Register</text>
+        <text x="190" y="211" text-anchor="middle" font-size="17">1. Register</text>
         <rect x="410" y="190" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="530" y="211" text-anchor="middle" font-size="11">Create Account (pending)</text>
+        <text x="530" y="211" text-anchor="middle" font-size="17">Create Account (pending)</text>
 
         <!-- Row 270: Pending / Approve -->
         <rect x="70" y="270" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="190" y="291" text-anchor="middle" font-size="11">2. Wait for Approval</text>
+        <text x="190" y="291" text-anchor="middle" font-size="17">2. Wait for Approval</text>
         <rect x="410" y="270" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="530" y="291" text-anchor="middle" font-size="11">Notify Admin</text>
+        <text x="530" y="291" text-anchor="middle" font-size="17">Notify Admin</text>
         <rect x="790" y="270" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="910" y="291" text-anchor="middle" font-size="11">3. Approve Account</text>
+        <text x="910" y="291" text-anchor="middle" font-size="17">3. Approve Account</text>
 
         <!-- Row 350: Browse -->
         <rect x="70" y="350" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="190" y="371" text-anchor="middle" font-size="11">4. Browse Posts</text>
+        <text x="190" y="371" text-anchor="middle" font-size="17">4. Browse Posts</text>
 
         <!-- Row 430: Create post -->
         <rect x="70" y="430" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="190" y="451" text-anchor="middle" font-size="11">5. Create Post</text>
+        <text x="190" y="451" text-anchor="middle" font-size="17">5. Create Post</text>
         <rect x="410" y="430" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="530" y="451" text-anchor="middle" font-size="11">Save Post</text>
+        <text x="530" y="451" text-anchor="middle" font-size="17">Save Post</text>
 
         <!-- Row 510: Match -->
         <rect x="70" y="510" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="190" y="531" text-anchor="middle" font-size="11">6. Send Match Request</text>
+        <text x="190" y="531" text-anchor="middle" font-size="17">6. Send Match Request</text>
         <rect x="410" y="510" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="530" y="531" text-anchor="middle" font-size="11">Save Match (pending)</text>
+        <text x="530" y="531" text-anchor="middle" font-size="17">Save Match (pending)</text>
 
         <!-- Row 590: Accept -->
         <rect x="70" y="590" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="190" y="611" text-anchor="middle" font-size="11">7. Match Accepted?</text>
+        <text x="190" y="611" text-anchor="middle" font-size="17">7. Match Accepted?</text>
         <rect x="410" y="590" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="530" y="611" text-anchor="middle" font-size="11">Update Match Status</text>
+        <text x="530" y="611" text-anchor="middle" font-size="17">Update Match Status</text>
 
         <!-- Row 670: Chat -->
         <rect x="70" y="670" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="190" y="691" text-anchor="middle" font-size="11">8. Real-time Chat</text>
+        <text x="190" y="691" text-anchor="middle" font-size="17">8. Real-time Chat</text>
         <rect x="410" y="670" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="530" y="691" text-anchor="middle" font-size="11">Socket.IO Messages</text>
+        <text x="530" y="691" text-anchor="middle" font-size="17">Socket.IO Messages</text>
 
         <!-- Row 750: Payment -->
         <rect x="70" y="750" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="190" y="771" text-anchor="middle" font-size="11">9. Make Payment</text>
+        <text x="190" y="771" text-anchor="middle" font-size="17">9. Make Payment</text>
         <rect x="410" y="750" width="240" height="34" fill="#fff" stroke="#111827"/>
-        <text x="530" y="771" text-anchor="middle" font-size="11">SSLCommerz Payment</text>
+        <text x="530" y="771" text-anchor="middle" font-size="17">SSLCommerz Payment</text>
 
         <!-- END -->
         <ellipse cx="190" cy="830" rx="36" ry="18" fill="#fff" stroke="#111827" stroke-width="1.4"/>
-        <text x="190" y="835" text-anchor="middle" font-size="11" font-weight="700">END</text>
+        <text x="190" y="835" text-anchor="middle" font-size="17" font-weight="700">END</text>
 
         <!-- Vertical flow (Member lane only) -->
         <path d="M190 128 V190" stroke="#111827" fill="none" marker-end="url(#arr)"/>
@@ -132,7 +143,7 @@
         <path d="M310 207 H410" stroke="#111827" fill="none" marker-end="url(#arr)"/>
         <path d="M650 287 H790" stroke="#111827" fill="none" marker-end="url(#arr)"/>
         <path d="M910 304 V327 H330 V295 H310" stroke="#111827" fill="none" stroke-dasharray="6 4" marker-end="url(#arr)"/>
-        <text x="344" y="322" font-size="9.5" fill="#4b5563">account activated</text>
+        <text x="344" y="322" font-size="15" fill="#1e293b">account activated</text>
         <path d="M310 447 H410" stroke="#111827" fill="none" marker-end="url(#arr)"/>
         <path d="M310 527 H410" stroke="#111827" fill="none" marker-end="url(#arr)"/>
         <path d="M310 607 H410" stroke="#111827" fill="none" marker-end="url(#arr)"/>

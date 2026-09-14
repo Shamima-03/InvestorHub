@@ -46,6 +46,14 @@ async function validateWithGateway(valId) {
   return response.json();
 }
 
+async function investedTowardGoal(postId) {
+  const agg = await Investment.aggregate([
+    { $match: { postId, status: { $in: ["completed", "pending"] } } },
+    { $group: { _id: null, sum: { $sum: "$amount" } } },
+  ]);
+  return agg[0]?.sum || 0;
+}
+
 // Never trust the callback payload alone — confirm with the validation API.
 // Idempotent because both the success redirect and the IPN can fire for one payment.
 async function settlePayment(tranId, valId) {
@@ -120,9 +128,23 @@ router.post(
         return res.status(400).json({ message: "You cannot invest in your own listing" });
       }
 
-      const tranId = `IH${Date.now().toString(36)}${crypto.randomBytes(5).toString("hex")}`.toUpperCase();
-
       const amountNum = Number(amount);
+      if (post.budget > 0) {
+        const alreadyIn = await investedTowardGoal(post._id);
+        const remaining = Math.round((post.budget - alreadyIn) * 100) / 100;
+        if (remaining < 10) {
+          return res.status(400).json({
+            message: "This listing has already reached its funding goal, so it cannot accept more investment",
+          });
+        }
+        if (amountNum > remaining) {
+          return res.status(400).json({
+            message: `You cannot invest more than the remaining goal of BDT ${remaining.toLocaleString()} (requested BDT ${Number(post.budget).toLocaleString()})`,
+          });
+        }
+      }
+
+      const tranId = `IH${Date.now().toString(36)}${crypto.randomBytes(5).toString("hex")}`.toUpperCase();
       const platformFee = Math.round(amountNum * PLATFORM_FEE_PERCENT) / 100;
       const netAmount = Math.round((amountNum - platformFee) * 100) / 100;
 

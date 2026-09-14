@@ -44,7 +44,18 @@
     </div>
 
     <div class="board">
-      <svg viewBox="0 0 1760 1250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="InvestorHub Use Case Diagram">
+      <svg viewBox="-50 0 1860 1250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="InvestorHub Use Case Diagram">
+    <style>
+      text {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-weight: 700;
+        stroke: #ffffff;
+        stroke-width: 3.2px;
+        paint-order: stroke fill;
+        stroke-linejoin: round;
+      }
+    </style>
+
         <defs>
           <marker id="openArrow" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto">
             <path d="M0 0 L12 5 L0 10" fill="none" stroke="#64748b" stroke-width="1.4"/>
@@ -54,11 +65,11 @@
           </marker>
         </defs>
         <rect x="250" y="60" width="1270" height="1110" rx="10" fill="#fbfdfd" stroke="#0f766e" stroke-width="2"/>
-        <text x="885" y="94" text-anchor="middle" font-size="19" font-weight="700" fill="#0f766e">InvestorHub</text>
+        <text x="885" y="94" text-anchor="middle" font-size="26" font-weight="700" fill="#0f766e">InvestorHub</text>
         <line x1="270" y1="110" x2="1500" y2="110" stroke="#99f6e4" stroke-width="1"/>
-        <text x="390" y="136" text-anchor="middle" font-size="11" font-weight="700" fill="#64748b" letter-spacing="0.09em">PUBLIC &#183; NO LOGIN</text>
-        <text x="885" y="136" text-anchor="middle" font-size="11" font-weight="700" fill="#64748b" letter-spacing="0.09em">MEMBER &#183; LOGGED IN &amp; APPROVED</text>
-        <text x="1330" y="136" text-anchor="middle" font-size="11" font-weight="700" fill="#64748b" letter-spacing="0.09em">ADMIN</text>
+        <text x="390" y="136" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a" letter-spacing="0.09em">PUBLIC &#183; NO LOGIN</text>
+        <text x="885" y="136" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a" letter-spacing="0.09em">MEMBER &#183; LOGGED IN &amp; APPROVED</text>
+        <text x="1330" y="136" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a" letter-spacing="0.09em">ADMIN</text>
         
         <!-- associations -->
         <path d="M135 222 H210 V200 H284" fill="none" stroke="#0f172a" stroke-width="1.15"/>
@@ -94,89 +105,89 @@
         
         <!-- include / extend -->
         <path d="M390 262 V226" fill="none" stroke="#64748b" stroke-width="1.15" stroke-dasharray="5 4" marker-end="url(#openArrow)"/>
-        <text x="402" y="248" text-anchor="start" font-size="10" fill="#64748b">&#171;extend&#187;</text>
+        <text x="402" y="248" text-anchor="start" font-size="15" fill="#0f172a">&#171;extend&#187;</text>
         <path d="M844 195 H934" fill="none" stroke="#64748b" stroke-width="1.15" stroke-dasharray="5 4" marker-end="url(#openArrow)"/>
-        <text x="889" y="186" text-anchor="middle" font-size="10" fill="#64748b">&#171;include&#187;</text>
+        <text x="889" y="186" text-anchor="middle" font-size="15" fill="#0f172a">&#171;include&#187;</text>
         <path d="M934 343 H844" fill="none" stroke="#64748b" stroke-width="1.15" stroke-dasharray="5 4" marker-end="url(#openArrow)"/>
-        <text x="889" y="334" text-anchor="middle" font-size="10" fill="#64748b">&#171;extend&#187;</text>
+        <text x="889" y="334" text-anchor="middle" font-size="15" fill="#0f172a">&#171;extend&#187;</text>
         <path d="M844 417 H934" fill="none" stroke="#64748b" stroke-width="1.15" stroke-dasharray="5 4" marker-end="url(#openArrow)"/>
-        <text x="889" y="408" text-anchor="middle" font-size="10" fill="#64748b">&#171;include&#187;</text>
+        <text x="889" y="408" text-anchor="middle" font-size="15" fill="#0f172a">&#171;include&#187;</text>
         <path d="M844 639 H934" fill="none" stroke="#64748b" stroke-width="1.15" stroke-dasharray="5 4" marker-end="url(#openArrow)"/>
-        <text x="889" y="630" text-anchor="middle" font-size="10" fill="#64748b">&#171;include&#187;</text>
+        <text x="889" y="630" text-anchor="middle" font-size="15" fill="#0f172a">&#171;include&#187;</text>
         <path d="M835 649 H875 V713 H934" fill="none" stroke="#64748b" stroke-width="1.15" stroke-dasharray="5 4" marker-end="url(#openArrow)"/>
-        <text x="880" y="700" text-anchor="start" font-size="10" fill="#64748b">&#171;include&#187;</text>
+        <text x="880" y="700" text-anchor="start" font-size="15" fill="#0f172a">&#171;include&#187;</text>
         <path d="M934 935 H844" fill="none" stroke="#64748b" stroke-width="1.15" stroke-dasharray="5 4" marker-end="url(#openArrow)"/>
-        <text x="889" y="926" text-anchor="middle" font-size="10" fill="#64748b">&#171;extend&#187;</text>
+        <text x="889" y="926" text-anchor="middle" font-size="15" fill="#0f172a">&#171;extend&#187;</text>
         <path d="M1330 552 V512" fill="none" stroke="#64748b" stroke-width="1.15" stroke-dasharray="5 4" marker-end="url(#openArrow)"/>
-        <text x="1342" y="536" text-anchor="start" font-size="10" fill="#64748b">&#171;extend&#187;</text>
+        <text x="1342" y="536" text-anchor="start" font-size="15" fill="#0f172a">&#171;extend&#187;</text>
         
         <!-- use cases -->
-        <ellipse cx="390" cy="200" rx="106" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="390" y="204.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Browse Listings</text>
-        <ellipse cx="390" cy="288" rx="106" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="390" y="292.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Search / Filter Listings</text>
-        <ellipse cx="390" cy="376" rx="106" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="390" y="380.5" text-anchor="middle" font-size="12.5" fill="#0f172a">View Listing Details</text>
-        <ellipse cx="390" cy="464" rx="106" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="390" y="468.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Register Account</text>
-        <ellipse cx="390" cy="552" rx="106" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="390" y="556.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Login</text>
-        <ellipse cx="390" cy="640" rx="106" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="390" y="644.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Contact Support</text>
-        <ellipse cx="730" cy="195" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="199.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Submit NID for Verification</text>
-        <ellipse cx="730" cy="269" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="273.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Update Profile &amp; Role Details</text>
-        <ellipse cx="730" cy="343" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="347.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Create Listing</text>
-        <ellipse cx="730" cy="417" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="421.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Manage Own Listings</text>
-        <ellipse cx="730" cy="491" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="495.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Send Match Request</text>
-        <ellipse cx="730" cy="565" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="569.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Respond to Match Request</text>
-        <ellipse cx="730" cy="639" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="643.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Start Conversation &amp; Chat</text>
-        <ellipse cx="730" cy="713" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="717.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Report Listing / User</text>
-        <ellipse cx="730" cy="787" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="791.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Track My Reports</text>
-        <ellipse cx="730" cy="861" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="865.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Logout</text>
-        <ellipse cx="730" cy="935" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="939.5" text-anchor="middle" font-size="12.5" fill="#0f172a">View My Investments</text>
-        <ellipse cx="730" cy="1009" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="1013.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Pay Entry Fee</text>
-        <ellipse cx="730" cy="1083" rx="114" ry="26" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
-        <text x="730" y="1087.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Invest in Business Listing</text>
-        <ellipse cx="1040" cy="195" rx="106" ry="26" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
-        <text x="1040" y="199.5" text-anchor="middle" font-size="12" fill="#0f172a">Upload NID Image</text>
-        <ellipse cx="1040" cy="343" rx="106" ry="26" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
-        <text x="1040" y="347.5" text-anchor="middle" font-size="12" fill="#0f172a">Upload Listing Image</text>
-        <ellipse cx="1040" cy="417" rx="106" ry="26" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
-        <text x="1040" y="421.5" text-anchor="middle" font-size="12" fill="#0f172a">Edit / Delete Own Listing</text>
-        <ellipse cx="1040" cy="639" rx="106" ry="26" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
-        <text x="1040" y="643.5" text-anchor="middle" font-size="12" fill="#0f172a">Send Message</text>
-        <ellipse cx="1040" cy="713" rx="106" ry="26" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
-        <text x="1040" y="717.5" text-anchor="middle" font-size="12" fill="#0f172a">Mark Messages Seen</text>
-        <ellipse cx="1040" cy="935" rx="106" ry="26" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
-        <text x="1040" y="939.5" text-anchor="middle" font-size="12" fill="#0f172a">Download Invoice (PDF)</text>
-        <ellipse cx="1330" cy="210" rx="122" ry="26" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
-        <text x="1330" y="214.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Approve / Reject User</text>
-        <ellipse cx="1330" cy="302" rx="122" ry="26" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
-        <text x="1330" y="306.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Suspend / Block / Delete User</text>
-        <ellipse cx="1330" cy="394" rx="122" ry="26" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
-        <text x="1330" y="398.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Moderate Listings</text>
-        <ellipse cx="1330" cy="486" rx="122" ry="26" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
-        <text x="1330" y="490.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Review Reports</text>
-        <ellipse cx="1330" cy="578" rx="122" ry="26" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
-        <text x="1330" y="582.5" text-anchor="middle" font-size="12" fill="#0f172a">Update Report Status</text>
-        <ellipse cx="1330" cy="670" rx="122" ry="26" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
-        <text x="1330" y="674.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Monitor Payments &amp; Fees</text>
-        <ellipse cx="1330" cy="762" rx="122" ry="26" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
-        <text x="1330" y="766.5" text-anchor="middle" font-size="12.5" fill="#0f172a">Manage Contact Messages</text>
-        <ellipse cx="1330" cy="854" rx="122" ry="26" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
-        <text x="1330" y="858.5" text-anchor="middle" font-size="12.5" fill="#0f172a">View Analytics</text>
+        <ellipse cx="390" cy="200" rx="106" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="390" y="204.5" text-anchor="middle" font-size="17" fill="#0f172a">Browse Listings</text>
+        <ellipse cx="390" cy="288" rx="106" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="390" y="292.5" text-anchor="middle" font-size="17" fill="#0f172a">Search / Filter Listings</text>
+        <ellipse cx="390" cy="376" rx="106" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="390" y="380.5" text-anchor="middle" font-size="17" fill="#0f172a">View Listing Details</text>
+        <ellipse cx="390" cy="464" rx="106" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="390" y="468.5" text-anchor="middle" font-size="17" fill="#0f172a">Register Account</text>
+        <ellipse cx="390" cy="552" rx="106" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="390" y="556.5" text-anchor="middle" font-size="17" fill="#0f172a">Login</text>
+        <ellipse cx="390" cy="640" rx="106" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="390" y="644.5" text-anchor="middle" font-size="17" fill="#0f172a">Contact Support</text>
+        <ellipse cx="730" cy="195" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="199.5" text-anchor="middle" font-size="17" fill="#0f172a">Submit NID for Verification</text>
+        <ellipse cx="730" cy="269" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="273.5" text-anchor="middle" font-size="17" fill="#0f172a">Update Profile &amp; Role Details</text>
+        <ellipse cx="730" cy="343" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="347.5" text-anchor="middle" font-size="17" fill="#0f172a">Create Listing</text>
+        <ellipse cx="730" cy="417" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="421.5" text-anchor="middle" font-size="17" fill="#0f172a">Manage Own Listings</text>
+        <ellipse cx="730" cy="491" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="495.5" text-anchor="middle" font-size="17" fill="#0f172a">Send Match Request</text>
+        <ellipse cx="730" cy="565" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="569.5" text-anchor="middle" font-size="17" fill="#0f172a">Respond to Match Request</text>
+        <ellipse cx="730" cy="639" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="643.5" text-anchor="middle" font-size="17" fill="#0f172a">Start Conversation &amp; Chat</text>
+        <ellipse cx="730" cy="713" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="717.5" text-anchor="middle" font-size="17" fill="#0f172a">Report Listing / User</text>
+        <ellipse cx="730" cy="787" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="791.5" text-anchor="middle" font-size="17" fill="#0f172a">Track My Reports</text>
+        <ellipse cx="730" cy="861" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="865.5" text-anchor="middle" font-size="17" fill="#0f172a">Logout</text>
+        <ellipse cx="730" cy="935" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="939.5" text-anchor="middle" font-size="17" fill="#0f172a">View My Investments</text>
+        <ellipse cx="730" cy="1009" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="1013.5" text-anchor="middle" font-size="17" fill="#0f172a">Pay Entry Fee</text>
+        <ellipse cx="730" cy="1083" rx="114" ry="31" fill="#fff" stroke="#0f766e" stroke-width="1.45"/>
+        <text x="730" y="1087.5" text-anchor="middle" font-size="17" fill="#0f172a">Invest in Business Listing</text>
+        <ellipse cx="1040" cy="195" rx="106" ry="31" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
+        <text x="1040" y="199.5" text-anchor="middle" font-size="17" fill="#0f172a">Upload NID Image</text>
+        <ellipse cx="1040" cy="343" rx="106" ry="31" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
+        <text x="1040" y="347.5" text-anchor="middle" font-size="17" fill="#0f172a">Upload Listing Image</text>
+        <ellipse cx="1040" cy="417" rx="106" ry="31" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
+        <text x="1040" y="421.5" text-anchor="middle" font-size="17" fill="#0f172a">Edit / Delete Own Listing</text>
+        <ellipse cx="1040" cy="639" rx="106" ry="31" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
+        <text x="1040" y="643.5" text-anchor="middle" font-size="17" fill="#0f172a">Send Message</text>
+        <ellipse cx="1040" cy="713" rx="106" ry="31" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
+        <text x="1040" y="717.5" text-anchor="middle" font-size="17" fill="#0f172a">Mark Messages Seen</text>
+        <ellipse cx="1040" cy="935" rx="106" ry="31" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
+        <text x="1040" y="939.5" text-anchor="middle" font-size="17" fill="#0f172a">Download Invoice (PDF)</text>
+        <ellipse cx="1330" cy="210" rx="122" ry="31" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
+        <text x="1330" y="214.5" text-anchor="middle" font-size="17" fill="#0f172a">Approve / Reject User</text>
+        <ellipse cx="1330" cy="302" rx="122" ry="31" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
+        <text x="1330" y="306.5" text-anchor="middle" font-size="17" fill="#0f172a">Suspend / Block / Delete User</text>
+        <ellipse cx="1330" cy="394" rx="122" ry="31" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
+        <text x="1330" y="398.5" text-anchor="middle" font-size="17" fill="#0f172a">Moderate Listings</text>
+        <ellipse cx="1330" cy="486" rx="122" ry="31" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
+        <text x="1330" y="490.5" text-anchor="middle" font-size="17" fill="#0f172a">Review Reports</text>
+        <ellipse cx="1330" cy="578" rx="122" ry="31" fill="#fff" stroke="#64748b" stroke-width="1.45"/>
+        <text x="1330" y="582.5" text-anchor="middle" font-size="17" fill="#0f172a">Update Report Status</text>
+        <ellipse cx="1330" cy="670" rx="122" ry="31" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
+        <text x="1330" y="674.5" text-anchor="middle" font-size="17" fill="#0f172a">Monitor Payments &amp; Fees</text>
+        <ellipse cx="1330" cy="762" rx="122" ry="31" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
+        <text x="1330" y="766.5" text-anchor="middle" font-size="17" fill="#0f172a">Manage Contact Messages</text>
+        <ellipse cx="1330" cy="854" rx="122" ry="31" fill="#fff" stroke="#b45309" stroke-width="1.45"/>
+        <text x="1330" y="858.5" text-anchor="middle" font-size="17" fill="#0f172a">View Analytics</text>
         
         <!-- actors -->
         <g stroke="#0f172a" stroke-width="1.6" fill="none">
@@ -186,7 +197,7 @@
           <path d="M110 250 L92 282"/>
           <path d="M110 250 L128 282"/>
         </g>
-        <text x="110" y="304" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Guest</text>
+        <text x="110" y="304" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">Guest</text>
         <g stroke="#0f766e" stroke-width="1.6" fill="none">
           <circle cx="110" cy="740" r="15"/>
           <path d="M110 755 V800"/>
@@ -194,8 +205,8 @@
           <path d="M110 800 L92 832"/>
           <path d="M110 800 L128 832"/>
         </g>
-        <text x="110" y="854" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0f766e">Registered User</text>
-        <text x="110" y="870.5" text-anchor="middle" font-size="10" font-weight="400" fill="#64748b">&#171;abstract&#187;</text>
+        <text x="110" y="854" text-anchor="middle" font-size="17" font-weight="700" fill="#0f766e">Registered User</text>
+        <text x="110" y="870.5" text-anchor="middle" font-size="15" font-weight="400" fill="#0f172a">&#171;abstract&#187;</text>
         <g stroke="#0f172a" stroke-width="1.5" fill="none">
           <circle cx="170" cy="1040" r="13"/>
           <path d="M170 1053 V1090"/>
@@ -203,7 +214,7 @@
           <path d="M170 1090 L157 1118"/>
           <path d="M170 1090 L183 1118"/>
         </g>
-        <text x="170" y="1140" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Investor</text>
+        <text x="170" y="1140" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">Investor</text>
         <g stroke="#0f172a" stroke-width="1.5" fill="none">
           <circle cx="50" cy="1040" r="13"/>
           <path d="M50 1053 V1090"/>
@@ -211,7 +222,7 @@
           <path d="M50 1090 L37 1118"/>
           <path d="M50 1090 L63 1118"/>
         </g>
-        <text x="50" y="1140" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Businessman</text>
+        <text x="50" y="1140" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">Businessman</text>
         <g stroke="#b45309" stroke-width="1.6" fill="none">
           <circle cx="1640" cy="470" r="15"/>
           <path d="M1640 485 V530"/>
@@ -219,7 +230,7 @@
           <path d="M1640 530 L1622 562"/>
           <path d="M1640 530 L1658 562"/>
         </g>
-        <text x="1640" y="584" text-anchor="middle" font-size="13" font-weight="700" fill="#b45309">Administrator</text>
+        <text x="1640" y="584" text-anchor="middle" font-size="18" font-weight="700" fill="#b45309">Administrator</text>
         <g stroke="#6d28d9" stroke-width="1.6" fill="none">
           <circle cx="1640" cy="1010" r="15"/>
           <path d="M1640 1025 V1070"/>
@@ -227,11 +238,11 @@
           <path d="M1640 1070 L1622 1102"/>
           <path d="M1640 1070 L1658 1102"/>
         </g>
-        <text x="1640" y="1124" text-anchor="middle" font-size="12" font-weight="700" fill="#6d28d9">SSLCommerz Gateway</text>
-        <text x="1640" y="1140" text-anchor="middle" font-size="10" font-weight="400" fill="#64748b">&#171;external system&#187;</text>
+        <text x="1640" y="1124" text-anchor="middle" font-size="17" font-weight="700" fill="#6d28d9">SSLCommerz Gateway</text>
+        <text x="1640" y="1140" text-anchor="middle" font-size="15" font-weight="400" fill="#0f172a">&#171;external system&#187;</text>
         <path d="M170 1027 V985 H110 V906" fill="none" stroke="#334155" stroke-width="1.35" marker-end="url(#genArrow)"/>
         <path d="M50 1027 V985 H110" fill="none" stroke="#334155" stroke-width="1.35"/>
-        <text x="122" y="977" font-size="10" fill="#334155">&#171;generalization&#187;</text>
+        <text x="122" y="977" font-size="15" fill="#334155">&#171;generalization&#187;</text>
       </svg>
     </div>
 

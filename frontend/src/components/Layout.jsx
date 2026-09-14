@@ -314,16 +314,6 @@ export function DashboardLayout() {
               </kbd>
             </form>
 
-            {user?.role !== "admin" && (
-              <Link
-                to="/dashboard/create-post"
-                className="h-9 pl-3 pr-3.5 inline-flex items-center gap-1.5 rounded-lg text-sm font-semibold
-                  text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-colors"
-              >
-                <PlusCircle size={16} />
-                <span className="hidden sm:inline">New post</span>
-              </Link>
-            )}
 
             <Link
               to="/"
